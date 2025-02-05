@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>NArchitecture.$(AssemblyName)</RootNamespace>
@@ -34,6 +34,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MimeKit" Version="4.7.1" />
+    <PackageReference Include="MimeKit" Version="4.10.0" />
   </ItemGroup>
 </Project>
