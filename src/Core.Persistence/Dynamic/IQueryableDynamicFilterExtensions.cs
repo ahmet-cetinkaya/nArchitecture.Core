@@ -23,7 +23,7 @@ public static class IQueryableDynamicFilterExtensions
         { "contains", "Contains" },
         { "doesnotcontain", "Contains" },
         { "in", "In" },
-        { "between", "Between" }
+        { "between", "Between" },
     };
 
     public static IQueryable<T> ToDynamic<T>(this IQueryable<T> query, DynamicQuery dynamicQuery)

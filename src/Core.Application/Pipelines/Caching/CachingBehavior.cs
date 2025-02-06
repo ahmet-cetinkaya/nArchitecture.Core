@@ -101,8 +101,10 @@ public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
             cacheGroupCacheSlidingExpirationValue
         );
 
-        DistributedCacheEntryOptions cacheOptions =
-            new() { SlidingExpiration = TimeSpan.FromSeconds(Convert.ToDouble(cacheGroupCacheSlidingExpirationValue)) };
+        DistributedCacheEntryOptions cacheOptions = new()
+        {
+            SlidingExpiration = TimeSpan.FromSeconds(Convert.ToDouble(cacheGroupCacheSlidingExpirationValue)),
+        };
 
         await _cache.SetAsync(key: request.CacheGroupKey!, newCacheGroupCache, cacheOptions, cancellationToken);
         _logger.LogInformation($"Added to Cache -> {request.CacheGroupKey}");
