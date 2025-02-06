@@ -3,6 +3,8 @@
         "build": "dotnet build --configuration Release",
         "test": "dotnet test --configuration Release",
         "benchmark": "dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj",
-        "benchmark:last": "dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run"
+        "benchmark:last": "dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run",
+        "analysis": "dotnet roslynator analyze",
+        "format": "dotnet csharpier ."
     }
 }
