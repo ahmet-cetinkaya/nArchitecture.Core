@@ -7,7 +7,7 @@ namespace NArchitecture.Core.Application.Pipelines.Authorization;
 /// <summary>
 /// Represents role claims for authorization.
 /// </summary>
-[StructLayout(LayoutKind.Auto)] // Optimizes the memory layout of the struct for better performance
+[StructLayout(LayoutKind.Auto)]
 public readonly ref struct RoleClaims
 {
     private readonly string[]? _identityRoles;
@@ -19,7 +19,7 @@ public readonly ref struct RoleClaims
     /// </summary>
     /// <param name="identityRoles">The roles assigned to the identity.</param>
     /// <param name="requiredRoles">The roles required for authorization.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // Forces method inlining for better performance in hot paths
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RoleClaims(string[]? identityRoles, string[]? requiredRoles)
     {
         _identityRoles = identityRoles;
@@ -30,7 +30,7 @@ public readonly ref struct RoleClaims
     /// <summary>
     /// Checks if the roles array contains the admin role.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // Forces method inlining as this is called frequently in role checks
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool ContainsAdmin(string[] roles)
     {
         foreach (var role in roles)
@@ -47,7 +47,7 @@ public readonly ref struct RoleClaims
     /// Determines if the identity has any of the required roles.
     /// </summary>
     /// <returns>True if the identity has required roles or is admin; otherwise, false.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // Forces method inlining for this critical authorization check
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasAnyRequiredRole()
     {
         if (!IsAuthenticated)
