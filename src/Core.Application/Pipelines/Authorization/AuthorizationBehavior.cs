@@ -1,48 +1,37 @@
-using System.Security.Claims;
+using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
-using NArchitecture.Core.Security.Constants;
-using NArchitecture.Core.Security.Extensions;
 
 namespace NArchitecture.Core.Application.Pipelines.Authorization;
 
-public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+/// <summary>
+/// Pipeline behavior that handles authorization for secured requests.
+/// </summary>
+/// <typeparam name="TRequest">The type of the request.</typeparam>
+/// <typeparam name="TResponse">The type of the response.</typeparam>
+public sealed class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, ISecuredRequest
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public AuthorizationBehavior(IHttpContextAccessor httpContextAccessor)
+    /// <summary>
+    /// Handles the authorization check for the request.
+    /// </summary>
+    /// <exception cref="AuthenticationException">Thrown when the user is not authenticated.</exception>
+    /// <exception cref="AuthorizationException">Thrown when the user is not authorized.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] // Forces method inlining to reduce overhead in the pipeline
+    public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        _httpContextAccessor = httpContextAccessor;
+        // Check authentication
+        if (!request.RoleClaims.IsAuthenticated)
+            return Task.FromException<TResponse>(new AuthenticationException(AUTHENTICATION_ERROR_MESSAGE));
+
+        // Check authorization
+        if (!request.RoleClaims.HasAnyRequiredRole())
+            return Task.FromException<TResponse>(new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE));
+
+        return next();
     }
 
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken
-    )
-    {
-        if (!_httpContextAccessor.HttpContext?.User.Claims.Any() ?? true)
-            throw new AuthorizationException("You are not authorized.");
-
-        IEnumerable<string> userRoleClaims = _httpContextAccessor.HttpContext?.User?.GetRoleClaims() ?? Array.Empty<string>();
-        string[] requestRoles =
-            request.Roles?.Where(role => !string.IsNullOrWhiteSpace(role)).Select(role => role.Trim()).ToArray()
-            ?? Array.Empty<string>();
-
-        if (requestRoles.Any())
-        {
-            bool isAuthorized = userRoleClaims.Any(userRole =>
-                userRole.Equals(GeneralOperationClaims.Admin, StringComparison.OrdinalIgnoreCase)
-                || requestRoles.Any(requestRole => requestRole.Equals(userRole, StringComparison.OrdinalIgnoreCase))
-            );
-
-            if (!isAuthorized)
-                throw new AuthorizationException("You are not authorized.");
-        }
-
-        TResponse response = await next();
-        return response;
-    }
+    private const string AUTHENTICATION_ERROR_MESSAGE = "User is not authenticated.";
+    private const string AUTHORIZATION_ERROR_MESSAGE = "User is not authorized.";
 }

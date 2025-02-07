@@ -1,7 +1,5 @@
-﻿using System.Security.Claims;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using NArchitecture.Core.Application.Pipelines.Authorization;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 
@@ -20,22 +18,17 @@ public class AuthorizationBehaviorBenchmark
     private TestRequest? _nonMatchingRoleRequest;
     private TestRequest? _multiRoleRequest;
     private static readonly Task<TestResponse> _cachedResponse = Task.FromResult(new TestResponse());
-    private IHttpContextAccessor? _httpContextAccessor;
 
     [GlobalSetup]
     public void Setup()
     {
-        _httpContextAccessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext() };
+        var handler = new TestRequestHandler();
+        _behavior = new();
 
-        var userClaims = new List<Claim> { new(ClaimTypes.Role, "admin"), new(ClaimTypes.Role, "test") };
-        _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(userClaims));
-
-        _behavior = new AuthorizationBehavior<TestRequest, TestResponse>(_httpContextAccessor);
-
-        _adminRequest = new TestRequest(["admin"]);
-        _matchingRoleRequest = new TestRequest(["test"]);
-        _nonMatchingRoleRequest = new TestRequest(["manager"]);
-        _multiRoleRequest = new TestRequest(["manager", "test"]);
+        _adminRequest = new TestRequest(["admin"], ["test"]);
+        _matchingRoleRequest = new TestRequest(["test"], ["test"]);
+        _nonMatchingRoleRequest = new TestRequest(["user"], ["admin"]);
+        _multiRoleRequest = new TestRequest(["user", "manager", "test"], ["test"]);
     }
 
     /// <summary>
@@ -74,7 +67,10 @@ public class AuthorizationBehaviorBenchmark
     public async Task<TestResponse> MultipleRoles() =>
         await _behavior!.Handle(_multiRoleRequest!, () => _cachedResponse, default);
 
-    private sealed record TestRequest(string[] Roles) : IRequest<TestResponse>, ISecuredRequest;
+    private sealed record TestRequest(string[] IdentityRoles, string[] RequiredRoles) : IRequest<TestResponse>, ISecuredRequest
+    {
+        public RoleClaims RoleClaims => new(IdentityRoles, RequiredRoles);
+    }
 
     public sealed record TestResponse;
 
