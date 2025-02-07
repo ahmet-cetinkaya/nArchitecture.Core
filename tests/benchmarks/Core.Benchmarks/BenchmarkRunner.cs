@@ -20,8 +20,9 @@ public static class BenchmarkRunner
         {
             var benchmarkTypes = assembly
                 .GetTypes()
-                .Where(t => t.Name.EndsWith("Benchmark"))
+                .Where(t => t.Name.EndsWith("Benchmarks"))
                 .Where(t => !t.IsAbstract && !t.IsInterface)
+                .OrderBy(t => GetRelativePath(t)) // Sort by relative path
                 .ToList();
 
             if (benchmarkTypes is [])
@@ -101,22 +102,28 @@ public static class BenchmarkRunner
     {
         var codeBase = type.Assembly.Location;
         var assemblyPath = Path.GetDirectoryName(codeBase);
-        var projectRoot = Directory.GetParent(assemblyPath!)?.Parent?.Parent?.Parent?.Parent?.FullName;
+        if (assemblyPath == null)
+            return type.Name + ".cs";
 
-        if (projectRoot == null)
-            return type.Name;
+        // Find the nearest .csproj file by walking up the directory tree
+        var currentDir = new DirectoryInfo(assemblyPath);
+        while (currentDir != null && !currentDir.GetFiles("*.csproj").Any())
+        {
+            currentDir = currentDir.Parent;
+        }
 
-        var namespaceSegments = type.Namespace?.Split('.');
-        var benchmarkIndex = Array.IndexOf(namespaceSegments ?? [], "BenchmarkTests");
+        var projectDir = currentDir?.FullName;
+        if (projectDir == null)
+            return type.Name + ".cs";
 
-        if (benchmarkIndex == -1)
-            return type.Name;
+        // Search for the file in and below the project directory
+        var fileName = type.Name + ".cs";
+        var files = Directory.GetFiles(projectDir, fileName, SearchOption.AllDirectories);
 
-        var relevantPath = string.Join(
-            Path.DirectorySeparatorChar,
-            namespaceSegments?.Skip(benchmarkIndex + 1) ?? Array.Empty<string>()
-        );
+        if (!files.Any())
+            return fileName;
 
-        return Path.Combine(relevantPath, type.Name + ".cs");
+        var fullPath = files.First();
+        return Path.GetRelativePath(projectDir, fullPath);
     }
 }

@@ -3,14 +3,14 @@ using MediatR;
 using NArchitecture.Core.Application.Pipelines.Authorization;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 
-namespace Core.Application.BenchmarkTests.Pipelines.Authorization;
+namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Authorization;
 
 /// <summary>
 /// Benchmark tests for AuthorizationBehavior performance.
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
-public class AuthorizationBehaviorBenchmark
+public class AuthorizationBehaviorBenchmarks
 {
     private AuthorizationBehavior<TestRequest, TestResponse>? _behavior;
     private TestRequest? _adminRequest;
