@@ -1,8 +1,11 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.ObjectPool;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 
@@ -15,6 +18,11 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
 {
     private readonly IDistributedCache _cache;
     private readonly ILogger<CacheRemovingBehavior<TRequest, TResponse>> _logger;
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> Locks = new();
+    private static readonly ObjectPool<HashSet<string>> HashSetPool = ObjectPool.Create(
+        new DefaultPooledObjectPolicy<HashSet<string>>()
+    );
+    private static readonly int _bufferSize = 4096;
 
     public CacheRemovingBehavior(IDistributedCache cache, ILogger<CacheRemovingBehavior<TRequest, TResponse>> logger)
     {
@@ -29,62 +37,134 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
     /// <param name="next">The next handler in the pipeline</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Response from the next handler</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken
     )
     {
+        // Check cancellation first
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Skip cache operations if bypassing cache
+        // Check if cache operations should be skipped
         if (request.BypassCache)
             return await next();
 
-        // Execute the request handler first
+        // Fast path for single key removal
+        if (request.CacheGroupKey == null && !string.IsNullOrEmpty(request.CacheKey))
+        {
+            // Execute the next handler first
+            TResponse response = await next();
+            cancellationToken.ThrowIfCancellationRequested(); // Check before cache operation
+            // Remove the single cache key
+            await _cache.RemoveAsync(request.CacheKey, cancellationToken);
+            return response;
+        }
+
+        // Handle complex group key removal
+        return await HandleWithGroupKeys(request, next, cancellationToken);
+    }
+
+    private async Task<TResponse> HandleWithGroupKeys(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        // Execute the next handler first
         TResponse response = await next();
 
-        // Process group-based cache removal
-        if (request.CacheGroupKey != null)
-            for (int i = 0; i < request.CacheGroupKey.Length; i++)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                string groupKey = request.CacheGroupKey[i];
+        // Process group keys if present
+        if (request.CacheGroupKey?.Length > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            // Rent memory buffer
+            using IMemoryOwner<byte> bufferLease = MemoryPool<byte>.Shared.Rent(_bufferSize);
+            // Remove group keys
+            await RemoveGroupKeysAsync(request.CacheGroupKey, bufferLease.Memory, cancellationToken);
+        }
 
-                // Get the cached group data
-                byte[]? cachedGroup = await _cache.GetAsync(groupKey, cancellationToken);
-                if (cachedGroup != null)
-                {
-                    // Deserialize and remove all keys in the group
-                    HashSet<string> keysInGroup = JsonSerializer.Deserialize<HashSet<string>>(
-                        Encoding.Default.GetString(cachedGroup)
-                    )!;
-                    foreach (string key in keysInGroup)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        // Remove individual cache entry
-                        await _cache.RemoveAsync(key, cancellationToken);
-                        _logger.LogInformation($"Removed Cache -> {key}");
-                    }
-
-                    // Remove group metadata
-                    await _cache.RemoveAsync(groupKey, cancellationToken);
-                    _logger.LogInformation($"Removed Cache -> {groupKey}");
-
-                    // Remove sliding expiration data
-                    await _cache.RemoveAsync($"{groupKey}SlidingExpiration", cancellationToken);
-                    _logger.LogInformation($"Removed Cache -> {groupKey}SlidingExpiration");
-                }
-            }
-
-        // Process individual cache key removal
-        if (request.CacheKey != null)
+        // Remove single key if present
+        if (!string.IsNullOrEmpty(request.CacheKey))
         {
             cancellationToken.ThrowIfCancellationRequested();
             await _cache.RemoveAsync(request.CacheKey, cancellationToken);
-            _logger.LogInformation($"Removed Cache -> {request.CacheKey}");
         }
 
         return response;
+    }
+
+    private async Task RemoveGroupKeysAsync(string[] groupKeys, Memory<byte> buffer, CancellationToken cancellationToken)
+    {
+        // Initialize task list and key set from pool
+        var pendingTasks = new List<Task>(capacity: 32);
+        HashSet<string> keySet = HashSetPool.Get();
+
+        try
+        {
+            // Process each group key
+            foreach (string groupKey in groupKeys)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Check for cancellation
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                // Acquire group lock
+                SemaphoreSlim @lock = Locks.GetOrAdd(groupKey, _ => new(1, 1));
+                await @lock.WaitAsync(cancellationToken);
+
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Retrieve group data
+                    byte[]? cachedGroup = await _cache.GetAsync(groupKey, cancellationToken);
+                    if (cachedGroup == null)
+                        continue;
+
+                    // Prepare key set
+                    keySet.Clear();
+                    var reader = new Utf8JsonReader(cachedGroup);
+                    if (JsonSerializer.Deserialize<string[]>(ref reader) is { } keys)
+                        keySet.UnionWith(keys);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Queue group and sliding expiration keys for removal
+                    pendingTasks.Add(_cache.RemoveAsync(groupKey, cancellationToken));
+                    pendingTasks.Add(_cache.RemoveAsync($"{groupKey}SlidingExpiration", cancellationToken));
+
+                    // Queue each key in group for removal
+                    foreach (string key in keySet)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        pendingTasks.Add(_cache.RemoveAsync(key, cancellationToken));
+                    }
+
+                    // Execute all removal tasks
+                    await Task.WhenAll(pendingTasks);
+                    pendingTasks.Clear();
+
+                    // Log the operation
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation("Removed cache group {Group} with {Count} keys", groupKey, keySet.Count);
+                }
+                finally
+                {
+                    // Release group lock
+                    _ = @lock.Release();
+                }
+            }
+        }
+        finally
+        {
+            // Return key set to pool
+            HashSetPool.Return(keySet);
+        }
     }
 }
