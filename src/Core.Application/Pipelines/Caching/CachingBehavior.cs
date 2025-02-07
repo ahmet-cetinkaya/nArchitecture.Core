@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 
 public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>, ICachableRequest
+    where TRequest : IRequest<TResponse>, ICacheableRequest
 {
     private readonly IDistributedCache _cache;
 
@@ -23,7 +23,20 @@ public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     {
         _cache = cache;
         _logger = logger;
-        _cacheSettings = configuration.GetSection("CacheSettings").Get<CacheSettings>() ?? throw new InvalidOperationException();
+
+        var section = configuration.GetSection("CacheSettings");
+        var slidingExpirationStr = section["SlidingExpiration"];
+
+        if (string.IsNullOrEmpty(slidingExpirationStr))
+            throw new InvalidOperationException("Cache settings are not configured: SlidingExpiration is missing");
+
+        if (!TimeSpan.TryParse(slidingExpirationStr, out TimeSpan slidingExpiration))
+            throw new InvalidOperationException("Cache settings are invalid: SlidingExpiration must be a valid TimeSpan");
+
+        if (slidingExpiration <= TimeSpan.Zero)
+            throw new InvalidOperationException("Cache settings are invalid: SlidingExpiration must be positive");
+
+        _cacheSettings = new CacheSettings { SlidingExpiration = slidingExpiration };
     }
 
     public async Task<TResponse> Handle(
@@ -32,11 +45,16 @@ public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         CancellationToken cancellationToken
     )
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (request.BypassCache)
             return await next();
 
         TResponse response;
         byte[]? cachedResponse = await _cache.GetAsync(request.CacheKey, cancellationToken);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (cachedResponse != null)
         {
             response = JsonSerializer.Deserialize<TResponse>(Encoding.Default.GetString(cachedResponse))!;
@@ -54,23 +72,34 @@ public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         CancellationToken cancellationToken
     )
     {
+        cancellationToken.ThrowIfCancellationRequested();
         TResponse response = await next();
 
-        TimeSpan slidingExpiration = request.SlidingExpiration ?? TimeSpan.FromDays(_cacheSettings.SlidingExpiration);
-        DistributedCacheEntryOptions cacheOptions = new() { SlidingExpiration = slidingExpiration };
+        TimeSpan slidingExpiration = request.SlidingExpiration ?? _cacheSettings.SlidingExpiration;
+        if (slidingExpiration <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(slidingExpiration), "Sliding expiration must be positive");
 
+        cancellationToken.ThrowIfCancellationRequested();
+
+        DistributedCacheEntryOptions cacheOptions = new() { SlidingExpiration = slidingExpiration };
         byte[] serializeData = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
+
         await _cache.SetAsync(request.CacheKey, serializeData, cacheOptions, cancellationToken);
         _logger.LogInformation($"Added to Cache -> {request.CacheKey}");
 
         if (request.CacheGroupKey != null)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             await addCacheKeyToGroup(request, slidingExpiration, cancellationToken);
+        }
 
         return response;
     }
 
     private async Task addCacheKeyToGroup(TRequest request, TimeSpan slidingExpiration, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         byte[]? cacheGroupCache = await _cache.GetAsync(key: request.CacheGroupKey!, cancellationToken);
         HashSet<string> cacheKeysInGroup;
         if (cacheGroupCache != null)
@@ -106,9 +135,11 @@ public class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
             SlidingExpiration = TimeSpan.FromSeconds(Convert.ToDouble(cacheGroupCacheSlidingExpirationValue)),
         };
 
+        cancellationToken.ThrowIfCancellationRequested();
         await _cache.SetAsync(key: request.CacheGroupKey!, newCacheGroupCache, cacheOptions, cancellationToken);
         _logger.LogInformation($"Added to Cache -> {request.CacheGroupKey}");
 
+        cancellationToken.ThrowIfCancellationRequested();
         await _cache.SetAsync(
             key: $"{request.CacheGroupKey}SlidingExpiration",
             serializeCachedGroupSlidingExpirationData,

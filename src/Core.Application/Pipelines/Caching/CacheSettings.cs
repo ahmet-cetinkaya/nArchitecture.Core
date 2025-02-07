@@ -1,6 +1,12 @@
 ﻿namespace NArchitecture.Core.Application.Pipelines.Caching;
 
+/// <summary>
+/// Cache configuration options.
+/// </summary>
 public class CacheSettings
 {
-    public int SlidingExpiration { get; set; }
+    /// <summary>
+    /// Default sliding expiration duration.
+    /// </summary>
+    public TimeSpan SlidingExpiration { get; set; }
 }
