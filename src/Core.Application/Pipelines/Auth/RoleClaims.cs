@@ -54,14 +54,15 @@ public readonly ref struct RoleClaims
             return false;
         if (_hasAdminRole)
             return true;
-        if (_requiredRoles == null)
+        if (_requiredRoles == null || _requiredRoles.Length == 0)
             return true;
 
         bool hasAnyValidRequiredRole = false;
         foreach (var required in _requiredRoles)
         {
             if (string.IsNullOrWhiteSpace(required))
-                continue;
+                return true;
+
             hasAnyValidRequiredRole = true;
             var requiredSpan = required.AsSpan().Trim();
 

@@ -261,4 +261,112 @@ public class AuthorizationBehaviorTests
         // Assert
         exception.ShouldBeNull("Roles with special characters should match exactly");
     }
+
+    /// <summary>
+    /// Tests that authorization handles mixed roles with precise role matching
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenMixedEmptyAndNonEmptyRoles_ShouldSucceed()
+    {
+        // Case 1: Empty required role should grant access
+        await AssertRoleAccess(["user"], ["", "editor"], true);
+
+        // Case 2: Non-empty required role should be matched
+        await AssertRoleAccess(["editor"], ["", "editor"], true);
+
+        // Case 3: Empty user role should not affect matching
+        await AssertRoleAccess(["user", "", "editor"], ["editor"], true);
+    }
+
+    /// <summary>
+    /// Tests boundary conditions for role matching
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenBoundaryConditions_ShouldHandleCorrectly()
+    {
+        // Empty arrays
+        await AssertRoleAccess(Array.Empty<string>(), Array.Empty<string>(), true);
+
+        // Single empty string vs null
+        await AssertRoleAccess([""], [null!], true);
+
+        // Mix of empty and valid roles
+        await AssertRoleAccess(["editor", ""], ["", "viewer"], true);
+    }
+
+    /// <summary>
+    /// Tests that authorization handles null values in role arrays
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenNullValuesInRoleArrays_ShouldHandle()
+    {
+        // Arrange
+        string[] identityRoles = ["user", null!, "editor"];
+        string[] requiredRoles = ["editor", null!];
+        var request = new MockSecuredRequest().SetRoles(identityRoles, requiredRoles);
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+
+        // Assert
+        exception.ShouldBeNull();
+    }
+
+    /// <summary>
+    /// Tests that authorization succeeds with multiple whitespace variations
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenMultipleWhitespaceVariations_ShouldSucceed()
+    {
+        await AssertRoleAccess(["  editor  ", "\teditor\t", "editor\n"], ["editor"], true);
+        await AssertRoleAccess(["editor"], ["  editor  ", "\teditor\t"], true);
+    }
+
+    /// <summary>
+    /// Tests that authorization handles empty strings in both identity and required roles
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenAllEmptyStrings_ShouldSucceed()
+    {
+        await AssertRoleAccess(["", "", ""], ["", "", ""], true);
+    }
+
+    /// <summary>
+    /// Tests admin role with various whitespace combinations
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenAdminRoleHasVariousWhitespace_ShouldSucceed()
+    {
+        await AssertRoleAccess([" admin"], ["editor"], true);
+        await AssertRoleAccess(["admin "], ["editor"], true);
+        await AssertRoleAccess(["\tadmin\t"], ["editor"], true);
+        await AssertRoleAccess(["admin\n"], ["editor"], true);
+    }
+
+    /// <summary>
+    /// Tests that authorization handles single whitespace roles
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenOnlyWhitespaceRoles_ShouldSucceed()
+    {
+        await AssertRoleAccess([" "], [" "], true);
+        await AssertRoleAccess(["\t"], ["\t"], true);
+        await AssertRoleAccess(["\n"], ["\n"], true);
+    }
+
+    /// <summary>
+    /// Tests RoleClaims.IsAuthenticated property directly
+    /// </summary>
+    [Fact]
+    public void RoleClaims_WhenIdentityRolesIsNull_IsAuthenticatedShouldBeFalse()
+    {
+        // Arrange
+        var roleClaims = new RoleClaims(null, ["editor"]);
+
+        // Assert
+        roleClaims.IsAuthenticated.ShouldBeFalse();
+
+        // Additional check with HasAnyRequiredRole
+        roleClaims.HasAnyRequiredRole().ShouldBeFalse("Unauthenticated users should not have any roles");
+    }
 }
