@@ -485,8 +485,8 @@ public class CachingBehaviorTests
         // Assert
         var groupCache = await _cache.GetAsync(request.CacheGroupKey);
         var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
-        keys.ShouldContain("existing-key");
-        keys.ShouldContain(request.CacheKey);
+        keys!.ShouldContain("existing-key");
+        keys!.ShouldContain(request.CacheKey);
     }
 
     /// <summary>

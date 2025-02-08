@@ -26,11 +26,7 @@ public class LoggingBehaviorBenchmarks
         _loggerMock = new Mock<ILogger>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
-        var httpContext = new DefaultHttpContext();
-        httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "test-user") }));
-        _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
-
-        _loggingBehavior = new(_loggerMock.Object, _httpContextAccessorMock.Object);
+        _loggingBehavior = new(_loggerMock.Object);
         _request = new TestRequest
         {
             Email = "test@example.com",
@@ -211,16 +207,16 @@ internal class TestRequest : IRequest<TestResponse>, ILoggableRequest
     public string SensitiveData { get; set; } = string.Empty;
 
     public LogOptions LogOptions =>
-        new()
-        {
-            LogResponse = true,
-            ExcludeParameters =
+        new(
+            user: "benchmarkuser",
+            logResponse: true,
+            excludeParameters:
             [
                 new("Password", true, '*', 2, 2),
                 new("SensitiveData", true, '*', 4, 5),
                 new("Email", true, '*', 2, 3),
-            ],
-        };
+            ]
+        );
 }
 
 public class TestResponse
