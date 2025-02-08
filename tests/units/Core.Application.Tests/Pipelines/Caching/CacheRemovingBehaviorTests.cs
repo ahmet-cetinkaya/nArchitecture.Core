@@ -393,7 +393,7 @@ public class CacheRemovingBehaviorTests
 
         // Set up cache data
         var groupData = new HashSet<string> { "key1" };
-        foreach (var groupKey in request.CacheOptions.CacheGroupKey)
+        foreach (var groupKey in request.CacheOptions.CacheGroupKey!)
         {
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
         }
@@ -434,7 +434,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Setup cache data
-        foreach (var groupKey in request.CacheOptions.CacheGroupKey)
+        foreach (var groupKey in request.CacheOptions.CacheGroupKey!)
         {
             var groupData = new HashSet<string> { "testKey" };
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));

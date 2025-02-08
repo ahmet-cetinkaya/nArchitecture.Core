@@ -164,7 +164,7 @@ public class CachingBehaviorTests
         await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey);
+        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
         groupCache.ShouldNotBeNull();
         var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.Default.GetString(groupCache!));
         keys.ShouldNotBeNull();
@@ -461,7 +461,7 @@ public class CachingBehaviorTests
         result.ShouldBe("test-response");
 
         // Verify group was created
-        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey);
+        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
         groupCache.ShouldNotBeNull();
         var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
         keys.ShouldNotBeNull();
@@ -543,13 +543,16 @@ public class CachingBehaviorTests
             ),
         };
         var existingKeys = new HashSet<string> { "existing-key" };
-        await _cache.SetAsync(request.CacheOptions.CacheGroupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(existingKeys)));
+        await _cache.SetAsync(
+            request.CacheOptions.CacheGroupKey!,
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(existingKeys))
+        );
 
         // Act
         await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey);
+        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
         var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
         keys!.ShouldContain("existing-key");
         keys!.ShouldContain(request.CacheOptions.CacheKey);
