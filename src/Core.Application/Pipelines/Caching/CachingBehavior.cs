@@ -1,15 +1,18 @@
-﻿using System.Buffers;
-using System.Buffers.Text;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ObjectPool;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 
+/// <summary>
+/// Implements caching behavior for MediatR pipeline using IDistributedCache.
+/// Handles cache operations for requests implementing ICacheableRequest.
+/// </summary>
+/// <typeparam name="TRequest">The type of request implementing ICacheableRequest</typeparam>
+/// <typeparam name="TResponse">The type of response</typeparam>
 public sealed class CachingBehavior<TRequest, TResponse>(
     IDistributedCache cache,
     ILogger<CachingBehavior<TRequest, TResponse>> logger,
@@ -17,15 +20,16 @@ public sealed class CachingBehavior<TRequest, TResponse>(
 ) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, ICacheableRequest
 {
-    private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web) { DefaultBufferSize = 4096 };
-    private static readonly ObjectPool<byte[]> s_byteArrayPool = new DefaultObjectPool<byte[]>(
-        new ByteArrayPooledObjectPolicy(4096),
-        50
-    );
-    private static readonly ObjectPool<DistributedCacheEntryOptions> s_cacheOptionsPool =
-        new DefaultObjectPool<DistributedCacheEntryOptions>(new DefaultPooledObjectPolicy<DistributedCacheEntryOptions>(), 20);
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly CacheSettings _cacheSettings = InitializeCacheSettings(configuration);
 
+    /// <summary>
+    /// Handles the request with caching support. Returns cached data if available, otherwise executes the request and caches the response.
+    /// </summary>
+    /// <param name="request">The request containing caching parameters</param>
+    /// <param name="next">The delegate to execute the request if cache miss</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The response from cache or from executing the request</returns>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
@@ -34,9 +38,11 @@ public sealed class CachingBehavior<TRequest, TResponse>(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
+        // Early exit if caching is bypassed
         if (request.BypassCache)
             return await next();
 
+        // Try to get from cache
         byte[]? cachedResponse = await cache.GetAsync(request.CacheKey, cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -45,31 +51,38 @@ public sealed class CachingBehavior<TRequest, TResponse>(
         {
             try
             {
-                var response = DeserializeFromUtf8Bytes<TResponse>(cachedResponse);
+                // Deserialize and return cached response
+                TResponse? response = DeserializeFromUtf8Bytes<TResponse>(cachedResponse);
                 logger.LogInformation("Cache hit: {CacheKey}", request.CacheKey);
                 return response;
             }
             catch
             {
+                // Log deserialization failures but continue with cache miss path
                 logger.LogWarning("Cache deserialization failed: {CacheKey}", request.CacheKey);
             }
         }
 
-        return await GetResponseAndAddToCache(request, next, cancellationToken);
+        // Cache miss - get fresh response
+        return await getResponseAndAddToCache(request, next, cancellationToken);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static T DeserializeFromUtf8Bytes<T>(ReadOnlySpan<byte> utf8Json)
     {
-        var result = JsonSerializer.Deserialize<T>(utf8Json, s_jsonOptions);
+        T? result = JsonSerializer.Deserialize<T>(utf8Json, JsonOptions);
         return result!;
     }
 
+    /// <summary>
+    /// Initializes cache settings from configuration.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when cache settings are missing or invalid</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static CacheSettings InitializeCacheSettings(IConfiguration configuration)
     {
-        var section = configuration.GetSection("CacheSettings");
-        var slidingExpirationStr = section["SlidingExpiration"];
+        IConfigurationSection section = configuration.GetSection("CacheSettings");
+        string? slidingExpirationStr = section["SlidingExpiration"];
 
         if (string.IsNullOrEmpty(slidingExpirationStr))
             throw new InvalidOperationException("Cache settings are not configured: SlidingExpiration is missing");
@@ -83,195 +96,101 @@ public sealed class CachingBehavior<TRequest, TResponse>(
         return new(slidingExpiration);
     }
 
-    private async ValueTask<TResponse> GetResponseAndAddToCache(
+    /// <summary>
+    /// Gets response from next handler and adds it to cache.
+    /// </summary>
+    private async ValueTask<TResponse> getResponseAndAddToCache(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken
     )
     {
+        // Get fresh response from handler
         TResponse response = await next();
 
+        // Validate and get sliding expiration
         TimeSpan slidingExpiration = request.SlidingExpiration ?? _cacheSettings.SlidingExpiration;
         if (slidingExpiration <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(slidingExpiration), "Sliding expiration must be positive");
 
-        var cacheOptions = s_cacheOptionsPool.Get();
-        try
-        {
-            cacheOptions.SlidingExpiration = slidingExpiration;
-            using var serializedData = SerializeToPooledUtf8Bytes(response);
-            await cache.SetAsync(request.CacheKey, serializedData.Array, cacheOptions, cancellationToken);
+        // Cache the response
+        var cacheOptions = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
+        byte[] serializedData = JsonSerializer.SerializeToUtf8Bytes(response, JsonOptions);
+        await cache.SetAsync(request.CacheKey, serializedData, cacheOptions, cancellationToken);
 
-            if (request.CacheGroupKey is not null)
-                await AddCacheKeyToGroup(request, slidingExpiration, cancellationToken);
+        // Add to cache group if specified
+        if (request.CacheGroupKey is not null)
+            await addCacheKeyToGroup(request, slidingExpiration, cancellationToken);
 
-            return response;
-        }
-        finally
-        {
-            s_cacheOptionsPool.Return(cacheOptions);
-        }
+        return response;
     }
 
-    private sealed class PooledByteArray : IDisposable
+    /// <summary>
+    /// Adds the cache key to a cache group for batch invalidation support.
+    /// </summary>
+    private async Task addCacheKeyToGroup(TRequest request, TimeSpan slidingExpiration, CancellationToken cancellationToken)
     {
-        public byte[] Array { get; }
-
-        public PooledByteArray(byte[] array) => Array = array;
-
-        public void Dispose() => s_byteArrayPool.Return(Array);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static PooledByteArray SerializeToPooledUtf8Bytes<T>(T value)
-    {
-        byte[] rentedArray = s_byteArrayPool.Get();
-        try
-        {
-            var tempArray = JsonSerializer.SerializeToUtf8Bytes(value, typeof(T), s_jsonOptions);
-            if (tempArray.Length > rentedArray.Length)
-            {
-                s_byteArrayPool.Return(rentedArray);
-                rentedArray = new byte[tempArray.Length];
-            }
-            tempArray.CopyTo(rentedArray, 0);
-            return new PooledByteArray(rentedArray[..tempArray.Length]);
-        }
-        catch
-        {
-            s_byteArrayPool.Return(rentedArray);
-            throw;
-        }
-    }
-
-    private async Task AddCacheKeyToGroup(TRequest request, TimeSpan slidingExpiration, CancellationToken cancellationToken)
-    {
-        var groupKey = request.CacheGroupKey!;
+        // Get existing group cache
+        string groupKey = request.CacheGroupKey!;
         byte[]? groupCache = await cache.GetAsync(groupKey, cancellationToken);
 
-        using var cacheKeysInGroup = new PooledSet<string>(
-            capacity: 16,
-            existing: groupCache is not null ? JsonSerializer.Deserialize<HashSet<string>>(groupCache, s_jsonOptions) : null
-        );
+        // Get or create cache keys set
+        HashSet<string> cacheKeysInGroup = groupCache is not null
+            ? JsonSerializer.Deserialize<HashSet<string>>(groupCache, JsonOptions) ?? []
+            : [];
 
+        // Add new key to group if not exists
         if (cacheKeysInGroup.Add(request.CacheKey))
         {
-            var cacheOptions = s_cacheOptionsPool.Get();
-            try
+            // Update group cache with new expiration
+            DistributedCacheEntryOptions cacheOptions = new()
             {
-                cacheOptions.SlidingExpiration = await GetOrUpdateGroupSlidingExpiration(
-                    groupKey,
-                    slidingExpiration,
-                    cancellationToken
-                );
+                SlidingExpiration = await getOrUpdateGroupSlidingExpiration(groupKey, slidingExpiration, cancellationToken),
+            };
 
-                using var serializedGroup = SerializeToPooledUtf8Bytes(cacheKeysInGroup.Inner);
-                await cache.SetAsync(groupKey, serializedGroup.Array, cacheOptions, cancellationToken);
-            }
-            finally
-            {
-                s_cacheOptionsPool.Return(cacheOptions);
-            }
+            byte[] serializedGroup = JsonSerializer.SerializeToUtf8Bytes(cacheKeysInGroup, JsonOptions);
+            await cache.SetAsync(groupKey, serializedGroup, cacheOptions, cancellationToken);
         }
     }
 
-    private async ValueTask<TimeSpan> GetOrUpdateGroupSlidingExpiration(
+    /// <summary>
+    /// Updates or sets the sliding expiration for a cache group.
+    /// </summary>
+    private async ValueTask<TimeSpan> getOrUpdateGroupSlidingExpiration(
         string groupKey,
         TimeSpan newExpiration,
         CancellationToken cancellationToken
     )
     {
-        const int MaxStackSize = 128;
-        byte[]? rentedArray = null;
-        byte[]? resultBuffer = null;
+        // Get existing expiration
+        string expirationKey = $"{groupKey}SlidingExpiration";
+        byte[]? existingExpirationBytes = await cache.GetAsync(expirationKey, cancellationToken);
 
-        try
+        // Calculate final expiration (max of existing and new)
+        int newSeconds = (int)newExpiration.TotalSeconds;
+        int finalSeconds;
+
+        if (existingExpirationBytes != null)
         {
-            var expirationKey = $"{groupKey}SlidingExpiration";
-            var existingExpirationBytes = await cache.GetAsync(expirationKey, cancellationToken);
-
-            var finalExpiration = existingExpirationBytes is not null
-                ? TimeSpan.FromSeconds(Math.Max(BitConverter.ToInt32(existingExpirationBytes), (int)newExpiration.TotalSeconds))
-                : newExpiration;
-
-            int totalSeconds = (int)finalExpiration.TotalSeconds;
-
-            // Handle the buffer allocation
-            if (totalSeconds <= MaxStackSize)
-            {
-                Span<byte> stackBuffer = stackalloc byte[MaxStackSize];
-                if (Utf8Formatter.TryFormat(totalSeconds, stackBuffer, out int bytesWritten))
-                {
-                    resultBuffer = stackBuffer[..bytesWritten].ToArray();
-                }
-            }
-            else
-            {
-                rentedArray = ArrayPool<byte>.Shared.Rent(totalSeconds);
-                Span<byte> rentedSpan = rentedArray;
-                if (Utf8Formatter.TryFormat(totalSeconds, rentedSpan, out int bytesWritten))
-                {
-                    resultBuffer = rentedSpan[..bytesWritten].ToArray();
-                }
-            }
-
-            if (resultBuffer != null)
-            {
-                await cache.SetAsync(
-                    expirationKey,
-                    resultBuffer,
-                    new DistributedCacheEntryOptions { SlidingExpiration = finalExpiration },
-                    cancellationToken
-                );
-            }
-
-            return finalExpiration;
+            int existingSeconds = BitConverter.ToInt32(existingExpirationBytes);
+            finalSeconds = Math.Max(existingSeconds, newSeconds);
         }
-        finally
+        else
         {
-            if (rentedArray is not null)
-                ArrayPool<byte>.Shared.Return(rentedArray);
+            finalSeconds = newSeconds;
         }
+
+        // Update expiration in cache
+        var finalExpiration = TimeSpan.FromSeconds(finalSeconds);
+        byte[] secondsBytes = BitConverter.GetBytes(finalSeconds);
+
+        await cache.SetAsync(
+            expirationKey,
+            secondsBytes,
+            new DistributedCacheEntryOptions { SlidingExpiration = finalExpiration },
+            cancellationToken
+        );
+
+        return finalExpiration;
     }
-}
-
-internal sealed class PooledSet<T> : IDisposable
-{
-    private static readonly ObjectPool<HashSet<T>> s_setPool = new DefaultObjectPool<HashSet<T>>(
-        new SetPooledObjectPolicy<T>(),
-        20
-    );
-
-    public HashSet<T> Inner { get; }
-
-    public PooledSet(int capacity = 4, HashSet<T>? existing = null)
-    {
-        Inner = s_setPool.Get();
-        Inner.Clear();
-        if (existing != null)
-            Inner.UnionWith(existing);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Add(T item) => Inner.Add(item);
-
-    public void Dispose() => s_setPool.Return(Inner);
-}
-
-internal sealed class SetPooledObjectPolicy<T> : IPooledObjectPolicy<HashSet<T>>
-{
-    public HashSet<T> Create() => new(capacity: 4);
-
-    public bool Return(HashSet<T> obj) => true;
-}
-
-internal sealed class ByteArrayPooledObjectPolicy : IPooledObjectPolicy<byte[]>
-{
-    private readonly int _defaultSize;
-
-    public ByteArrayPooledObjectPolicy(int defaultSize) => _defaultSize = defaultSize;
-
-    public byte[] Create() => new byte[_defaultSize];
-
-    public bool Return(byte[] obj) => obj.Length == _defaultSize;
 }

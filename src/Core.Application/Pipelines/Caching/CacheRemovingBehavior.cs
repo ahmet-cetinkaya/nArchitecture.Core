@@ -107,11 +107,8 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
             // Process each group key
             foreach (string groupKey in groupKeys)
             {
+                // Check for cancellation before each group processing
                 cancellationToken.ThrowIfCancellationRequested();
-
-                // Check for cancellation
-                if (cancellationToken.IsCancellationRequested)
-                    break;
 
                 // Acquire group lock
                 SemaphoreSlim @lock = Locks.GetOrAdd(groupKey, _ => new(1, 1));
@@ -119,8 +116,6 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
 
                 try
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
                     // Retrieve group data
                     byte[]? cachedGroup = await _cache.GetAsync(groupKey, cancellationToken);
                     if (cachedGroup == null)
@@ -132,6 +127,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                     if (JsonSerializer.Deserialize<string[]>(ref reader) is { } keys)
                         keySet.UnionWith(keys);
 
+                    // Check cancellation before starting removal tasks
                     cancellationToken.ThrowIfCancellationRequested();
 
                     // Queue group and sliding expiration keys for removal
@@ -141,8 +137,6 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                     // Queue each key in group for removal
                     foreach (string key in keySet)
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
-
                         pendingTasks.Add(_cache.RemoveAsync(key, cancellationToken));
                     }
 
@@ -156,14 +150,12 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                 }
                 finally
                 {
-                    // Release group lock
                     _ = @lock.Release();
                 }
             }
         }
         finally
         {
-            // Return key set to pool
             HashSetPool.Return(keySet);
         }
     }
