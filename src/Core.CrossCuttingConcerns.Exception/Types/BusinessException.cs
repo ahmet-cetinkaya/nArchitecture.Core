@@ -1,5 +1,8 @@
 ﻿namespace NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 
+/// <summary>
+/// Represents errors that occur during business logic operations.
+/// </summary>
 public class BusinessException : System.Exception
 {
     public BusinessException() { }

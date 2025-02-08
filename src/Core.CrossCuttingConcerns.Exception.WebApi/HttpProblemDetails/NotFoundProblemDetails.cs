@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDetails;
 
+/// <summary>
+/// Represents HTTP problem details for resource not found errors.
+/// </summary>
 public class NotFoundProblemDetails : ProblemDetails
 {
     private const string DEFAULT_TITLE = "Resource not found";

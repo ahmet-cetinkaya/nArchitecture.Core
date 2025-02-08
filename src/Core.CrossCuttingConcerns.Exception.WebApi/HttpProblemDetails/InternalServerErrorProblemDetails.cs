@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDetails;
 
+/// <summary>
+/// Represents HTTP problem details for internal server errors.
+/// </summary>
 public class InternalServerErrorProblemDetails : ProblemDetails
 {
     private const string DEFAULT_TITLE = "Internal server error";

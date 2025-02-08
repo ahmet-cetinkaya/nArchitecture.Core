@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDetails;
 
+/// <summary>
+/// Represents HTTP problem details for business rule violations.
+/// </summary>
 public class BusinessProblemDetails : ProblemDetails
 {
     private const string DEFAULT_TITLE = "Business rule violation";

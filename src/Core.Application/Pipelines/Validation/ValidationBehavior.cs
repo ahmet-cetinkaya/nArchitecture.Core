@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.Validation.Abstractions;
 using ValidationException = NArchitecture.Core.CrossCuttingConcerns.Exception.Types.ValidationException;
 

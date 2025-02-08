@@ -6,8 +6,14 @@ using NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDetail
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Handlers;
 
+/// <summary>
+/// Handles HTTP-specific exception processing and converts exceptions to appropriate HTTP responses.
+/// </summary>
 public class HttpExceptionHandler : ExceptionHandler
 {
+    /// <summary>
+    /// Gets or sets the HTTP response object used for sending exception details.
+    /// </summary>
     public HttpResponse Response
     {
         get => _response ?? throw new NullReferenceException(nameof(_response));
