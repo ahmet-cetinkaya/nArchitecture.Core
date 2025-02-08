@@ -2,6 +2,9 @@
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.Handlers;
 
+/// <summary>
+/// Provides a base class for handling different types of exceptions in the application.
+/// </summary>
 public abstract class ExceptionHandler
 {
     public abstract Task HandleException(BusinessException businessException);

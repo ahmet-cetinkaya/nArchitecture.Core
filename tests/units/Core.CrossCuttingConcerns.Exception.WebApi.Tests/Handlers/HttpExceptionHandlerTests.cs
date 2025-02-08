@@ -8,6 +8,9 @@ using Shouldly;
 
 namespace Core.CrossCuttingConcerns.Exception.WebApi.Tests.Handlers;
 
+/// <summary>
+/// Tests for verifying HTTP exception handler responses.
+/// </summary>
 public class HttpExceptionHandlerTests
 {
     private readonly HttpExceptionHandler _handler;
@@ -23,6 +26,9 @@ public class HttpExceptionHandlerTests
         _handler.Response = _httpContext.Response;
     }
 
+    /// <summary>
+    /// Helper method to get response body from test context.
+    /// </summary>
     private async Task<T> GetResponseBody<T>()
     {
         _bodyStream.Seek(0, SeekOrigin.Begin);
@@ -31,6 +37,9 @@ public class HttpExceptionHandlerTests
             ?? throw new InvalidOperationException("Response body could not be deserialized");
     }
 
+    /// <summary>
+    /// Tests handling of business exceptions.
+    /// </summary>
     [Fact(DisplayName = "HandleException should set 400 status code for BusinessException")]
     public async Task HandleException_WhenBusinessException_ShouldReturn400WithProblemDetails()
     {
@@ -47,6 +56,9 @@ public class HttpExceptionHandlerTests
         problemDetails.Detail.ShouldBe(errorMessage);
     }
 
+    /// <summary>
+    /// Tests handling of validation exceptions with multiple errors.
+    /// </summary>
     [Fact(DisplayName = "HandleException should handle ValidationException with multiple errors")]
     public async Task HandleException_WhenValidationException_ShouldReturn400WithAllErrors()
     {
@@ -69,6 +81,9 @@ public class HttpExceptionHandlerTests
         problemDetails.Errors.ShouldContain(e => e.PropertyName == "Age" && e.Errors!.Count() == 2);
     }
 
+    /// <summary>
+    /// Tests handling of authorization exceptions.
+    /// </summary>
     [Fact(DisplayName = "HandleException should set 401 status code for AuthorizationException")]
     public async Task HandleException_WhenAuthorizationException_ShouldReturn401WithProblemDetails()
     {
@@ -85,6 +100,9 @@ public class HttpExceptionHandlerTests
         problemDetails.Detail.ShouldBe(errorMessage);
     }
 
+    /// <summary>
+    /// Tests handling of not found exceptions.
+    /// </summary>
     [Fact(DisplayName = "HandleException should set 404 status code for NotFoundException")]
     public async Task HandleException_WhenNotFoundException_ShouldReturn404WithProblemDetails()
     {
@@ -101,6 +119,9 @@ public class HttpExceptionHandlerTests
         problemDetails.Detail.ShouldBe(errorMessage);
     }
 
+    /// <summary>
+    /// Tests handling of generic exceptions with different messages.
+    /// </summary>
     [Theory(DisplayName = "HandleException should handle generic exceptions with different messages")]
     [InlineData("Database connection failed")]
     [InlineData("System is unavailable")]
@@ -120,6 +141,9 @@ public class HttpExceptionHandlerTests
         problemDetails.Detail.ShouldBe(expectedMessage);
     }
 
+    /// <summary>
+    /// Tests response property behavior when not initialized.
+    /// </summary>
     [Fact(DisplayName = "Response property should throw when not initialized")]
     public void Response_WhenNotSet_ShouldThrowNullReferenceException()
     {

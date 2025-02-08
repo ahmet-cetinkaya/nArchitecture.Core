@@ -7,6 +7,9 @@ using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Middleware;
 
+/// <summary>
+/// Middleware for handling exceptions globally in the Web API pipeline.
+/// </summary>
 public class ExceptionMiddleware
 {
     private readonly IHttpContextAccessor _contextAccessor;
@@ -24,6 +27,9 @@ public class ExceptionMiddleware
         _httpExceptionHandler = new HttpExceptionHandler();
     }
 
+    /// <summary>
+    /// Processes HTTP requests and handles any exceptions that occur.
+    /// </summary>
     public async Task Invoke(HttpContext context)
     {
         try
@@ -37,6 +43,7 @@ public class ExceptionMiddleware
         }
     }
 
+    // Handles the exception and generates appropriate HTTP response
     protected virtual Task HandleExceptionAsync(HttpResponse response, dynamic exception)
     {
         response.ContentType = MediaTypeNames.Application.Json;
@@ -45,6 +52,7 @@ public class ExceptionMiddleware
         return _httpExceptionHandler.HandleException(exception);
     }
 
+    // Logs the exception details including method name and user information
     protected virtual Task LogException(HttpContext context, System.Exception exception)
     {
         List<LogParameter> logParameters = [new LogParameter { Type = context.GetType().Name, Value = exception.ToString() }];

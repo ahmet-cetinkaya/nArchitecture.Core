@@ -6,11 +6,14 @@ using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Middleware;
 using NArchitecture.Core.CrossCuttingConcerns.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
-using Shouldly;
 using NArchitecture.Core.Validation.Abstractions;
+using Shouldly;
 
 namespace Core.CrossCuttingConcerns.Exception.WebApi.Tests.Middlewares;
 
+/// <summary>
+/// Tests for verifying the exception handling middleware functionality.
+/// </summary>
 public class ExceptionMiddlewareTests
 {
     private readonly Mock<ILogger> _loggerMock;
@@ -25,6 +28,9 @@ public class ExceptionMiddlewareTests
         _contextAccessorMock.Setup(x => x.HttpContext).Returns(_httpContext);
     }
 
+    /// <summary>
+    /// Tests successful request handling without exceptions.
+    /// </summary>
     [Fact]
     public async Task Invoke_WhenNoException_ShouldCompleteSuccessfully()
     {
@@ -39,6 +45,9 @@ public class ExceptionMiddlewareTests
         _loggerMock.Verify(x => x.Information(It.IsAny<string>()), Times.Never);
     }
 
+    /// <summary>
+    /// Tests handling of business exceptions with 400 status code.
+    /// </summary>
     [Fact]
     public async Task Invoke_WhenBusinessException_ShouldReturn400StatusCode()
     {
@@ -55,14 +64,14 @@ public class ExceptionMiddlewareTests
         _loggerMock.Verify(x => x.Information(It.Is<string>(s => s.IndexOf(exceptionMessage) >= 0)));
     }
 
+    /// <summary>
+    /// Tests handling of validation exceptions with 400 status code.
+    /// </summary>
     [Fact]
     public async Task Invoke_WhenValidationException_ShouldReturn400StatusCode()
     {
         // Arrange
-        var validationErrors = new List<ValidationError>
-        {
-            new("Property", "Error message"),
-        };
+        var validationErrors = new List<ValidationError> { new("Property", "Error message") };
         RequestDelegate next = _ => throw new ValidationException(validationErrors);
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
@@ -73,6 +82,9 @@ public class ExceptionMiddlewareTests
         _httpContext.Response.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
     }
 
+    /// <summary>
+    /// Tests handling of authorization exceptions with 401 status code.
+    /// </summary>
     [Fact]
     public async Task Invoke_WhenAuthorizationException_ShouldReturn401StatusCode()
     {
@@ -87,6 +99,9 @@ public class ExceptionMiddlewareTests
         _httpContext.Response.StatusCode.ShouldBe(StatusCodes.Status401Unauthorized);
     }
 
+    /// <summary>
+    /// Tests handling of not found exceptions with 404 status code.
+    /// </summary>
     [Fact]
     public async Task Invoke_WhenNotFoundException_ShouldReturn404StatusCode()
     {
@@ -128,6 +143,9 @@ public class ExceptionMiddlewareTests
         }
     }
 
+    /// <summary>
+    /// Tests logging of authenticated user information.
+    /// </summary>
     [Fact]
     public async Task Invoke_WithAuthenticatedUser_ShouldLogUserName()
     {
@@ -148,6 +166,9 @@ public class ExceptionMiddlewareTests
         );
     }
 
+    /// <summary>
+    /// Tests logging behavior when user is not authenticated.
+    /// </summary>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
