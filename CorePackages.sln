@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
@@ -85,6 +85,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Application.Tests", "tests\units\Core.Application.Tests\Core.Application.Tests.csproj", "{3AF7E32B-DEFD-45C1-866C-214810EC8E62}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Validation.Abstractions", "src\Core.Validation.Abstractions\Core.Validation.Abstractions.csproj", "{A77CB1D6-ED02-40D6-9505-BBF230A78A3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Validation.FluentValidation", "src\Core.Validation.FluentValidation\Core.Validation.FluentValidation.csproj", "{2073F742-F5F2-4529-9B81-D9E57775908F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
