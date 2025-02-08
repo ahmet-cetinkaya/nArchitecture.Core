@@ -66,7 +66,7 @@ public class ExceptionMiddleware
                 : _contextAccessor.HttpContext.User.Identity.Name!,
         };
 
-        _loggerService.Information(JsonSerializer.Serialize(logDetail));
+        _ = _loggerService.InformationAsync(JsonSerializer.Serialize(logDetail));
         return Task.CompletedTask;
     }
 }
