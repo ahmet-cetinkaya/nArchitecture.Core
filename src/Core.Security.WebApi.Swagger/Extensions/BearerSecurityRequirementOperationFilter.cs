@@ -9,20 +9,19 @@ public class BearerSecurityRequirementOperationFilter : IOperationFilter
     {
         const string openApiSecurityScheme = "oauth2",
             openApiSecurityName = "Bearer";
-        OpenApiSecurityRequirement openApiSecurityRequirement =
-            new()
+        OpenApiSecurityRequirement openApiSecurityRequirement = new()
+        {
             {
+                new OpenApiSecurityScheme
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = openApiSecurityName },
-                        Scheme = openApiSecurityScheme,
-                        Name = openApiSecurityName,
-                        In = ParameterLocation.Header,
-                    },
-                    Array.Empty<string>()
-                }
-            };
+                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = openApiSecurityName },
+                    Scheme = openApiSecurityScheme,
+                    Name = openApiSecurityName,
+                    In = ParameterLocation.Header,
+                },
+                Array.Empty<string>()
+            },
+        };
         operation.Security.Add(openApiSecurityRequirement);
     }
 }

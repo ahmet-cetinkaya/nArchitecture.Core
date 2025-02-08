@@ -1,8 +1,9 @@
 ﻿namespace NArchitecture.Core.Application.Pipelines.Caching;
 
+/// <summary>
+/// Enables cache removal operations.
+/// </summary>
 public interface ICacheRemoverRequest
 {
-    bool BypassCache { get; }
-    string? CacheKey { get; }
-    string[]? CacheGroupKey { get; }
+    CacheRemoverOptions CacheOptions => CacheRemoverOptions.Default;
 }
