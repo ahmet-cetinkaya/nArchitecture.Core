@@ -31,7 +31,7 @@ public class LoggingBehaviorTests
         // Assert
         response.ShouldBe(expectedResponse);
         _loggerMock.Verify(
-            x => x.Information(It.Is<string>(s => s.Contains("testuser") && s.Contains(nameof(TestRequest)))),
+            x => x.InformationAsync(It.Is<string>(s => s.Contains("testuser") && s.Contains(nameof(TestRequest)))),
             Times.Once
         );
     }
@@ -52,7 +52,7 @@ public class LoggingBehaviorTests
 
         // Assert
         response.ShouldBe(expectedResponse);
-        _loggerMock.Verify(x => x.Information(It.Is<string>(s => s.Contains("?"))), Times.Once);
+        _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(s => s.Contains("?"))), Times.Once);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
@@ -94,7 +94,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
@@ -122,7 +122,7 @@ public class LoggingBehaviorTests
             async () => await loggingBehavior.Handle(request, next, CancellationToken.None)
         );
 
-        _loggerMock.Verify(x => x.Information(It.IsAny<string>()), Times.Once);
+        _loggerMock.Verify(x => x.InformationAsync(It.IsAny<string>()), Times.Once);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(
@@ -168,7 +168,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequestWithExclusion, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
@@ -192,7 +192,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequestWithMasking, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
@@ -249,7 +249,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequestWithResponseLogging, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
@@ -315,7 +315,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<ComplexMaskingRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
@@ -345,7 +345,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<MultipleExclusionRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
@@ -380,7 +380,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<ComplexResponseRequest, ComplexResponse>(_loggerMock.Object);
 
         var logMessages = new List<string>();
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => logMessages.Add(msg));
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => logMessages.Add(msg));
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(complexResponse), CancellationToken.None);
@@ -465,7 +465,7 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestDefaultMaskingRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.Information(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
         await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);

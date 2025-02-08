@@ -42,7 +42,7 @@ public class ExceptionMiddlewareTests
         await middleware.Invoke(_httpContext);
 
         // Assert
-        _loggerMock.Verify(x => x.Information(It.IsAny<string>()), Times.Never);
+        _loggerMock.Verify(x => x.InformationAsync(It.IsAny<string>()), Times.Never);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class ExceptionMiddlewareTests
 
         // Assert
         _httpContext.Response.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
-        _loggerMock.Verify(x => x.Information(It.Is<string>(s => s.IndexOf(exceptionMessage) >= 0)));
+        _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(s => s.IndexOf(exceptionMessage) >= 0)));
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ public class ExceptionMiddlewareTests
 
         // Assert
         _loggerMock.Verify(
-            x => x.Information(It.Is<string>(s => VerifyLogDetail(s, expectedUserName))),
+            x => x.InformationAsync(It.Is<string>(s => VerifyLogDetail(s, expectedUserName))),
             Times.Once,
             "Log should contain the authenticated user's name"
         );
@@ -185,7 +185,7 @@ public class ExceptionMiddlewareTests
 
         // Assert
         _loggerMock.Verify(
-            x => x.Information(It.Is<string>(s => VerifyLogDetail(s, "?"))),
+            x => x.InformationAsync(It.Is<string>(s => VerifyLogDetail(s, "?"))),
             Times.Once,
             "Log should contain '?' for unauthenticated or empty user name"
         );

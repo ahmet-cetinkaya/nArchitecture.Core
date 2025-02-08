@@ -1,7 +1,13 @@
 ﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging;
 
+/// <summary>
+/// Extends LogDetail to include exception information for error logging.
+/// </summary>
 public class LogDetailWithException : LogDetail
 {
+    /// <summary>
+    /// Gets or sets the exception message that occurred during the operation.
+    /// </summary>
     public string ExceptionMessage { get; set; }
 
     public LogDetailWithException()

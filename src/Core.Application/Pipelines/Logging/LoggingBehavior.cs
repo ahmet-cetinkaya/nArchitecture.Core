@@ -66,7 +66,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         };
 
         // Log request
-        logger.Information(JsonSerializer.Serialize(logDetail, _jsonOptions));
+        _ = logger.InformationAsync(JsonSerializer.Serialize(logDetail, _jsonOptions));
 
         // Execute handler
         var response = await next();
@@ -75,7 +75,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         if (request.LogOptions.LogResponse)
         {
             logDetail.Parameters.Add(new LogParameter { Type = typeof(TResponse).Name, Value = response! });
-            logger.Information(JsonSerializer.Serialize(logDetail, _jsonOptions));
+            _ = logger.InformationAsync(JsonSerializer.Serialize(logDetail, _jsonOptions));
         }
 
         return response;
