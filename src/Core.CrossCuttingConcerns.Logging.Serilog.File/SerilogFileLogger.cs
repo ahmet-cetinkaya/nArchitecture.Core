@@ -1,22 +1,22 @@
-﻿using NArchitecture.Core.CrossCuttingConcerns.Logging.Configurations;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog;
-using Serilog;
+﻿using Serilog;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File;
 
-public class SerilogFileLogger : SerilogLoggerServiceBase
-{
-    public SerilogFileLogger(FileLogConfiguration configuration)
-        : base(logger: null!)
-    {
-        Logger = new LoggerConfiguration()
+/// <summary>
+/// Implements file-based logging using Serilog with configurable settings.
+/// </summary>
+public class SerilogFileLogger(SerilogFileLogConfiguration configuration)
+    : SerilogLoggerServiceBase(
+        // Configure and create Serilog logger instance with file sink
+        new LoggerConfiguration()
+            .MinimumLevel.Debug()
             .WriteTo.File(
-                path: $"{Directory.GetCurrentDirectory() + configuration.FolderPath}.txt",
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: null,
-                fileSizeLimitBytes: 5000000,
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}"
+                path: $"{Directory.GetCurrentDirectory() + configuration.FolderPath}.log",
+                rollingInterval: configuration.RollingInterval,
+                retainedFileCountLimit: configuration.RetainedFileCountLimit,
+                fileSizeLimitBytes: configuration.FileSizeLimitBytes,
+                outputTemplate: configuration.OutputTemplate,
+                buffered: true
             )
-            .CreateLogger();
-    }
-}
+            .CreateLogger()
+    ) { }

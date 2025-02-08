@@ -3,42 +3,73 @@ using PackageSerilog = Serilog;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog;
 
-public abstract class SerilogLoggerServiceBase : ILogger
+/// <summary>
+/// Base class for Serilog logging implementations that provides common logging functionality.
+/// </summary>
+public abstract class SerilogLoggerServiceBase(PackageSerilog.ILogger logger) : ILogger
 {
-    protected PackageSerilog.ILogger? Logger { get; set; }
+    /// <summary>
+    /// The Serilog logger instance used for logging operations.
+    /// </summary>
+    protected readonly PackageSerilog.ILogger Logger = logger;
 
-    protected SerilogLoggerServiceBase(PackageSerilog.ILogger logger)
+    /// <summary>
+    /// Logs a critical message that represents a critical error that requires immediate attention.
+    /// </summary>
+    /// <param name="message">The message to be logged</param>
+    public Task CriticalAsync(string message)
     {
-        Logger = logger;
+        Logger.Fatal(message);
+        return Task.CompletedTask;
     }
 
-    public void Critical(string message)
+    /// <summary>
+    /// Logs a debug message that is used for development and troubleshooting.
+    /// </summary>
+    /// <param name="message">The message to be logged</param>
+    public Task DebugAsync(string message)
     {
-        Logger?.Fatal(message);
+        Logger.Debug(message);
+        return Task.CompletedTask;
     }
 
-    public void Debug(string message)
+    /// <summary>
+    /// Logs an error message that represents an error that has occurred.
+    /// </summary>
+    /// <param name="message">The message to be logged</param>
+    public Task ErrorAsync(string message)
     {
-        Logger?.Debug(message);
+        Logger.Error(message);
+        return Task.CompletedTask;
     }
 
-    public void Error(string message)
+    /// <summary>
+    /// Logs an informational message that provides general information.
+    /// </summary>
+    /// <param name="message">The message to be logged</param>
+    public Task InformationAsync(string message)
     {
-        Logger?.Error(message);
+        Logger.Information(message);
+        return Task.CompletedTask;
     }
 
-    public void Information(string message)
+    /// <summary>
+    /// Logs a trace message that is used for detailed tracing of the application's execution.
+    /// </summary>
+    /// <param name="message">The message to be logged</param>
+    public Task TraceAsync(string message)
     {
-        Logger?.Information(message);
+        Logger.Verbose(message);
+        return Task.CompletedTask;
     }
 
-    public void Trace(string message)
+    /// <summary>
+    /// Logs a warning message that represents a potential issue or important situation.
+    /// </summary>
+    /// <param name="message">The message to be logged</param>
+    public Task WarningAsync(string message)
     {
-        Logger?.Verbose(message);
-    }
-
-    public void Warning(string message)
-    {
-        Logger?.Warning(message);
+        Logger.Warning(message);
+        return Task.CompletedTask;
     }
 }
