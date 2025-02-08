@@ -6,7 +6,7 @@ using NArchitecture.Core.CrossCuttingConcerns.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 using Shouldly;
 
-namespace Core.Application.Tests.Pipelines.Logging;
+namespace NArchitecture.Core.Application.Tests.Pipelines.Logging;
 
 public class LoggingBehaviorTests
 {
