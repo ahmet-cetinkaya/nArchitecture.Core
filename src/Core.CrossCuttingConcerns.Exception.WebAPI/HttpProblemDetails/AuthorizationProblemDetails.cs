@@ -5,11 +5,14 @@ namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDe
 
 public class AuthorizationProblemDetails : ProblemDetails
 {
-    public AuthorizationProblemDetails(string detail)
+    private const string DEFAULT_TITLE = "Authorization error";
+    private const string DEFAULT_TYPE = "https://example.com/probs/authorization";
+
+    public AuthorizationProblemDetails(string detail, string title = DEFAULT_TITLE, string type = DEFAULT_TYPE)
     {
-        Title = "Authorization error";
         Detail = detail;
+        Title = title;
         Status = StatusCodes.Status401Unauthorized;
-        Type = "https://example.com/probs/authorization";
+        Type = type;
     }
 }

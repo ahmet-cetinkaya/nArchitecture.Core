@@ -5,11 +5,14 @@ namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDe
 
 public class NotFoundProblemDetails : ProblemDetails
 {
-    public NotFoundProblemDetails(string detail)
+    private const string DEFAULT_TITLE = "Resource not found";
+    private const string DEFAULT_TYPE = "https://example.com/probs/notfound";
+
+    public NotFoundProblemDetails(string detail, string title = DEFAULT_TITLE, string type = DEFAULT_TYPE)
     {
-        Title = "Not found";
+        Title = title;
         Detail = detail;
         Status = StatusCodes.Status404NotFound;
-        Type = "https://example.com/probs/notfound";
+        Type = type;
     }
 }

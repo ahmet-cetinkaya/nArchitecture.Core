@@ -7,6 +7,6 @@ public static class ApplicationBuilderExceptionMiddlewareExtensions
 {
     public static void ConfigureCustomExceptionMiddleware(this IApplicationBuilder app)
     {
-        app.UseMiddleware<ExceptionMiddleware>();
+        _ = app.UseMiddleware<ExceptionMiddleware>();
     }
 }

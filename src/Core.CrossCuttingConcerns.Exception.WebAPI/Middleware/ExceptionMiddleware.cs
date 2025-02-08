@@ -14,6 +14,8 @@ public class ExceptionMiddleware
     private readonly ILogger _loggerService;
     private readonly RequestDelegate _next;
 
+    private const string UNKNOWN_USER = "?";
+
     public ExceptionMiddleware(RequestDelegate next, IHttpContextAccessor contextAccessor, ILogger loggerService)
     {
         _next = next;
@@ -51,7 +53,9 @@ public class ExceptionMiddleware
         {
             MethodName = _next.Method.Name,
             Parameters = logParameters,
-            User = _contextAccessor.HttpContext?.User.Identity?.Name ?? "?",
+            User = string.IsNullOrWhiteSpace(_contextAccessor.HttpContext?.User.Identity?.Name)
+                ? UNKNOWN_USER
+                : _contextAccessor.HttpContext.User.Identity.Name!,
         };
 
         _loggerService.Information(JsonSerializer.Serialize(logDetail));
