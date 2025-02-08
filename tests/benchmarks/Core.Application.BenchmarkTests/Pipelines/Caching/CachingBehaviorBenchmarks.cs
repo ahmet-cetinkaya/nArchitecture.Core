@@ -64,6 +64,54 @@ public class CachingBehaviorBenchmarks
         await _behavior.Handle(_request, () => Task.FromResult("bypass-response"), CancellationToken.None);
     }
 
+    [Benchmark(Description = "Parallel Cache Miss - 100 Requests")]
+    public async Task HandleParallelCacheMiss()
+    {
+        _cacheMock.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((byte[]?)null);
+
+        var tasks = new List<Task>();
+        for (int i = 0; i < 100; i++)
+        {
+            var request = new TestRequest { CacheKey = $"test-key-{i}" };
+            tasks.Add(_behavior.Handle(request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None));
+        }
+        await Task.WhenAll(tasks);
+    }
+
+    [Benchmark(Description = "Sequential Cache Miss - 100 Requests")]
+    public async Task HandleSequentialCacheMiss()
+    {
+        _cacheMock.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((byte[]?)null);
+
+        for (int i = 0; i < 100; i++)
+        {
+            var request = new TestRequest { CacheKey = $"test-key-{i}" };
+            await _behavior.Handle(request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
+        }
+    }
+
+    [Benchmark(Description = "Parallel Cache Hit - 100 Requests")]
+    public async Task HandleParallelCacheHit()
+    {
+        var tasks = new List<Task>();
+        for (int i = 0; i < 100; i++)
+        {
+            var request = new TestRequest { CacheKey = $"test-key-{i}" };
+            tasks.Add(_behavior.Handle(request, () => Task.FromResult("cached-response"), CancellationToken.None));
+        }
+        await Task.WhenAll(tasks);
+    }
+
+    [Benchmark(Description = "Sequential Cache Hit - 100 Requests")]
+    public async Task HandleSequentialCacheHit()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            var request = new TestRequest { CacheKey = $"test-key-{i}" };
+            await _behavior.Handle(request, () => Task.FromResult("cached-response"), CancellationToken.None);
+        }
+    }
+
     public class TestRequest : IRequest<string>, ICacheableRequest
     {
         public bool BypassCache { get; set; }
