@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Core.Validation.Abstractions\Core.Validation.Abstractions.csproj" />
+    <ProjectReference Include="../Core.CrossCuttingConcerns.Exception/Core.CrossCuttingConcerns.Exception.csproj" />
+    <ProjectReference Include="../Core.Validation.Abstractions/Core.Validation.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

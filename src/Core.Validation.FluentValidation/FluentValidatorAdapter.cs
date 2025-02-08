@@ -1,4 +1,4 @@
-using FluentValidation;
+using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.Validation.Abstractions;
 
 namespace NArchitecture.Core.Validation.FluentValidation;

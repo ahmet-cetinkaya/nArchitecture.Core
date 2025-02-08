@@ -78,7 +78,7 @@ public class ValidationBehaviorTests
         exception.Errors.ShouldNotBeEmpty();
         var validationError = exception.Errors.FirstOrDefault();
         validationError.ShouldNotBeNull();
-        validationError.Property.ShouldBe(propertyName);
+        validationError.PropertyName.ShouldBe(propertyName);
         validationError.Errors!.ShouldContain(errorMessage);
 
         validatorMock.Verify(v => v.Validate(It.IsAny<DummyRequest>()), Times.Once);
@@ -152,7 +152,7 @@ public class ValidationBehaviorTests
 
         // Assert
         exception.Errors.Count().ShouldBe(2);
-        exception.Errors.ShouldContain(e => e.Property == "Property1" && e.Errors!.Contains("Error1"));
-        exception.Errors.ShouldContain(e => e.Property == "Property2" && e.Errors!.Contains("Error2"));
+        exception.Errors.ShouldContain(e => e.PropertyName == "Property1" && e.Errors!.Contains("Error1"));
+        exception.Errors.ShouldContain(e => e.PropertyName == "Property2" && e.Errors!.Contains("Error2"));
     }
 }

@@ -10,9 +10,7 @@ public class HttpExceptionHandler : ExceptionHandler
 {
     public HttpResponse Response
     {
-#pragma warning disable S112 // General or reserved exceptions should never be thrown
         get => _response ?? throw new NullReferenceException(nameof(_response));
-#pragma warning restore S112 // General or reserved exceptions should never be thrown
         set => _response = value;
     }
 
@@ -49,7 +47,9 @@ public class HttpExceptionHandler : ExceptionHandler
     public override Task HandleException(System.Exception exception)
     {
         Response.StatusCode = StatusCodes.Status500InternalServerError;
-        string details = new InternalServerErrorProblemDetails(exception.Message).ToJson();
+        string details = new InternalServerErrorProblemDetails(
+            detail: string.IsNullOrWhiteSpace(exception.Message) ? null : exception.Message
+        ).ToJson();
         return Response.WriteAsync(details);
     }
 }
