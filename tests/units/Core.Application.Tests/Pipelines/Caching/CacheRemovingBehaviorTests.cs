@@ -13,9 +13,9 @@ namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;
 
 public class MockCacheRemoverRequest : IRequest<int>, ICacheRemoverRequest
 {
-    public string? CacheKey { get; set; }
-    public string[]? CacheGroupKey { get; set; }
-    public bool BypassCache { get; set; }
+    // Use a backing property for the new CacheOptions
+    public CacheRemoverOptions CacheOptions { get; set; } =
+        new CacheRemoverOptions(bypassCache: false, cacheKey: string.Empty, cacheGroupKey: System.Array.Empty<string>());
 }
 
 public class CacheRemovingBehaviorTests
@@ -42,7 +42,10 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WhenCacheKeyProvided_ShouldRemoveFromCache()
     {
         // Arrange
-        var request = new MockCacheRemoverRequest { CacheKey = "test-key" };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: "test-key", cacheGroupKey: null),
+        };
         await _cache.SetAsync("test-key", Encoding.UTF8.GetBytes("test-value"));
 
         // Act
@@ -73,7 +76,10 @@ public class CacheRemovingBehaviorTests
         }
         await _cache.SetAsync($"{groupKey}SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
-        var request = new MockCacheRemoverRequest { CacheGroupKey = [groupKey] };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: new[] { groupKey }),
+        };
 
         // Act
         await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
@@ -121,7 +127,10 @@ public class CacheRemovingBehaviorTests
         }
         await _cache.SetAsync("group2SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
-        var request = new MockCacheRemoverRequest { CacheGroupKey = groupKeys };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: groupKeys),
+        };
 
         // Act
         await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
@@ -155,7 +164,14 @@ public class CacheRemovingBehaviorTests
         var existingKey = "existing-key";
         await _cache.SetAsync(existingKey, Encoding.UTF8.GetBytes("test-value"));
 
-        var request = new MockCacheRemoverRequest { CacheGroupKey = ["non-existent-group"] };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(
+                bypassCache: false,
+                cacheKey: null,
+                cacheGroupKey: new[] { "non-existent-group" }
+            ),
+        };
 
         // Act
         await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
@@ -181,9 +197,7 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            BypassCache = true,
-            CacheKey = testKey,
-            CacheGroupKey = [groupKey],
+            CacheOptions = new CacheRemoverOptions(bypassCache: true, cacheKey: testKey, cacheGroupKey: new[] { groupKey }),
         };
 
         // Act
@@ -244,9 +258,7 @@ public class CacheRemovingBehaviorTests
         // Arrange
         var request = new MockCacheRemoverRequest
         {
-            CacheKey = cacheKey,
-            CacheGroupKey = groupKeys,
-            BypassCache = bypassCache,
+            CacheOptions = new CacheRemoverOptions(bypassCache: bypassCache, cacheKey: cacheKey, cacheGroupKey: groupKeys),
         };
 
         if (cacheKey != null)
@@ -293,7 +305,10 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WithEmptyGroupKey_ShouldNotThrowException()
     {
         // Arrange
-        var request = new MockCacheRemoverRequest { CacheGroupKey = Array.Empty<string>() };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: Array.Empty<string>()),
+        };
 
         // Act
         var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
@@ -314,7 +329,10 @@ public class CacheRemovingBehaviorTests
         const string groupKey = "invalid-group";
         await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes("invalid-json"));
 
-        var request = new MockCacheRemoverRequest { CacheGroupKey = new[] { groupKey } };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: new[] { groupKey }),
+        };
 
         // Act
         var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
@@ -334,7 +352,14 @@ public class CacheRemovingBehaviorTests
     {
         // Arrange
         var cts = new CancellationTokenSource();
-        var request = new MockCacheRemoverRequest { CacheKey = "test-key", CacheGroupKey = new[] { "test-group" } };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(
+                bypassCache: false,
+                cacheKey: "test-key",
+                cacheGroupKey: new[] { "test-group" }
+            ),
+        };
 
         // Set up some cache data to ensure we hit the cache operations
         await _cache.SetAsync("test-group", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new HashSet<string> { "test-key" })));
@@ -359,12 +384,16 @@ public class CacheRemovingBehaviorTests
         var cts = new CancellationTokenSource();
         var request = new MockCacheRemoverRequest
         {
-            CacheGroupKey = ["group1", "group2", "group3"], // Multiple groups to ensure we hit the loop
+            CacheOptions = new CacheRemoverOptions(
+                bypassCache: false,
+                cacheKey: null,
+                cacheGroupKey: new[] { "group1", "group2", "group3" } // Multiple groups to ensure we hit the loop
+            ),
         };
 
         // Set up cache data
         var groupData = new HashSet<string> { "key1" };
-        foreach (var groupKey in request.CacheGroupKey)
+        foreach (var groupKey in request.CacheOptions.CacheGroupKey)
         {
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
         }
@@ -395,10 +424,17 @@ public class CacheRemovingBehaviorTests
     {
         // Arrange
         var cts = new CancellationTokenSource();
-        var request = new MockCacheRemoverRequest { CacheGroupKey = ["group1", "group2", "group3", "group4"] };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(
+                bypassCache: false,
+                cacheKey: null,
+                cacheGroupKey: new[] { "group1", "group2", "group3", "group4" }
+            ),
+        };
 
         // Setup cache data
-        foreach (var groupKey in request.CacheGroupKey)
+        foreach (var groupKey in request.CacheOptions.CacheGroupKey)
         {
             var groupData = new HashSet<string> { "testKey" };
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
@@ -447,7 +483,14 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WhenProcessingGroups_ShouldLogInformation()
     {
         // Arrange
-        var request = new MockCacheRemoverRequest { CacheGroupKey = ["group1", "group2"] };
+        var request = new MockCacheRemoverRequest
+        {
+            CacheOptions = new CacheRemoverOptions(
+                bypassCache: false,
+                cacheKey: null,
+                cacheGroupKey: new[] { "group1", "group2" }
+            ),
+        };
 
         // Setup cache data with different number of keys per group
         var group1Keys = new HashSet<string> { "key1", "key2" };

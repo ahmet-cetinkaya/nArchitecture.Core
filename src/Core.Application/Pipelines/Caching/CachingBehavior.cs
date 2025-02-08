@@ -38,13 +38,11 @@ public sealed class CachingBehavior<TRequest, TResponse>(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Early exit if caching is bypassed
-        if (request.BypassCache)
+        // Use the new struct property.
+        if (request.CacheOptions.BypassCache)
             return await next();
 
-        // Try to get from cache
-        byte[]? cachedResponse = await cache.GetAsync(request.CacheKey, cancellationToken);
-
+        byte[]? cachedResponse = await cache.GetAsync(request.CacheOptions.CacheKey, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
 
         if (cachedResponse is not null)
@@ -53,13 +51,13 @@ public sealed class CachingBehavior<TRequest, TResponse>(
             {
                 // Deserialize and return cached response
                 TResponse? response = DeserializeFromUtf8Bytes<TResponse>(cachedResponse);
-                logger.LogInformation("Cache hit: {CacheKey}", request.CacheKey);
+                logger.LogInformation("Cache hit: {CacheKey}", request.CacheOptions.CacheKey);
                 return response;
             }
             catch
             {
                 // Log deserialization failures but continue with cache miss path
-                logger.LogWarning("Cache deserialization failed: {CacheKey}", request.CacheKey);
+                logger.LogWarning("Cache deserialization failed: {CacheKey}", request.CacheOptions.CacheKey);
             }
         }
 
@@ -109,17 +107,17 @@ public sealed class CachingBehavior<TRequest, TResponse>(
         TResponse response = await next();
 
         // Validate and get sliding expiration
-        TimeSpan slidingExpiration = request.SlidingExpiration ?? _cacheSettings.SlidingExpiration;
+        TimeSpan slidingExpiration = request.CacheOptions.SlidingExpiration ?? _cacheSettings.SlidingExpiration;
         if (slidingExpiration <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(slidingExpiration), "Sliding expiration must be positive");
 
         // Cache the response
         var cacheOptions = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
         byte[] serializedData = JsonSerializer.SerializeToUtf8Bytes(response, JsonOptions);
-        await cache.SetAsync(request.CacheKey, serializedData, cacheOptions, cancellationToken);
+        await cache.SetAsync(request.CacheOptions.CacheKey, serializedData, cacheOptions, cancellationToken);
 
         // Add to cache group if specified
-        if (request.CacheGroupKey is not null)
+        if (request.CacheOptions.CacheGroupKey is not null)
             await addCacheKeyToGroup(request, slidingExpiration, cancellationToken);
 
         return response;
@@ -131,7 +129,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
     private async Task addCacheKeyToGroup(TRequest request, TimeSpan slidingExpiration, CancellationToken cancellationToken)
     {
         // Get existing group cache
-        string groupKey = request.CacheGroupKey!;
+        string groupKey = request.CacheOptions.CacheGroupKey!;
         byte[]? groupCache = await cache.GetAsync(groupKey, cancellationToken);
 
         // Get or create cache keys set
@@ -140,7 +138,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
             : [];
 
         // Add new key to group if not exists
-        if (cacheKeysInGroup.Add(request.CacheKey))
+        if (cacheKeysInGroup.Add(request.CacheOptions.CacheKey))
         {
             // Update group cache with new expiration
             DistributedCacheEntryOptions cacheOptions = new()

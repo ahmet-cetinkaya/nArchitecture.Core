@@ -48,17 +48,17 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
         cancellationToken.ThrowIfCancellationRequested();
 
         // Check if cache operations should be skipped
-        if (request.BypassCache)
+        if (request.CacheOptions.BypassCache)
             return await next();
 
         // Fast path for single key removal
-        if (request.CacheGroupKey == null && !string.IsNullOrEmpty(request.CacheKey))
+        if (request.CacheOptions.CacheGroupKey == null && !string.IsNullOrEmpty(request.CacheOptions.CacheKey))
         {
             // Execute the next handler first
             TResponse response = await next();
             cancellationToken.ThrowIfCancellationRequested(); // Check before cache operation
             // Remove the single cache key
-            await _cache.RemoveAsync(request.CacheKey, cancellationToken);
+            await _cache.RemoveAsync(request.CacheOptions.CacheKey, cancellationToken);
             return response;
         }
 
@@ -77,20 +77,20 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
         TResponse response = await next();
 
         // Process group keys if present
-        if (request.CacheGroupKey?.Length > 0)
+        if (request.CacheOptions.CacheGroupKey?.Length > 0)
         {
             cancellationToken.ThrowIfCancellationRequested();
             // Rent memory buffer
             using IMemoryOwner<byte> bufferLease = MemoryPool<byte>.Shared.Rent(_bufferSize);
             // Remove group keys
-            await RemoveGroupKeysAsync(request.CacheGroupKey, bufferLease.Memory, cancellationToken);
+            await RemoveGroupKeysAsync(request.CacheOptions.CacheGroupKey, bufferLease.Memory, cancellationToken);
         }
 
         // Remove single key if present
-        if (!string.IsNullOrEmpty(request.CacheKey))
+        if (!string.IsNullOrEmpty(request.CacheOptions.CacheKey))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await _cache.RemoveAsync(request.CacheKey, cancellationToken);
+            await _cache.RemoveAsync(request.CacheOptions.CacheKey, cancellationToken);
         }
 
         return response;
