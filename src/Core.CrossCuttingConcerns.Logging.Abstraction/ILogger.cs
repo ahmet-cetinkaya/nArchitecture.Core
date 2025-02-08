@@ -1,11 +1,14 @@
 ﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 
+/// <summary>
+/// Defines asynchronous logging operations for different log levels.
+/// </summary>
 public interface ILogger
 {
-    public void Trace(string message);
-    public void Critical(string message);
-    public void Information(string message);
-    public void Warning(string message);
-    public void Debug(string message);
-    public void Error(string message);
+    Task TraceAsync(string message);
+    Task CriticalAsync(string message);
+    Task InformationAsync(string message);
+    Task WarningAsync(string message);
+    Task DebugAsync(string message);
+    Task ErrorAsync(string message);
 }
