@@ -7,25 +7,18 @@ namespace NArchitecture.Core.Application.Pipelines.Authorization;
 /// <summary>
 /// Represents role claims for authorization.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the RoleClaims struct.
+/// </remarks>
+/// <param name="identityRoles">The roles assigned to the identity.</param>
+/// <param name="requiredRoles">The roles required for authorization.</param>
 [StructLayout(LayoutKind.Auto)]
-public readonly ref struct RoleClaims
+[method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+public readonly ref struct RoleClaims(string[]? identityRoles, string[]? requiredRoles)
 {
-    private readonly string[]? _identityRoles;
-    private readonly string[]? _requiredRoles;
-    private readonly bool _hasAdminRole;
-
-    /// <summary>
-    /// Initializes a new instance of the RoleClaims struct.
-    /// </summary>
-    /// <param name="identityRoles">The roles assigned to the identity.</param>
-    /// <param name="requiredRoles">The roles required for authorization.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public RoleClaims(string[]? identityRoles, string[]? requiredRoles)
-    {
-        _identityRoles = identityRoles;
-        _requiredRoles = requiredRoles;
-        _hasAdminRole = identityRoles != null && ContainsAdmin(identityRoles);
-    }
+    private readonly string[]? _identityRoles = identityRoles;
+    private readonly string[]? _requiredRoles = requiredRoles;
+    private readonly bool _hasAdminRole = identityRoles != null && ContainsAdmin(identityRoles);
 
     /// <summary>
     /// Checks if the roles array contains the admin role.
