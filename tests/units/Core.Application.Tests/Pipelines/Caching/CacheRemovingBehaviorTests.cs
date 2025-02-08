@@ -348,4 +348,143 @@ public class CacheRemovingBehaviorTests
             await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
     }
+
+    /// <summary>
+    /// Tests that cancellation is properly handled during group key processing
+    /// </summary>
+    [Fact]
+    public async Task Handle_WithCancellationDuringGroupKeyProcessing_ShouldStopProcessing()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+        var request = new MockCacheRemoverRequest
+        {
+            CacheGroupKey = ["group1", "group2", "group3"], // Multiple groups to ensure we hit the loop
+        };
+
+        // Set up cache data
+        var groupData = new HashSet<string> { "key1" };
+        foreach (var groupKey in request.CacheGroupKey)
+        {
+            await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
+        }
+
+        // Set up next delegate to cancel during execution
+        RequestHandlerDelegate<int> next = () =>
+        {
+            cts.Cancel(); // Cancel during execution
+            return Task.FromResult(42);
+        };
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        {
+            await _behavior.Handle(request, next, cts.Token);
+        });
+
+        // Verify that not all groups were processed
+        var lastGroupValue = await _cache.GetAsync("group3");
+        lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
+    }
+
+    /// <summary>
+    /// Tests cancellation handling during group processing loop
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenCancellationRequestedDuringLoop_ShouldBreakAndStopProcessing()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+        var request = new MockCacheRemoverRequest { CacheGroupKey = ["group1", "group2", "group3", "group4"] };
+
+        // Setup cache data
+        foreach (var groupKey in request.CacheGroupKey)
+        {
+            var groupData = new HashSet<string> { "testKey" };
+            await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
+        }
+
+        // Cancel after first group is processed
+        int processedGroups = 0;
+        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+        _loggerMock
+            .Setup(x =>
+                x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsAnyType>(),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                )
+            )
+            .Callback(() =>
+            {
+                processedGroups++;
+                if (processedGroups == 1)
+                {
+                    cts.Cancel();
+                    throw new OperationCanceledException(cts.Token);
+                }
+            });
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        {
+            await _behavior.Handle(request, _nextDelegate, cts.Token);
+        });
+
+        // Verify only first group was processed
+        (await _cache.GetAsync("group1")).ShouldBeNull("First group should be processed");
+        (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
+        (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
+        (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
+    }
+
+    /// <summary>
+    /// Tests that logger information is properly called for each group
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenProcessingGroups_ShouldLogInformation()
+    {
+        // Arrange
+        var request = new MockCacheRemoverRequest { CacheGroupKey = ["group1", "group2"] };
+
+        // Setup cache data with different number of keys per group
+        var group1Keys = new HashSet<string> { "key1", "key2" };
+        var group2Keys = new HashSet<string> { "key3" };
+        await _cache.SetAsync("group1", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(group1Keys)));
+        await _cache.SetAsync("group2", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(group2Keys)));
+
+        // Enable information logging
+        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+
+        // Act
+        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+
+        // Assert
+        // Verify logger was called with correct group names and key counts
+        _loggerMock.Verify(
+            x =>
+                x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("group1") && v.ToString()!.Contains("2")),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.Once
+        );
+
+        _loggerMock.Verify(
+            x =>
+                x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("group2") && v.ToString()!.Contains("1")),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.Once
+        );
+    }
 }
