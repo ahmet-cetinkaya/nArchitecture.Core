@@ -2,8 +2,8 @@
     "scripts": {
         "build": "dotnet build --configuration Release",
         "test": "dotnet test --configuration Release",
-        "benchmark": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj",
-        "benchmark:last": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run",
+        "benchmark": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj && dotnet restore",
+        "benchmark:last": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run && dotnet restore",
         "analysis": "dotnet roslynator analyze",
         "format": "dotnet csharpier ."
     }
