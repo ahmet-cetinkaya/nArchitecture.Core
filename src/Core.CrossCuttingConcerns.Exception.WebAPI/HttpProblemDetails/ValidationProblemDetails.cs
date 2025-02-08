@@ -1,19 +1,25 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
+using NArchitecture.Core.Validation.Abstractions;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDetails;
 
 public class ValidationProblemDetails : ProblemDetails
 {
-    public IEnumerable<ValidationExceptionModel> Errors { get; init; }
+    private const string DEFAULT_TITLE = "Validation error(s)";
+    private const string DEFAULT_TYPE = "https://example.com/probs/validation";
 
-    public ValidationProblemDetails(IEnumerable<ValidationExceptionModel> errors)
+    public IEnumerable<ValidationError> Errors { get; init; }
+
+    public ValidationProblemDetails(
+        IEnumerable<ValidationError> errors,
+        string title = DEFAULT_TITLE,
+        string type = DEFAULT_TYPE
+    )
     {
-        Title = "Validation error(s)";
-        Detail = "One or more validation errors occurred.";
-        Errors = errors;
+        Title = title;
         Status = StatusCodes.Status400BadRequest;
-        Type = "https://example.com/probs/validation";
+        Type = type;
+        Errors = errors;
     }
 }

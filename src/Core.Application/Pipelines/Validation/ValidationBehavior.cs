@@ -30,19 +30,8 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
         {
             ValidationResult validationResult = _validator.Validate(request);
 
-            if (!validationResult.IsValid)
-            {
-                var errorModels = validationResult
-                    .Errors?.Select(error => new ValidationExceptionModel
-                    {
-                        Property = error.PropertyName,
-                        Errors = new[] { error.ErrorMessage },
-                    })
-                    .ToList();
-
-                if (errorModels is not null && errorModels.Any())
-                    throw new ValidationException(errorModels);
-            }
+            if (!validationResult.IsValid && validationResult.Errors?.Any() == true)
+                throw new ValidationException(validationResult.Errors);
         }
 
         TResponse response = await next();

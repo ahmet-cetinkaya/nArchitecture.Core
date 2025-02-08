@@ -33,4 +33,7 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core.Validation.Abstractions\Core.Validation.Abstractions.csproj" />
+  </ItemGroup>
 </Project>
