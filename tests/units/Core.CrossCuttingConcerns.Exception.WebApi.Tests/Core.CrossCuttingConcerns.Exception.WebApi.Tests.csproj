@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../src/Core.CrossCuttingConcerns.Exception.WebAPI/Core.CrossCuttingConcerns.Exception.WebApi.csproj" />
+    <ProjectReference Include="../../../src/Core.CrossCuttingConcerns.Exception.WebApi/Core.CrossCuttingConcerns.Exception.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

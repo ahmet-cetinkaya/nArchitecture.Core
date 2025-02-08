@@ -54,7 +54,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Serilog", "src\Core.CrossCuttingConcerns.Logging.SeriLog\Core.CrossCuttingConcerns.Logging.Serilog.csproj", "{570EB8D5-8D08-4026-BB52-684E7F599422}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Exception.WebApi", "src\Core.CrossCuttingConcerns.Exception.WebAPI\Core.CrossCuttingConcerns.Exception.WebApi.csproj", "{E9F71091-42BA-42FA-B3ED-83042C813780}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Exception.WebApi", "src\Core.CrossCuttingConcerns.Exception.WebApi\Core.CrossCuttingConcerns.Exception.WebApi.csproj", "{E9F71091-42BA-42FA-B3ED-83042C813780}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Abstraction", "src\Core.CrossCuttingConcerns.Logging.Abstraction\Core.CrossCuttingConcerns.Logging.Abstraction.csproj", "{4DDE97CF-FC8C-4333-A7AE-80B68E55927F}"
 EndProject
