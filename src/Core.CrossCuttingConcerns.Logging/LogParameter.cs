@@ -1,9 +1,23 @@
 ﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging;
 
+/// <summary>
+/// Represents a parameter information for logging purposes.
+/// </summary>
 public class LogParameter
 {
+    /// <summary>
+    /// Gets or sets the name of the parameter.
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// Gets or sets the value of the parameter.
+    /// </summary>
     public object Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the type name of the parameter.
+    /// </summary>
     public string Type { get; set; }
 
     public LogParameter()
