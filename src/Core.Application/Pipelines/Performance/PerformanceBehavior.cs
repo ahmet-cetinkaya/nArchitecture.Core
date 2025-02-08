@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace NArchitecture.Core.Application.Pipelines.Performance;
 
+/// <summary>
+/// Pipeline behavior for measuring request performance.
+/// </summary>
 public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, IIntervalRequest
 {
@@ -22,28 +25,37 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         CancellationToken cancellationToken
     )
     {
+        // Get the request name.
         string requestName = request.GetType().Name;
 
         TResponse response;
 
         try
         {
+            // Start timing.
             _stopwatch.Start();
+
+            // Process the request.
             response = await next();
         }
         finally
         {
-            if (_stopwatch.Elapsed.TotalSeconds > request.Interval)
-            {
-                string message = $"Performance -> {requestName} {_stopwatch.Elapsed.TotalSeconds} s";
+            // Stop the stopwatch.
+            _stopwatch.Stop();
 
-                Debug.WriteLine(message);
-                _logger.LogInformation(message);
+            // Log if elapsed time exceeds threshold.
+            if (_stopwatch.Elapsed.TotalSeconds > request.IntervalOptions.Interval)
+            {
+                _logger.LogInformation(
+                    $"Performance -> {requestName} took {_stopwatch.Elapsed.TotalSeconds}s, exceeding the threshold of {request.IntervalOptions.Interval}s"
+                );
             }
 
-            _stopwatch.Restart();
+            // Reset stopwatch for next measurement.
+            _stopwatch.Reset();
         }
 
+        // Return the response.
         return response;
     }
 }
