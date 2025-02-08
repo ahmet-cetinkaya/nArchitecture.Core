@@ -33,12 +33,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.11.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.1" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup>
@@ -46,5 +42,6 @@
     <ProjectReference Include="..\Core.CrossCuttingConcerns.Logging\Core.CrossCuttingConcerns.Logging.csproj" />
     <ProjectReference Include="..\Core.CrossCuttingConcerns.Exception\Core.CrossCuttingConcerns.Exception.csproj" />
     <ProjectReference Include="..\Core.Security\Core.Security.csproj" />
+    <ProjectReference Include="..\Core.Validation.Abstractions\Core.Validation.Abstractions.csproj" />
   </ItemGroup>
 </Project>
