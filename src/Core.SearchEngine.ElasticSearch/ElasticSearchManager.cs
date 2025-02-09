@@ -64,7 +64,7 @@ public class ElasticSearchManager : ISearchEngine
 
     public async Task<SearchResult> InsertManyAsync(string indexName, object[] items)
     {
-        var bulkResponse = await _client.BulkAsync(b => b.Index(indexName).IndexMany(items));
+        var bulkResponse = await _client.BulkAsync(b => b.Index(indexName).IndexMany(items).Refresh(Refresh.True));
 
         return CreateResponse(bulkResponse.IsValidResponse, bulkResponse.ElasticsearchServerError?.Error?.Reason);
     }
@@ -138,7 +138,11 @@ public class ElasticSearchManager : ISearchEngine
 
     public async Task<SearchResult> UpdateAsync(SearchDocumentWithData document)
     {
-        var response = await _client.UpdateAsync<object, object>(document.IndexName, document.Id, u => u.Doc(document.Data));
+        var response = await _client.UpdateAsync<object, object>(
+            document.IndexName,
+            document.Id,
+            u => u.Doc(document.Data).Refresh(Refresh.True)
+        );
 
         return CreateResponse(response.IsValidResponse, response.ElasticsearchServerError?.Error?.Reason);
     }
@@ -151,7 +155,7 @@ public class ElasticSearchManager : ISearchEngine
         var response = await _client.UpdateAsync<object, object>(
             model.IndexName,
             model.Id,
-            u => u.Doc(model.Data).RetryOnConflict(3)
+            u => u.Doc(model.Data).Refresh(Refresh.True).RetryOnConflict(3)
         );
 
         return CreateResponse(response.IsValidResponse, response.ElasticsearchServerError?.Error?.Reason);
@@ -159,7 +163,7 @@ public class ElasticSearchManager : ISearchEngine
 
     public async Task<SearchResult> DeleteAsync(SearchDocument document)
     {
-        var response = await _client.DeleteAsync<object>(document.IndexName, document.Id);
+        var response = await _client.DeleteAsync<object>(document.IndexName, document.Id, d => d.Refresh(Refresh.True));
 
         return CreateResponse(response.IsValidResponse, response.ElasticsearchServerError?.Error?.Reason);
     }
