@@ -31,14 +31,16 @@ public class TestDocument
 public class ElasticSearchFixture : IAsyncLifetime
 {
     private readonly string _containerName;
-    public ElasticSearchManager Manager { get; private set; }
+    public ElasticSearchManager Manager { get; private set; } = null!;
     private readonly DockerClient _dockerClient;
     private string? _containerId;
     private const string TestIndex = "test-index";
     private const string TestAlias = "test-alias";
-    private readonly ElasticsearchClient _client;
+    private ElasticsearchClient _client = null!;
     private readonly int _httpPort;
     private readonly int _transportPort;
+    private bool _skipContainerCreation;
+    private string _elasticHost = null!;
 
     public ElasticSearchFixture()
     {
@@ -46,9 +48,29 @@ public class ElasticSearchFixture : IAsyncLifetime
         _httpPort = GetRandomPort();
         _transportPort = GetRandomPort();
 
+        var dockerUri = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? new Uri("npipe://./pipe/docker_engine")
+            : new Uri("unix:///var/run/docker.sock");
+        _dockerClient = new DockerClientConfiguration(dockerUri).CreateClient();
+    }
+
+    private async Task InitializeManager()
+    {
+        // Get the host from environment or use localhost
+        _elasticHost = Environment.GetEnvironmentVariable("ELASTICSEARCH_URL") ?? $"http://localhost:{_httpPort}";
+
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELASTICSEARCH_URL")))
+        {
+            await InitializeLocalContainer();
+        }
+        else
+        {
+            _skipContainerCreation = true;
+        }
+
         var config = new ElasticSearchConfig
         {
-            ConnectionString = $"http://localhost:{_httpPort}",
+            ConnectionString = _elasticHost,
             NumberOfReplicas = 1,
             NumberOfShards = 3,
             Analyzer = "standard",
@@ -70,11 +92,6 @@ public class ElasticSearchFixture : IAsyncLifetime
 
         Manager = new ElasticSearchManager(config);
         _client = new ElasticsearchClient(settings);
-
-        var dockerUri = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? new Uri("npipe://./pipe/docker_engine")
-            : new Uri("unix:///var/run/docker.sock");
-        _dockerClient = new DockerClientConfiguration(dockerUri).CreateClient();
     }
 
     /// <summary>
@@ -114,10 +131,7 @@ public class ElasticSearchFixture : IAsyncLifetime
         }
     }
 
-    /// <summary>
-    /// Initializes the test environment by starting ElasticSearch container and creating test data.
-    /// </summary>
-    public async Task InitializeAsync()
+    private async Task InitializeLocalContainer()
     {
         await CleanupExistingContainers();
 
@@ -140,48 +154,90 @@ public class ElasticSearchFixture : IAsyncLifetime
                             new List<PortBinding> { new() { HostPort = _transportPort.ToString() } }
                         },
                     },
+                    Memory = 2147483648,
+                    MemorySwap = 4294967296,
                 },
-                Env = new[] { "discovery.type=single-node", "xpack.security.enabled=false" },
+                Env = new[] { "discovery.type=single-node", "xpack.security.enabled=false", "ES_JAVA_OPTS=-Xms512m -Xmx512m" },
             }
         );
 
         _containerId = createContainerResponse.ID;
         await _dockerClient.Containers.StartContainerAsync(_containerId, null);
+    }
 
-        // Wait for Elasticsearch to be ready
-        using var httpClient = new HttpClient();
-        var maxAttempts = 30;
-        var attempt = 0;
-        while (attempt < maxAttempts)
+    /// <summary>
+    /// Initializes the test environment by starting ElasticSearch container and creating test data.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        await InitializeManager();
+
+        if (!_skipContainerCreation)
         {
-            try
+            // Local environment health check
+            using var httpClient = new HttpClient();
+            var maxAttempts = 60;
+            var attempt = 0;
+            while (attempt < maxAttempts)
             {
-                var response = await httpClient.GetAsync($"http://localhost:{_httpPort}");
-                if (response.IsSuccessStatusCode)
-                    break;
+                try
+                {
+                    var response = await httpClient.GetAsync($"http://localhost:{_httpPort}/_cluster/health");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await Task.Delay(5000);
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Ignore exceptions while waiting
+                }
+                attempt++;
+                await Task.Delay(2000);
             }
-            catch
+
+            if (attempt >= maxAttempts)
+                throw new Exception("Elasticsearch failed to start within the expected timeframe.");
+        }
+        else
+        {
+            // CI environment health check
+            using var httpClient = new HttpClient();
+            var maxAttempts = 30;
+            var attempt = 0;
+
+            while (attempt < maxAttempts)
             {
-                // Ignore exceptions while waiting
+                try
+                {
+                    var response = await httpClient.GetAsync($"{_elasticHost}/_cluster/health");
+                    if (response.IsSuccessStatusCode)
+                        break;
+                }
+                catch
+                {
+                    // Ignore exceptions while waiting
+                }
+                attempt++;
+                await Task.Delay(1000);
             }
-            attempt++;
-            await Task.Delay(1000);
+
+            if (attempt >= maxAttempts)
+                throw new Exception("Could not connect to Elasticsearch service.");
         }
 
-        if (attempt >= maxAttempts)
-            throw new Exception("Elasticsearch failed to start within the expected timeframe.");
-
         // Create test index and insert test data
-        await Manager.CreateIndexAsync(new IndexModel("test-index", "test-alias"));
+        await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
+        await Task.Delay(1000);
+
         await Manager.InsertAsync(
             new SearchDocumentWithData(
                 Id: "1",
-                IndexName: "test-index",
+                IndexName: TestIndex,
                 Data: new TestDocument { Name = "Test", Description = "Sample Description" }
             )
         );
-
-        // Wait for Elasticsearch to index the data
         await Task.Delay(1000);
     }
 
@@ -222,7 +278,7 @@ public class ElasticSearchFixture : IAsyncLifetime
     /// </summary>
     public async Task DisposeAsync()
     {
-        if (_containerId != null)
+        if (!_skipContainerCreation && _containerId != null)
         {
             await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters());
             await _dockerClient.Containers.RemoveContainerAsync(_containerId, new ContainerRemoveParameters());
