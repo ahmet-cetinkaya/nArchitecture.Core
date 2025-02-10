@@ -6,6 +6,13 @@ namespace NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection;
 
 public static class ServiceCollectionResourceLocalizationManagerExtension
 {
+    // Define constants to avoid magic strings
+    private const string FeaturesFolder = "Features";
+    private const string ResourcesFolder = "Resources";
+    private const string LocalesFolder = "Locales";
+    private const string YamlExtension = ".yaml";
+    private const string FileSearchPattern = "*" + YamlExtension;
+
     /// <summary>
     /// Adds <see cref="ResourceLocalizationManager"/> as <see cref="ILocalizationService"/> to <see cref="IServiceCollection"/>.
     /// <list type="bullet">
@@ -21,38 +28,56 @@ public static class ServiceCollectionResourceLocalizationManagerExtension
     {
         services.AddScoped<ILocalizationService, ResourceLocalizationManager>(_ =>
         {
-            // <locale, <featureName, resourceDir>>
-            Dictionary<string, Dictionary<string, string>> resources = [];
-
-            string[] featureDirs = Directory.GetDirectories(
-                Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "Features")
-            );
-            foreach (string featureDir in featureDirs)
-            {
-                string featureName = Path.GetFileName(featureDir);
-                string localeDir = Path.Combine(featureDir, "Resources", "Locales");
-                if (Directory.Exists(localeDir))
-                {
-                    string[] localeFiles = Directory.GetFiles(localeDir);
-                    foreach (string localeFile in localeFiles)
-                    {
-                        string localeName = Path.GetFileNameWithoutExtension(localeFile);
-                        int separatorIndex = localeName.IndexOf('.');
-                        string localeCulture = localeName[(separatorIndex + 1)..];
-
-                        if (File.Exists(localeFile))
-                        {
-                            if (!resources.ContainsKey(localeCulture))
-                                resources.Add(localeCulture, []);
-                            resources[localeCulture].Add(featureName, localeFile);
-                        }
-                    }
-                }
-            }
-
+            Dictionary<string, Dictionary<string, string>> resources = GetLocalizationResources();
             return new ResourceLocalizationManager(resources);
         });
 
         return services;
+    }
+
+    private static Dictionary<string, Dictionary<string, string>> GetLocalizationResources()
+    {
+        var resources = new Dictionary<string, Dictionary<string, string>>();
+        string? assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        if (assemblyLocation is null)
+            return resources;
+
+        string featuresPath = Path.Combine(assemblyLocation, FeaturesFolder);
+        if (!Directory.Exists(featuresPath))
+            return resources;
+
+        string[] featureDirectories = Directory.GetDirectories(featuresPath);
+
+        foreach (string featureDir in featureDirectories)
+        {
+            IEnumerable<(string culture, string filePath)> localeFiles = GetLocaleFiles(featureDir);
+            foreach ((string culture, string filePath) in localeFiles)
+            {
+                if (!resources.ContainsKey(culture))
+                    resources[culture] = [];
+
+                resources[culture][Path.GetFileName(featureDir)] = filePath;
+            }
+        }
+
+        return resources;
+    }
+
+    private static IEnumerable<(string culture, string filePath)> GetLocaleFiles(string featureDir)
+    {
+        string localeDir = Path.Combine(featureDir, ResourcesFolder, LocalesFolder);
+        if (!Directory.Exists(localeDir))
+            yield break;
+
+        foreach (string file in Directory.EnumerateFiles(localeDir, FileSearchPattern))
+        {
+            string fileName = Path.GetFileNameWithoutExtension(file);
+            int separatorIndex = fileName.IndexOf('.');
+            if (separatorIndex == -1)
+                continue;
+
+            string culture = fileName[(separatorIndex + 1)..];
+            yield return (culture, file);
+        }
     }
 }
