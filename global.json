@@ -5,6 +5,7 @@
         "benchmark": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj && dotnet restore",
         "benchmark:last": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run && dotnet restore",
         "analysis": "dotnet roslynator analyze",
-        "format": "dotnet csharpier ."
+        "format": "dotnet csharpier .",
+        "test:ci:dotnet": "act --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/dotnet.yml"
     }
 }
