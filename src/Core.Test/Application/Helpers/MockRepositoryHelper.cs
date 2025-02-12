@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq;
-using NArchitecture.Core.Persistence.Paging;
-using NArchitecture.Core.Persistence.Repositories;
+using NArchitecture.Core.Persistence.Abstractions.Paging;
+using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Test.Application.Helpers;
 
@@ -40,8 +40,8 @@ public static class MockRepositoryHelper
                     It.IsAny<Expression<Func<TEntity, bool>>>(),
                     It.IsAny<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>>(),
                     It.IsAny<Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>>(),
-                    It.IsAny<int>(),
-                    It.IsAny<int>(),
+                    It.IsAny<uint>(),
+                    It.IsAny<uint>(),
                     It.IsAny<bool>(),
                     It.IsAny<bool>(),
                     It.IsAny<CancellationToken>()

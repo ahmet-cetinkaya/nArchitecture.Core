@@ -6,14 +6,15 @@
     <RootNamespace>NArchitecture.$(AssemblyName)</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>NArchitecture.$(AssemblyName)</PackageId>
-    <Version>1.0.6</Version>
+    <Version>1.1.4</Version>
     <Title>NArchitecture $(AssemblyName)</Title>
-    <Description>Provides utilities for testing.</Description>
+    <Description>Provides persistence utilities for data access using Entity Framework Core.</Description>
     <Product>NArchitecture</Product>
     <Authors>Kodlama.io, Contributors</Authors>
     <Company>Kodlama.io</Company>
-    <PackageTags>Clean Architecture, Union Architecture, Core, NArchitecture, Test, Unit Test,
-      Integration Test, Testing, Mocking</PackageTags>
+    <PackageTags>Clean Architecture, Union Architecture, Core, NArchitecture, Persistence, Data
+      Access, Repository Pattern, Entity Framework, Unit of Work, Database, ORM, NoSQL, Relational,
+      File System</PackageTags>
     <PackageIcon>n-architecture-logo.png</PackageIcon>
     <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -34,13 +35,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="EFCore.BulkExtensions.MIT" Version="8.17.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Core.Persistence.Abstraction/Core.Persistence.Abstraction.csproj" />
-    <ProjectReference Include="..\Core.Application\Core.Application.csproj" />
-    <ProjectReference Include="..\Core.Localization.Resource.Yaml\Core.Localization.Resource.Yaml.csproj" />
+    <ProjectReference Include="..\Core.Persistence.Abstractions\Core.Persistence.Abstractions.csproj" />
   </ItemGroup>
 </Project>

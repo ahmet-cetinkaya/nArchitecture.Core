@@ -2,7 +2,7 @@
 using Moq;
 using NArchitecture.Core.Application.Rules;
 using NArchitecture.Core.Localization.Resource.Yaml;
-using NArchitecture.Core.Persistence.Repositories;
+using NArchitecture.Core.Persistence.Abstractions.Repositories;
 using NArchitecture.Core.Test.Application.FakeData;
 using NArchitecture.Core.Test.Application.Helpers;
 

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Mailing.Abstractions", "src\Core.Mailing.Abstractions\Core.Mailing.Abstractions.csproj", "{B5C9694A-C714-465D-836A-8C77366B4E03}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence", "src\Core.Persistence\Core.Persistence.csproj", "{03D3D1A1-1C07-41CA-8B02-DB5394A874A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence.EntityFramework", "src\Core.Persistence.EntityFramework\Core.Persistence.EntityFramework.csproj", "{03D3D1A1-1C07-41CA-8B02-DB5394A874A3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Security", "src\Core.Security\Core.Security.csproj", "{826DEEBC-A67D-4448-A339-A04E0ED36F52}"
 EndProject
@@ -68,7 +68,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Security.WebApi.Swagge
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence.DependencyInjection", "src\Core.Persistence.DependencyInjection\Core.Persistence.DependencyInjection.csproj", "{21482084-82B8-41FA-8477-ED78B3037375}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence.EntityFramework.DependencyInjection", "src\Core.Persistence.EntityFramework.DependencyInjection\Core.Persistence.EntityFramework.DependencyInjection.csproj", "{21482084-82B8-41FA-8477-ED78B3037375}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CB1FFAF8-1946-40AF-AF0F-7FD37E2A7AC6}"
 EndProject
@@ -105,6 +105,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Localization.WebApi.Tests", "tests\units\Core.Localization.WebApi.Tests\Core.Localization.WebApi.Tests.csproj", "{E23A6792-8D43-4D25-B2B3-5FB5FA9F9E90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Mailing.MailKit.Tests", "tests\units\Core.Mailing.MailKit.Tests\Core.Mailing.MailKit.Tests.csproj", "{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Persistence.Abstractions", "src\Core.Persistence.Abstractions\Core.Persistence.Abstractions.csproj", "{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -272,6 +274,10 @@ Global
 		{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -321,6 +327,7 @@ Global
 		{2E15C423-FA41-48B5-A257-3EEDB4C2E573} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
 		{E23A6792-8D43-4D25-B2B3-5FB5FA9F9E90} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
 		{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
+		{5BEB45AD-5D0C-4096-9797-ECF34BB2B338} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E988190-9FBF-4E2E-9B3A-35C418139397}

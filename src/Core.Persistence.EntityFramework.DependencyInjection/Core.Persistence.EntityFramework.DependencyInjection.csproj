@@ -6,14 +6,15 @@
     <RootNamespace>NArchitecture.$(AssemblyName)</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>NArchitecture.$(AssemblyName)</PackageId>
-    <Version>1.0.6</Version>
+    <Version>1.0.2</Version>
     <Title>NArchitecture $(AssemblyName)</Title>
-    <Description>Provides utilities for testing.</Description>
+    <Description>Provides dependency injection extensions for NArchitecture.Core.Persistence.</Description>
     <Product>NArchitecture</Product>
     <Authors>Kodlama.io, Contributors</Authors>
     <Company>Kodlama.io</Company>
-    <PackageTags>Clean Architecture, Union Architecture, Core, NArchitecture, Test, Unit Test,
-      Integration Test, Testing, Mocking</PackageTags>
+    <PackageTags>Clean Architecture, Union Architecture, Core, NArchitecture, Persistence, Data
+      Access, Entity Framework, Dependency Injection, Repository Pattern, Unit of Work, Database,
+      ORM, NoSQL, Relational, File System</PackageTags>
     <PackageIcon>n-architecture-logo.png</PackageIcon>
     <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -34,13 +35,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <ProjectReference
+      Include="../Core.Persistence.EntityFramework/Core.Persistence.EntityFramework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Core.Persistence.Abstraction/Core.Persistence.Abstraction.csproj" />
-    <ProjectReference Include="..\Core.Application\Core.Application.csproj" />
-    <ProjectReference Include="..\Core.Localization.Resource.Yaml\Core.Localization.Resource.Yaml.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+      Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
   </ItemGroup>
 </Project>
