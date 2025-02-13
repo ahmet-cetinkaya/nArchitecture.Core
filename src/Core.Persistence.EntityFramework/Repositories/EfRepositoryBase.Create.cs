@@ -15,6 +15,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     public TEntity Add(TEntity entity)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
         EditEntityPropertiesToAdd(entity);
         _ = Context.Add(entity);
         return entity;
@@ -22,6 +25,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
         EditEntityPropertiesToAdd(entity);
         _ = await Context.AddAsync(entity, cancellationToken);
         return entity;
@@ -29,11 +35,18 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     public void BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000)
     {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
+
         if (entities.Count == 0)
             return;
 
         foreach (TEntity entity in entities)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
             EditEntityPropertiesToAdd(entity);
+        }
 
         foreach (var batch in entities.Chunk(batchSize))
         {
@@ -47,11 +60,18 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         CancellationToken cancellationToken = default
     )
     {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities));
+
         if (entities.Count == 0)
             return;
 
         foreach (TEntity entity in entities)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
             EditEntityPropertiesToAdd(entity);
+        }
 
         foreach (var batch in entities.Chunk(batchSize))
         {

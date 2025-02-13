@@ -5,43 +5,63 @@ namespace NArchitecture.Core.Persistence.EntityFramework.Paging;
 
 public static class IQueryablePaginateExtensions
 {
+    private const int MaxPageSize = 100_000;
+
+    private static void ValidatePaginationParameters(int index, int size)
+    {
+        if (index < 0)
+            throw new ArgumentException("Page index cannot be negative.", nameof(index));
+        if (index == int.MaxValue)
+            throw new ArgumentException("Page index is too large.", nameof(index));
+            
+        if (size <= 0)
+            throw new ArgumentException("Page size must be greater than 0.", nameof(size));
+        if (size == int.MaxValue || size > MaxPageSize)
+            throw new ArgumentException("Page size is too large.", nameof(size));
+
+        if (index >= int.MaxValue / size)
+            throw new ArgumentException("Page index and size combination would cause arithmetic overflow.", nameof(index));
+    }
+
     public static async Task<IPaginate<T>> ToPaginateAsync<T>(
         this IQueryable<T> source,
-        uint index,
-        uint size,
+        int index,
+        int size,
         CancellationToken cancellationToken = default
     )
     {
-        uint count = Convert.ToUInt32(await source.LongCountAsync(cancellationToken).ConfigureAwait(false));
-        List<T> items = await source
-            .Skip(Convert.ToInt32((index) * size))
-            .Take(Convert.ToInt32(size))
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        ValidatePaginationParameters(index, size);
+
+        int count = await source.CountAsync(cancellationToken).ConfigureAwait(false);
+        var items = await source.Skip(index * size).Take(size).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var pages = (int)Math.Ceiling(count / (double)size);
 
         Paginate<T> list = new()
         {
             Index = index,
             Size = size,
             Count = count,
-            Items = items,
-            Pages = Convert.ToUInt32(Math.Ceiling(count / (double)size)),
+            Pages = pages,
+            Items = items
         };
         return list;
     }
 
-    public static IPaginate<T> ToPaginate<T>(this IQueryable<T> source, uint index, uint size)
+    public static IPaginate<T> ToPaginate<T>(this IQueryable<T> source, int index, int size)
     {
-        uint count = Convert.ToUInt32(source.LongCount());
-        var items = source.Skip(Convert.ToInt32(index * size)).Take(Convert.ToInt32(size)).ToList();
+        ValidatePaginationParameters(index, size);
+
+        int count = source.Count();
+        var items = source.Skip(index * size).Take(size).ToList();
+        var pages = (int)Math.Ceiling(count / (double)size);
 
         Paginate<T> list = new()
         {
             Index = index,
             Size = size,
             Count = count,
-            Items = items,
-            Pages = Convert.ToUInt32(Math.Ceiling(count / (double)size)),
+            Pages = pages,
+            Items = items
         };
         return list;
     }

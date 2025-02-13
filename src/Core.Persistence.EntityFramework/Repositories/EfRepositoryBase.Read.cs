@@ -93,10 +93,13 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         bool withDeleted = false,
         bool enableTracking = true,
-        uint fetchLimit = 1_000_000,
-        uint chunkSize = 1_000
+        int fetchLimit = 1_000_000,
+        int chunkSize = 1_000
     )
     {
+        if (chunkSize <= 0)
+            throw new ArgumentException("Chunk size must be greater than 0.", nameof(chunkSize));
+
         IQueryable<TEntity> queryable = Query();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -106,18 +109,21 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (predicate != null)
             queryable = queryable.Where(predicate);
 
-        uint totalCount = (uint)queryable.Count();
+        int totalCount = queryable.Count();
         if (totalCount > fetchLimit)
             throw new InvalidOperationException(string.Format(ResultSetTooLarge, fetchLimit, totalCount));
 
         var results = new List<TEntity>();
-        uint processedCount = 0;
+        int processedCount = 0;
 
         while (processedCount < totalCount)
         {
-            var chunk = queryable.Skip((int)processedCount).Take((int)chunkSize).ToList();
+            var chunk = queryable.Skip(processedCount).Take(chunkSize).ToList();
+            if (chunk.Count == 0)
+                break;
+
             results.AddRange(chunk);
-            processedCount += (uint)chunk.Count;
+            processedCount += chunk.Count;
         }
 
         return results;
@@ -128,11 +134,14 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         bool withDeleted = false,
         bool enableTracking = true,
-        uint fetchLimit = 1_000_000,
-        uint chunkSize = 1_000,
+        int fetchLimit = 1_000_000,
+        int chunkSize = 1_000,
         CancellationToken cancellationToken = default
     )
     {
+        if (chunkSize <= 0)
+            throw new ArgumentException("Chunk size must be greater than 0.", nameof(chunkSize));
+
         IQueryable<TEntity> queryable = Query();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -142,18 +151,21 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (predicate != null)
             queryable = queryable.Where(predicate);
 
-        uint totalCount = (uint)await queryable.CountAsync(cancellationToken);
+        int totalCount = await queryable.CountAsync(cancellationToken);
         if (totalCount > fetchLimit)
             throw new InvalidOperationException(string.Format(ResultSetTooLarge, fetchLimit, totalCount));
 
-        var results = new List<TEntity>();
-        uint processedCount = 0;
+        var results = new HashSet<TEntity>();
+        int processedCount = 0;
 
         while (processedCount < totalCount)
         {
-            var chunk = await queryable.Skip((int)processedCount).Take((int)chunkSize).ToListAsync(cancellationToken);
-            results.AddRange(chunk);
-            processedCount += (uint)chunk.Count;
+            var chunk = await queryable.Skip(processedCount).Take(chunkSize).ToListAsync(cancellationToken);
+            if (chunk.Count == 0)
+                break;
+
+            results.UnionWith(chunk);
+            processedCount += chunk.Count;
 
             if (cancellationToken.IsCancellationRequested)
                 break;
@@ -162,16 +174,35 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         return results;
     }
 
+    private const int MaxPageSize = 100_000;
+
+    private void validatePaginationParameters(int index, int size)
+    {
+        if (index < 0)
+            throw new ArgumentException("Page index cannot be negative.", nameof(index));
+        if (index == int.MaxValue)
+            throw new ArgumentException("Page index is too large.", nameof(index));
+            
+        if (size <= 0)
+            throw new ArgumentException("Page size must be greater than 0.", nameof(size));
+        if (size == int.MaxValue || size > MaxPageSize)
+            throw new ArgumentException("Page size is too large.", nameof(size));
+
+        if (index >= int.MaxValue / size)
+            throw new ArgumentException("Page index and size combination would cause arithmetic overflow.", nameof(index));
+    }
+
     public IPaginate<TEntity> GetList(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true
     )
     {
+        validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -189,13 +220,14 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default
     )
     {
+        validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -213,12 +245,13 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         DynamicQuery dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true
     )
     {
+        validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -234,13 +267,14 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         DynamicQuery dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default
     )
     {
+        validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -304,8 +338,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     public IPaginate<TEntity> GetRandomList(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true
     )
@@ -324,8 +358,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     public async Task<IPaginate<TEntity>> GetRandomListAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default
@@ -342,17 +376,17 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         return await queryable.OrderBy(x => EF.Functions.Random()).ToPaginateAsync(index, size, cancellationToken);
     }
 
-    public uint Count(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false)
+    public int Count(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false)
     {
         IQueryable<TEntity> queryable = Query();
         if (withDeleted)
             queryable = queryable.IgnoreQueryFilters();
         if (predicate != null)
             queryable = queryable.Where(predicate);
-        return (uint)queryable.Count();
+        return queryable.Count();
     }
 
-    public async Task<uint> CountAsync(
+    public async Task<int> CountAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         bool withDeleted = false,
         CancellationToken cancellationToken = default
@@ -363,20 +397,20 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             queryable = queryable.IgnoreQueryFilters();
         if (predicate != null)
             queryable = queryable.Where(predicate);
-        return (uint)await queryable.CountAsync(cancellationToken);
+        return await queryable.CountAsync(cancellationToken);
     }
 
-    public ulong CountLong(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false)
+    public long CountLong(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false)
     {
         IQueryable<TEntity> queryable = Query();
         if (withDeleted)
             queryable = queryable.IgnoreQueryFilters();
         if (predicate != null)
             queryable = queryable.Where(predicate);
-        return (ulong)queryable.LongCount();
+        return queryable.LongCount();
     }
 
-    public async Task<ulong> CountLongAsync(
+    public async Task<long> CountLongAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         bool withDeleted = false,
         CancellationToken cancellationToken = default
@@ -387,7 +421,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             queryable = queryable.IgnoreQueryFilters();
         if (predicate != null)
             queryable = queryable.Where(predicate);
-        return (ulong)await queryable.LongCountAsync(cancellationToken);
+        return await queryable.LongCountAsync(cancellationToken);
     }
 
     public bool Any(

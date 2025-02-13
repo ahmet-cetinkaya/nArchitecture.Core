@@ -2,22 +2,22 @@
 
 public class Paginate<T> : IPaginate<T>
 {
-    public Paginate(IEnumerable<T> source, uint index, uint size)
+    public Paginate(IEnumerable<T> source, int index, int size)
     {
         Index = index;
         Size = size;
 
         if (source is IQueryable<T> queryable)
         {
-            Count = Convert.ToUInt32(queryable.LongCount());
-            Pages = Convert.ToUInt32(Math.Ceiling(Count / (double)Size));
+            Count = queryable.Count();
+            Pages = Convert.ToInt32(Math.Ceiling(Count / (double)Size));
             Items = queryable.Skip(Convert.ToInt32(Index * Size)).Take(Convert.ToInt32(Size)).ToArray();
         }
         else
         {
             T[] enumerable = source as T[] ?? [.. source];
-            Count = Convert.ToUInt32(enumerable.LongCount());
-            Pages = Convert.ToUInt32(Math.Ceiling(Count / (double)Size));
+            Count = Convert.ToInt32(enumerable.Length);
+            Pages = Convert.ToInt32(Math.Ceiling(Count / (double)Size));
             Items = enumerable.Skip(Convert.ToInt32(Index * Size)).Take(Convert.ToInt32(Size)).ToArray();
         }
     }
@@ -27,39 +27,34 @@ public class Paginate<T> : IPaginate<T>
         Items = Array.Empty<T>();
     }
 
-    public uint Index { get; set; }
-    public uint Size { get; set; }
-    public uint Count { get; set; }
-    public uint Pages { get; set; }
-    public IEnumerable<T> Items { get; set; }
+    public int Index { get; set; }
+    public int Size { get; set; }
+    public int Count { get; set; }
+    public int Pages { get; set; }
+    public ICollection<T> Items { get; set; }
     public bool HasPrevious => Index > 0;
     public bool HasNext => Index + 1 < Pages;
 }
 
 public class Paginate<TSource, TResult> : IPaginate<TResult>
 {
-    public Paginate(
-        IEnumerable<TSource> source,
-        Func<IEnumerable<TSource>, IEnumerable<TResult>> converter,
-        uint index,
-        uint size
-    )
+    public Paginate(IEnumerable<TSource> source, Func<IEnumerable<TSource>, IEnumerable<TResult>> converter, int index, int size)
     {
         Index = index;
         Size = size;
 
         if (source is IQueryable<TSource> queryable)
         {
-            Count = Convert.ToUInt32(queryable.LongCount());
-            Pages = Convert.ToUInt32(Math.Ceiling(Count / (double)Size));
+            Count = queryable.Count();
+            Pages = Convert.ToInt32(Math.Ceiling(Count / (double)Size));
             TSource[] items = [.. queryable.Skip(Convert.ToInt32(Index * Size)).Take(Convert.ToInt32(Size))];
             Items = [.. converter(items)];
         }
         else
         {
             TSource[] enumerable = source as TSource[] ?? [.. source];
-            Count = Convert.ToUInt32(enumerable.LongCount());
-            Pages = Convert.ToUInt32(Math.Ceiling(Count / (double)Size));
+            Count = enumerable.Length;
+            Pages = Convert.ToInt32(Math.Ceiling(Count / (double)Size));
             TSource[] items = [.. enumerable.Skip(Convert.ToInt32(Index * Size)).Take(Convert.ToInt32(Size))];
             Items = [.. converter(items)];
         }
@@ -74,11 +69,11 @@ public class Paginate<TSource, TResult> : IPaginate<TResult>
         Items = [.. converter(source.Items)];
     }
 
-    public uint Index { get; }
-    public uint Size { get; }
-    public uint Count { get; }
-    public uint Pages { get; }
-    public IEnumerable<TResult> Items { get; }
+    public int Index { get; }
+    public int Size { get; }
+    public int Count { get; }
+    public int Pages { get; }
+    public ICollection<TResult> Items { get; }
     public bool HasPrevious => Index > 0;
     public bool HasNext => Index + 1 < Pages;
 }

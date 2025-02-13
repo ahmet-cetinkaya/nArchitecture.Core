@@ -41,15 +41,15 @@ public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         bool withDeleted = false,
         bool enableTracking = true,
-        uint fetchLimit = 1_000_000,
-        uint chunkSize = 1_000
+        int fetchLimit = 1_000_000,
+        int chunkSize = 1_000
     );
     IPaginate<TEntity> GetList(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true
     );
@@ -57,8 +57,8 @@ public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
         DynamicQuery dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true
     );
@@ -68,13 +68,13 @@ public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
     IPaginate<TEntity> GetRandomList(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true
     );
-    uint Count(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false);
-    ulong CountLong(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false);
+    int Count(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false);
+    long CountLong(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false);
     bool Any(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,

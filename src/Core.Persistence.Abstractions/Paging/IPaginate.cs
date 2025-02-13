@@ -2,11 +2,11 @@
 
 public interface IPaginate<T>
 {
-    uint Index { get; }
-    uint Size { get; }
-    uint Count { get; }
-    uint Pages { get; }
-    IEnumerable<T> Items { get; }
+    int Index { get; }
+    int Size { get; }
+    int Count { get; }
+    int Pages { get; }
+    ICollection<T> Items { get; }
     bool HasPrevious { get; }
     bool HasNext { get; }
 }

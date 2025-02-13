@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reflection;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -14,20 +14,32 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     // Public Methods
     public TEntity Delete(TEntity entity, bool permanent = false)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
         SetEntityAsDeleted(entity, permanent, isAsync: false).Wait();
         return entity;
     }
 
     public async Task<TEntity> DeleteAsync(TEntity entity, bool permanent = false, CancellationToken cancellationToken = default)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
         await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
         return entity;
     }
 
     public void BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000)
     {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
+
         if (entities.Count == 0)
             return;
+
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         if (permanent)
         {
@@ -53,8 +65,14 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         CancellationToken cancellationToken = default
     )
     {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
+
         if (entities.Count == 0)
             return;
+
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         if (permanent)
             foreach (var batch in entities.Chunk(batchSize))
@@ -100,23 +118,21 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             await SetEntityAsDeleted(entity, permanent, isAsync, cancellationToken);
     }
 
-    private const string CreateQueryNotFound = "CreateQuery<TElement> method is not found in IQueryProvider.";
-
     protected IQueryable<object>? GetRelationLoaderQuery(IQueryable query, Type navigationPropertyType)
     {
+        if (query is not IQueryable<IEntityTimestamps>)
+            return null;
+
         Type queryProviderType = query.Provider.GetType();
         MethodInfo createQueryMethod =
             queryProviderType
                 .GetMethods()
                 .First(m => m is { Name: nameof(query.Provider.CreateQuery), IsGenericMethod: true })
-                ?.MakeGenericMethod(navigationPropertyType) ?? throw new InvalidOperationException(CreateQueryNotFound);
+                ?.MakeGenericMethod(navigationPropertyType)
+            ?? throw new InvalidOperationException(DeleteMessages.CreateQueryNotFound);
         var queryProviderQuery = (IQueryable<object>)createQueryMethod.Invoke(query.Provider, parameters: [query.Expression])!;
         return queryProviderQuery.Where(x => !((IEntityTimestamps)x).DeletedDate.HasValue);
     }
-
-    private const string EntityHasOneToOneRelation =
-        "Entity {0} has a one-to-one relationship with {1} via the primary key ({2}). "
-        + "Soft Delete causes problems if you try to create an entry again with the same foreign key.";
 
     protected void CheckHasEntityHaveOneToOneRelation(TEntity entity)
     {
@@ -131,7 +147,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             IReadOnlyList<IProperty> primaryKeyProperties = Context.Entry(entity).Metadata.FindPrimaryKey()!.Properties;
             string primaryKeyNames = string.Join(", ", primaryKeyProperties.Select(prop => prop.Name));
             throw new InvalidOperationException(
-                string.Format(EntityHasOneToOneRelation, entity.GetType().Name, relatedEntity, primaryKeyNames)
+                string.Format(DeleteMessages.EntityHasOneToOneRelation, entity.GetType().Name, relatedEntity, primaryKeyNames)
             );
         }
     }
@@ -202,8 +218,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
                         navValue = GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType())
                             ?.ToList();
 
-                    if (navValue == null)
-                        continue;
+                if (navValue == null)
+                    continue;
                 }
 
                 foreach (object navValueItem in (IEnumerable)navValue)
@@ -228,8 +244,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
                         navValue = GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType())
                             ?.FirstOrDefault();
 
-                    if (navValue == null)
-                        continue;
+                if (navValue == null)
+                    continue;
                 }
 
                 await setEntityAsSoftDeleted((IEntityTimestamps)navValue, isAsync, isRoot: false, cancellationToken);
@@ -237,5 +253,13 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
 
         _ = Context.Update(entity);
+    }
+
+    protected struct DeleteMessages
+    {
+        public const string EntityHasOneToOneRelation =
+            "Entity {0} has a one-to-one relationship with {1} via the primary key ({2}). "
+            + "Soft Delete causes problems if you try to create an entry again with the same foreign key.";
+        public const string CreateQueryNotFound = "CreateQuery<TElement> method is not found in IQueryProvider.";
     }
 }

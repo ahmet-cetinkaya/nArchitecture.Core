@@ -48,16 +48,16 @@ public interface IAsyncRepository<TEntity, TEntityId> : IQuery<TEntity>
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         bool withDeleted = false,
         bool enableTracking = true,
-        uint fetchLimit = 1_000_000,
-        uint chunkSize = 1_000,
+        int fetchLimit = 1_000_000,
+        int chunkSize = 1_000,
         CancellationToken cancellationToken = default
     );
     Task<IPaginate<TEntity>> GetListAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default
@@ -66,8 +66,8 @@ public interface IAsyncRepository<TEntity, TEntityId> : IQuery<TEntity>
         DynamicQuery dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default
@@ -83,18 +83,18 @@ public interface IAsyncRepository<TEntity, TEntityId> : IQuery<TEntity>
     Task<IPaginate<TEntity>> GetRandomListAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
-        uint index = 0,
-        uint size = 10,
+        int index = 0,
+        int size = 10,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default
     );
-    Task<uint> CountAsync(
+    Task<int> CountAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         bool withDeleted = false,
         CancellationToken cancellationToken = default
     );
-    Task<ulong> CountLongAsync(
+    Task<long> CountLongAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         bool withDeleted = false,
         CancellationToken cancellationToken = default

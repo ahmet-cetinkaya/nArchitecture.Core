@@ -25,4 +25,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     {
         return await Context.SaveChangesAsync(cancellationToken);
     }
+
+    protected struct Messages
+    {
+        public const string EntityCannotBeNull = "Entity cannot be null.";
+        public const string CollectionCannotBeNull = "Collection cannot be null.";
+        public const string CollectionContainsNullEntity = "Collection contains null entity.";
+    }
 }

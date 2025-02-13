@@ -40,8 +40,8 @@ public static class MockRepositoryHelper
                     It.IsAny<Expression<Func<TEntity, bool>>>(),
                     It.IsAny<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>>(),
                     It.IsAny<Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>>(),
-                    It.IsAny<uint>(),
-                    It.IsAny<uint>(),
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
                     It.IsAny<bool>(),
                     It.IsAny<bool>(),
                     It.IsAny<CancellationToken>()
@@ -63,9 +63,17 @@ public static class MockRepositoryHelper
 
                     if (!withDeleted)
                         list = entityList.Where(e => !e.DeletedDate.HasValue).ToList();
-                    list = expression == null ? entityList : (IList<TEntity>)entityList.Where(expression.Compile()).ToList();
+                    list = expression == null ? entityList : entityList.Where(expression.Compile()).ToList();
 
-                    Paginate<TEntity> paginateList = new() { Items = list };
+                    var paginatedList = list.Skip(index * size).Take(size).ToList();
+                    Paginate<TEntity> paginateList = new() 
+                    { 
+                        Index = index, 
+                        Size = size, 
+                        Count = list.Count, 
+                        Pages = (int)Math.Ceiling(list.Count / (double)size), 
+                        Items = paginatedList 
+                    };
                     return paginateList;
                 }
             );
