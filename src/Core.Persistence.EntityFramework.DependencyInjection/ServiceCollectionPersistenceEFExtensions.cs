@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NArchitecture.Core.Persistence.Abstractions.DbMigrationApplier;
 using NArchitecture.Core.Persistence.EntityFramework.DbMigrationApplier;
 
-namespace NArchitecture.Core.Persistence.DependencyInjection;
+namespace NArchitecture.Core.Persistence.EntityFramework.DependencyInjection;
 
 public static class ServiceCollectionPersistenceEFExtensions
 {
