@@ -31,8 +31,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.AmazonTran
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.AmazonTranslate.DependencyInjection", "src\Core.Translation.AmazonTranslate.DependencyInjection\Core.Translation.AmazonTranslate.DependencyInjection.csproj", "{326AEEBB-7767-4FB2-84FE-12B47C065526}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence.WebApi", "src\Core.Persistence.WebApi\Core.Persistence.WebApi.csproj", "{8922C45F-4E06-4CCC-B032-588A0D5C174D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{349CE34D-A942-422C-943A-DE4BEC1E39B3}"
 	ProjectSection(SolutionItems) = preProject
 		.csharpierrc = .csharpierrc
