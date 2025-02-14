@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
@@ -33,7 +32,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         return entity;
     }
 
-    public void BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000)
+    public virtual void BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000)
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
@@ -46,15 +45,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             if (entity == null)
                 throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
             EditEntityPropertiesToAdd(entity);
-        }
-
-        foreach (var batch in entities.Chunk(batchSize))
-        {
-            Context.BulkInsert(batch);
+            _ = Context.Add(entity);
         }
     }
 
-    public async Task BulkAddAsync(
+    public virtual async Task BulkAddAsync(
         ICollection<TEntity> entities,
         int batchSize = 1_000,
         CancellationToken cancellationToken = default
@@ -71,11 +66,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             if (entity == null)
                 throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
             EditEntityPropertiesToAdd(entity);
-        }
-
-        foreach (var batch in entities.Chunk(batchSize))
-        {
-            await Context.BulkInsertAsync(batch, cancellationToken: cancellationToken);
+            _ = await Context.AddAsync(entity, cancellationToken);
         }
     }
 }

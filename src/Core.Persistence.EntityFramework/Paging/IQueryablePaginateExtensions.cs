@@ -33,8 +33,8 @@ public static class IQueryablePaginateExtensions
         ValidatePaginationParameters(index, size);
 
         int count = await source.CountAsync(cancellationToken).ConfigureAwait(false);
-        var items = await source.Skip(index * size).Take(size).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var pages = (int)Math.Ceiling(count / (double)size);
+        List<T> items = await source.Skip(index * size).Take(size).ToListAsync(cancellationToken).ConfigureAwait(false);
+        int pages = (int)Math.Ceiling(count / (double)size);
 
         Paginate<T> list = new()
         {
@@ -53,7 +53,7 @@ public static class IQueryablePaginateExtensions
 
         int count = source.Count();
         var items = source.Skip(index * size).Take(size).ToList();
-        var pages = (int)Math.Ceiling(count / (double)size);
+        int pages = (int)Math.Ceiling(count / (double)size);
 
         Paginate<T> list = new()
         {

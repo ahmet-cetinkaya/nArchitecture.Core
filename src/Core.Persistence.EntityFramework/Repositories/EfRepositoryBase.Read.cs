@@ -160,7 +160,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         while (processedCount < totalCount)
         {
-            var chunk = await queryable.Skip(processedCount).Take(chunkSize).ToListAsync(cancellationToken);
+            List<TEntity> chunk = await queryable.Skip(processedCount).Take(chunkSize).ToListAsync(cancellationToken);
             if (chunk.Count == 0)
                 break;
 

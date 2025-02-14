@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
@@ -15,6 +14,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     public TEntity Update(TEntity entity)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
         EditEntityPropertiesToUpdate(entity);
         _ = Context.Update(entity);
         return entity;
@@ -22,6 +24,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     public Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
         EditEntityPropertiesToUpdate(entity);
         _ = Context.Update(entity);
         return Task.FromResult(entity);
@@ -29,29 +34,39 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     public void BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000)
     {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
+
         if (entities.Count == 0)
             return;
 
-        foreach (TEntity entity in entities)
-            EditEntityPropertiesToUpdate(entity);
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
-        foreach (var batch in entities.Chunk(batchSize))
+        foreach (TEntity entity in entities)
         {
-            Context.BulkUpdate(batch);
+            EditEntityPropertiesToUpdate(entity);
+            _ = Context.Update(entity);
         }
     }
 
-    public async Task BulkUpdateAsync(ICollection<TEntity> entities, int batchSize = 1_000, CancellationToken cancellationToken = default)
+    public Task BulkUpdateAsync(ICollection<TEntity> entities, int batchSize = 1_000, CancellationToken cancellationToken = default)
     {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
+
         if (entities.Count == 0)
-            return;
+            return Task.CompletedTask;
+
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         foreach (TEntity entity in entities)
-            EditEntityPropertiesToUpdate(entity);
-
-        foreach (var batch in entities.Chunk(batchSize))
         {
-            await Context.BulkUpdateAsync(batch, cancellationToken: cancellationToken);
+            EditEntityPropertiesToUpdate(entity);
+            _ = Context.Update(entity);
         }
+
+        return Task.CompletedTask;
     }
 }

@@ -112,7 +112,7 @@ public static class IQueryableDynamicFilterExtensions
             }
             else if (filter.Operator == "between")
             {
-                var values = filter.Value.Split(',');
+                string[] values = filter.Value.Split(',');
                 if (values.Length != 2)
                     throw new ArgumentException("Invalid Value for 'between' operator");
 
