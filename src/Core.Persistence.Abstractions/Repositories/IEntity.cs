@@ -9,5 +9,5 @@ public interface IEntity<T>
     /// <summary>
     /// Gets or sets the identifier for the entity.
     /// </summary>
-    T Id { get; set; }
+    T? Id { get; set; }
 }
