@@ -1,19 +1,20 @@
 ﻿namespace NArchitecture.Core.Persistence.Abstractions.Repositories;
 
-public abstract class Entity<TId> : IEntity<TId>, IEntityTimestamps
+/// <summary>
+/// Serves as the base class for entities, incorporating common identifier and timestamp properties.
+/// </summary>
+/// <typeparam name="TId">The type representing the entity identifier.</typeparam>
+public abstract class Entity<TId>(TId Id) : IEntity<TId>, IEntityTimestamps
 {
-    public TId Id { get; set; }
+    /// <inheritdoc cref="IEntity{T}.Id"/>
+    public TId Id { get; set; } = Id;
+
+    /// <inheritdoc cref="IEntityTimestamps.CreatedDate"/>
     public DateTime CreatedDate { get; set; }
+
+    /// <inheritdoc cref="IEntityTimestamps.UpdatedDate"/>
     public DateTime? UpdatedDate { get; set; }
+
+    /// <inheritdoc cref="IEntityTimestamps.DeletedDate"/>
     public DateTime? DeletedDate { get; set; }
-
-    public Entity()
-    {
-        Id = default!;
-    }
-
-    public Entity(TId id)
-    {
-        Id = id;
-    }
 }

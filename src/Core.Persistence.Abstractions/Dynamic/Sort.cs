@@ -1,19 +1,17 @@
 ﻿namespace NArchitecture.Core.Persistence.Abstractions.Dynamic;
 
-public record Sort
+/// <summary>
+/// Represents the sorting criteria for dynamic queries.
+/// </summary>
+public record Sort(string Field, string Dir)
 {
-    public string Field { get; set; }
-    public string Dir { get; set; }
+    /// <summary>
+    /// Gets or sets the field to sort by.
+    /// </summary>
+    public string Field { get; set; } = Field;
 
-    public Sort()
-    {
-        Field = string.Empty;
-        Dir = string.Empty;
-    }
-
-    public Sort(string field, string dir)
-    {
-        Field = field;
-        Dir = dir;
-    }
+    /// <summary>
+    /// Gets or sets the sorting direction (e.g., "asc" or "desc").
+    /// </summary>
+    public string Dir { get; set; } = Dir;
 }

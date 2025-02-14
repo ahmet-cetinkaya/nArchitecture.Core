@@ -1,15 +1,17 @@
 ﻿namespace NArchitecture.Core.Persistence.Abstractions.Dynamic;
 
-public record DynamicQuery
+/// <summary>
+/// Represents a dynamic query containing optional sort and filter criteria.
+/// </summary>
+public record DynamicQuery(IEnumerable<Sort>? Sort = null, Filter? Filter = null)
 {
-    public IEnumerable<Sort>? Sort { get; set; }
-    public Filter? Filter { get; set; }
+    /// <summary>
+    /// Gets or sets the collection of sort criteria.
+    /// </summary>
+    public IEnumerable<Sort>? Sort { get; set; } = Sort;
 
-    public DynamicQuery() { }
-
-    public DynamicQuery(IEnumerable<Sort>? sort, Filter? filter)
-    {
-        Sort = sort;
-        Filter = filter;
-    }
+    /// <summary>
+    /// Gets or sets the filter criteria.
+    /// </summary>
+    public Filter? Filter { get; set; } = Filter;
 }
