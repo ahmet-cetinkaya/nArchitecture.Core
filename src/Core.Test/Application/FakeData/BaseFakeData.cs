@@ -1,4 +1,4 @@
-﻿using NArchitecture.Core.Persistence.Repositories;
+﻿using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Test.Application.FakeData;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using NArchitecture.Core.Persistence.DbMigrationApplier;
+using NArchitecture.Core.Persistence.Abstractions.DbMigrationApplier;
 
 namespace NArchitecture.Core.Persistence.WebApi;
 
@@ -11,7 +11,7 @@ public static class ApplicationBuilderDbMigrationApplierExtensions
         IEnumerable<IDbMigrationApplierService> migrationCreatorServices =
             app.ApplicationServices.GetServices<IDbMigrationApplierService>();
         foreach (IDbMigrationApplierService service in migrationCreatorServices)
-            service.Initialize();
+            _ = service.Initialize();
 
         return app;
     }

@@ -40,6 +40,7 @@
     <PackageReference Include="System.Text.Encodings.Web" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
+    <ProjectReference Include="../Core.Persistence.Abstraction/Core.Persistence.Abstractions.csproj" />
+    <ProjectReference Include="../Core.Persistence.EntityFramework/Core.Persistence.EntityFramework.csproj" />
   </ItemGroup>
 </Project>

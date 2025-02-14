@@ -1,4 +1,4 @@
-﻿using NArchitecture.Core.Persistence.Repositories;
+﻿using NArchitecture.Core.Persistence.Abstractions.Repositories;
 using NArchitecture.Core.Security.Enums;
 
 namespace NArchitecture.Core.Security.Entities;

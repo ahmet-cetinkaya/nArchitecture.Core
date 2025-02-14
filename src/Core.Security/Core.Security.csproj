@@ -42,6 +42,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
+    <ProjectReference Include="../Core.Persistence.Abstractions/Core.Persistence.Abstractions.csproj" />
   </ItemGroup>
 </Project>

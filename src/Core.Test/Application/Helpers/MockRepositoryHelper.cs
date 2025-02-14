@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq;
-using NArchitecture.Core.Persistence.Paging;
-using NArchitecture.Core.Persistence.Repositories;
+using NArchitecture.Core.Persistence.Abstractions.Paging;
+using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Test.Application.Helpers;
 
@@ -63,9 +63,17 @@ public static class MockRepositoryHelper
 
                     if (!withDeleted)
                         list = entityList.Where(e => !e.DeletedDate.HasValue).ToList();
-                    list = expression == null ? entityList : (IList<TEntity>)entityList.Where(expression.Compile()).ToList();
+                    list = expression == null ? entityList : entityList.Where(expression.Compile()).ToList();
 
-                    Paginate<TEntity> paginateList = new() { Items = list };
+                    var paginatedList = list.Skip(index * size).Take(size).ToList();
+                    Paginate<TEntity> paginateList = new() 
+                    { 
+                        Index = index, 
+                        Size = size, 
+                        Count = list.Count, 
+                        Pages = (int)Math.Ceiling(list.Count / (double)size), 
+                        Items = paginatedList 
+                    };
                     return paginateList;
                 }
             );
