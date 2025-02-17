@@ -11,5 +11,13 @@ public interface IMailService
     /// <param name="mail">The mail details.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task SendEmailAsync(Mail mail, CancellationToken cancellationToken = default);
+    Task SendAsync(Mail mail, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends multiple emails asynchronously.
+    /// </summary>
+    /// <param name="mailList">The list of emails to send.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task SendBulkAsync(IEnumerable<Mail> mailList, CancellationToken cancellationToken = default);
 }

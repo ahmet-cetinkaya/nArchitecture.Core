@@ -4,6 +4,7 @@ using MimeKit;
 using Moq;
 using NArchitecture.Core.Mailing.Abstractions;
 using NArchitecture.Core.Mailing.MailKit;
+using NArchitecture.Core.Mailing.MailKit.Models;
 using Shouldly;
 using Xunit;
 
@@ -61,7 +62,7 @@ public class MailKitMailServiceTests
             .Returns(Task.FromResult(""));
 
         // Act
-        await _sut.SendEmailAsync(mail);
+        await _sut.SendAsync(mail);
 
         // Assert
         _smtpClientMock.Verify(
@@ -82,7 +83,7 @@ public class MailKitMailServiceTests
         };
 
         // Act
-        await _sut.SendEmailAsync(mail);
+        await _sut.SendAsync(mail);
 
         // Assert
         _smtpClientMock.Verify(x => x.SendAsync(It.IsAny<MimeMessage>(), It.IsAny<CancellationToken>(), null), Times.Never);
@@ -119,7 +120,7 @@ public class MailKitMailServiceTests
         // Act & Assert
         await Should.ThrowAsync<ServiceNotConnectedException>(async () =>
         {
-            await _sut.SendEmailAsync(mail);
+            await _sut.SendAsync(mail);
         });
     }
 
@@ -159,7 +160,7 @@ public class MailKitMailServiceTests
         // Act & Assert
         await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
-            await _sut.SendEmailAsync(mail, cts.Token);
+            await _sut.SendAsync(mail, cts.Token);
         });
     }
 
@@ -195,7 +196,7 @@ public class MailKitMailServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.SendEmailAsync(mail);
+        await _sut.SendAsync(mail);
 
         // Assert
         _smtpClientMock.Verify(
