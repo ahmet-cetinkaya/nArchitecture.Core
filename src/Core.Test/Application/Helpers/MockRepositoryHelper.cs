@@ -62,17 +62,17 @@ public static class MockRepositoryHelper
                     IList<TEntity> list = new List<TEntity>();
 
                     if (!withDeleted)
-                        list = entityList.Where(e => !e.DeletedDate.HasValue).ToList();
+                        list = entityList.Where(e => !e.DeletedAt.HasValue).ToList();
                     list = expression == null ? entityList : entityList.Where(expression.Compile()).ToList();
 
                     var paginatedList = list.Skip(index * size).Take(size).ToList();
-                    Paginate<TEntity> paginateList = new() 
-                    { 
-                        Index = index, 
-                        Size = size, 
-                        Count = list.Count, 
-                        Pages = (int)Math.Ceiling(list.Count / (double)size), 
-                        Items = paginatedList 
+                    Paginate<TEntity> paginateList = new()
+                    {
+                        Index = index,
+                        Size = size,
+                        Count = list.Count,
+                        Pages = (int)Math.Ceiling(list.Count / (double)size),
+                        Items = paginatedList,
                     };
                     return paginateList;
                 }
@@ -103,7 +103,7 @@ public static class MockRepositoryHelper
                 ) =>
                 {
                     if (!withDeleted)
-                        entityList = entityList.Where(e => !e.DeletedDate.HasValue).ToList();
+                        entityList = entityList.Where(e => !e.DeletedAt.HasValue).ToList();
                     TEntity? result = entityList.FirstOrDefault(predicate: expression.Compile());
                     return result;
                 }
@@ -152,7 +152,7 @@ public static class MockRepositoryHelper
                 (TEntity entity, bool permanent, CancellationToken cancellationToken) =>
                 {
                     if (!permanent)
-                        entity.DeletedDate = DateTime.UtcNow;
+                        entity.DeletedAt = DateTime.UtcNow;
                     else
                         entityList.Remove(entity);
                     return entity;
@@ -182,7 +182,7 @@ public static class MockRepositoryHelper
                 ) =>
                 {
                     if (!withDeleted)
-                        entityList = entityList.Where(e => !e.DeletedDate.HasValue).ToList();
+                        entityList = entityList.Where(e => !e.DeletedAt.HasValue).ToList();
                     return entityList.Any(expression.Compile());
                 }
             );

@@ -391,10 +391,8 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         var exception = isAsync
-            ? await Should.ThrowAsync<ArgumentException>(
-                async () => await Repository.GetListByDynamicAsync(invalidDynamic))
-            : Should.Throw<ArgumentException>(
-                () => Repository.GetListByDynamic(invalidDynamic));
+            ? await Should.ThrowAsync<ArgumentException>(async () => await Repository.GetListByDynamicAsync(invalidDynamic))
+            : Should.Throw<ArgumentException>(() => Repository.GetListByDynamic(invalidDynamic));
 
         exception.Message.ShouldBe("Invalid Operator");
     }
@@ -413,11 +411,9 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         if (isAsync)
-            await Should.NotThrowAsync(async () => 
-                await Repository.GetListByDynamicAsync(new DynamicQuery()));
+            await Should.NotThrowAsync(async () => await Repository.GetListByDynamicAsync(new DynamicQuery()));
         else
-            Should.NotThrow(() => 
-                Repository.GetListByDynamic(new DynamicQuery()));
+            Should.NotThrow(() => Repository.GetListByDynamic(new DynamicQuery()));
     }
 
     [Theory(DisplayName = "GetListByDynamic - Should handle null filter")]
@@ -436,11 +432,9 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         if (isAsync)
-            await Should.NotThrowAsync(async () => 
-                await Repository.GetListByDynamicAsync(dynamicQuery));
+            await Should.NotThrowAsync(async () => await Repository.GetListByDynamicAsync(dynamicQuery));
         else
-            Should.NotThrow(() => 
-                Repository.GetListByDynamic(dynamicQuery));
+            Should.NotThrow(() => Repository.GetListByDynamic(dynamicQuery));
     }
 
     [Theory(DisplayName = "GetListByDynamic - Should throw ParseException for nonexistent field")]
@@ -469,9 +463,9 @@ public partial class EfRepositoryBaseTests
         // Act & Assert
         var exception = isAsync
             ? await Should.ThrowAsync<System.Linq.Dynamic.Core.Exceptions.ParseException>(
-                async () => await Repository.GetListByDynamicAsync(dynamicQuery))
-            : Should.Throw<System.Linq.Dynamic.Core.Exceptions.ParseException>(
-                () => Repository.GetListByDynamic(dynamicQuery));
+                async () => await Repository.GetListByDynamicAsync(dynamicQuery)
+            )
+            : Should.Throw<System.Linq.Dynamic.Core.Exceptions.ParseException>(() => Repository.GetListByDynamic(dynamicQuery));
 
         exception.Message.ShouldBe("No property or field 'nonexistentField' exists in type 'TestEntity'");
     }
@@ -627,12 +621,7 @@ public partial class EfRepositoryBaseTests
     public async Task GetList_ShouldRespectOrderByParameter(bool isAsync)
     {
         // Arrange
-        var entities = new[]
-        {
-            CreateTestEntity("A"),
-            CreateTestEntity("C"),
-            CreateTestEntity("B")
-        };
+        var entities = new[] { CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B") };
         await Repository.BulkAddAsync(entities);
         await Repository.SaveChangesAsync();
 
@@ -642,8 +631,7 @@ public partial class EfRepositoryBaseTests
             : Repository.GetList(orderBy: q => q.OrderBy(e => e.Name));
 
         // Assert
-        result.Items.Select(e => e.Name)
-            .ShouldBe(new[] { "A", "B", "C" }, ignoreOrder: false);
+        result.Items.Select(e => e.Name).ShouldBe(new[] { "A", "B", "C" }, ignoreOrder: false);
     }
 
     [Theory(DisplayName = "GetAll - Should respect withDeleted parameter")]
@@ -686,12 +674,7 @@ public partial class EfRepositoryBaseTests
     public async Task GetListByDynamic_ShouldHandleSortParameters(bool isAsync)
     {
         // Arrange
-        var entities = new[]
-        {
-            CreateTestEntity("A"),
-            CreateTestEntity("C"),
-            CreateTestEntity("B")
-        };
+        var entities = new[] { CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B") };
         await Repository.BulkAddAsync(entities);
         await Repository.SaveChangesAsync();
 
@@ -699,18 +682,15 @@ public partial class EfRepositoryBaseTests
         {
             Sort = new[]
             {
-                new Sort { Field = "name", Dir = "asc" }
-            }
+                new Sort { Field = "name", Dir = "asc" },
+            },
         };
 
         // Act
-        var result = isAsync
-            ? await Repository.GetListByDynamicAsync(dynamicQuery)
-            : Repository.GetListByDynamic(dynamicQuery);
+        var result = isAsync ? await Repository.GetListByDynamicAsync(dynamicQuery) : Repository.GetListByDynamic(dynamicQuery);
 
         // Assert
-        result.Items.Select(e => e.Name)
-            .ShouldBe(new[] { "A", "B", "C" }, ignoreOrder: false);
+        result.Items.Select(e => e.Name).ShouldBe(new[] { "A", "B", "C" }, ignoreOrder: false);
     }
 
     [Theory(DisplayName = "GetList - Should handle last page correctly")]
@@ -726,9 +706,7 @@ public partial class EfRepositoryBaseTests
         await Repository.SaveChangesAsync();
 
         // Act - Request last page
-        var result = isAsync
-            ? await Repository.GetListAsync(index: 3, size: 3)
-            : Repository.GetList(index: 3, size: 3);
+        var result = isAsync ? await Repository.GetListAsync(index: 3, size: 3) : Repository.GetList(index: 3, size: 3);
 
         // Assert
         result.Index.ShouldBe(3);

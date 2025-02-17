@@ -37,9 +37,9 @@ public partial class EfRepositoryBaseTests
         // Assert
         var dbEntity = await Repository.GetByIdAsync(entity.Id, withDeleted: true);
         _ = dbEntity.ShouldNotBeNull();
-        dbEntity.DeletedDate.ShouldNotBeNull();
-        dbEntity.DeletedDate.Value.ShouldBeGreaterThanOrEqualTo(beforeDelete);
-        dbEntity.DeletedDate.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
+        dbEntity.DeletedAt.ShouldNotBeNull();
+        dbEntity.DeletedAt.Value.ShouldBeGreaterThanOrEqualTo(beforeDelete);
+        dbEntity.DeletedAt.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
     }
 
     [Theory(DisplayName = "Delete/DeleteAsync - Should permanent delete entity when specified")]
@@ -103,9 +103,9 @@ public partial class EfRepositoryBaseTests
         dbEntities.Count.ShouldBe(entityCount);
         foreach (var entity in dbEntities)
         {
-            entity.DeletedDate.ShouldNotBeNull();
-            entity.DeletedDate.Value.ShouldBeGreaterThanOrEqualTo(beforeDelete);
-            entity.DeletedDate.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
+            entity.DeletedAt.ShouldNotBeNull();
+            entity.DeletedAt.Value.ShouldBeGreaterThanOrEqualTo(beforeDelete);
+            entity.DeletedAt.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
         }
     }
 
@@ -216,14 +216,11 @@ public partial class EfRepositoryBaseTests
         // Assert
         var dbParent = await Repository.GetByIdAsync(parent.Id, withDeleted: true);
         dbParent.ShouldNotBeNull();
-        dbParent.DeletedDate.ShouldNotBeNull();
+        dbParent.DeletedAt.ShouldNotBeNull();
 
-        var children = await Repository.GetAllAsync(
-            predicate: e => e.ParentId == parent.Id,
-            withDeleted: true
-        );
+        var children = await Repository.GetAllAsync(predicate: e => e.ParentId == parent.Id, withDeleted: true);
         children.Count.ShouldBe(2);
-        children.ShouldAllBe(c => c.DeletedDate != null);
+        children.ShouldAllBe(c => c.DeletedAt != null);
     }
 
     // Bu testi kaldırıyoruz çünkü artık one-to-one ilişkilerde exception fırlatmıyoruz
@@ -243,7 +240,7 @@ public partial class EfRepositoryBaseTests
         // Arrange
         var entity = await CreateAndAddTestEntity();
         var initialDeleteTime = DateTime.UtcNow.AddMinutes(-5);
-        entity.DeletedDate = initialDeleteTime;
+        entity.DeletedAt = initialDeleteTime;
         await Repository.SaveChangesAsync();
 
         // Act
@@ -261,7 +258,7 @@ public partial class EfRepositoryBaseTests
         // Assert
         var dbEntity = await Repository.GetByIdAsync(entity.Id, withDeleted: true);
         dbEntity.ShouldNotBeNull();
-        dbEntity.DeletedDate.ShouldBe(initialDeleteTime);
+        dbEntity.DeletedAt.ShouldBe(initialDeleteTime);
     }
 
     [Theory(DisplayName = "Delete - Should handle null navigation properties")]
@@ -279,13 +276,13 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         if (isAsync)
-            await Should.NotThrowAsync(async () => 
+            await Should.NotThrowAsync(async () =>
             {
                 await Repository.DeleteAsync(entity);
                 await Repository.SaveChangesAsync();
             });
         else
-            Should.NotThrow(() => 
+            Should.NotThrow(() =>
             {
                 Repository.Delete(entity);
                 Repository.SaveChanges();
@@ -322,7 +319,7 @@ public partial class EfRepositoryBaseTests
         // Assert
         var allEntities = await Repository.GetAllAsync(withDeleted: true);
         allEntities.Count.ShouldBe(2); // Only soft deleted entities should remain
-        allEntities.ShouldAllBe(e => e.DeletedDate != null);
+        allEntities.ShouldAllBe(e => e.DeletedAt != null);
     }
 
     [Theory(DisplayName = "Delete - Should soft delete one-to-one related entity")]
@@ -351,15 +348,15 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var dbEntity = await Context.TestEntities
-            .IgnoreQueryFilters()
+        var dbEntity = await Context
+            .TestEntities.IgnoreQueryFilters()
             .Include(e => e.SingleDetail)
             .SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedDate.ShouldNotBeNull();
+        dbEntity.DeletedAt.ShouldNotBeNull();
         dbEntity.SingleDetail.ShouldNotBeNull();
-        dbEntity.SingleDetail.DeletedDate.ShouldNotBeNull();
-        dbEntity.SingleDetail.DeletedDate.ShouldBe(dbEntity.DeletedDate); // Aynı zamanda silinmiş olmalılar
+        dbEntity.SingleDetail.DeletedAt.ShouldNotBeNull();
+        dbEntity.SingleDetail.DeletedAt.ShouldBe(dbEntity.DeletedAt); // Aynı zamanda silinmiş olmalılar
     }
 
     [Theory(DisplayName = "Delete - Should soft delete one-to-many related entities")]
@@ -374,7 +371,7 @@ public partial class EfRepositoryBaseTests
         var details = new[]
         {
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 1" },
-            new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" }
+            new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" },
         };
         entity.Details = details.ToList();
         await Context.SaveChangesAsync();
@@ -392,14 +389,14 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var dbEntity = await Context.TestEntities
-            .IgnoreQueryFilters()
+        var dbEntity = await Context
+            .TestEntities.IgnoreQueryFilters()
             .Include(e => e.Details)
             .SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedDate.ShouldNotBeNull();
+        dbEntity.DeletedAt.ShouldNotBeNull();
         dbEntity.Details.Count.ShouldBe(2);
-        dbEntity.Details.ShouldAllBe(d => d.DeletedDate != null);
+        dbEntity.Details.ShouldAllBe(d => d.DeletedAt != null);
     }
 
     [Theory(DisplayName = "Delete - Should soft delete many-to-many related entities")]
@@ -414,7 +411,7 @@ public partial class EfRepositoryBaseTests
         var tags = new[]
         {
             new TagEntity { Name = "Tag 1" },
-            new TagEntity { Name = "Tag 2" }
+            new TagEntity { Name = "Tag 2" },
         };
         await Context.Tags.AddRangeAsync(tags);
         await Context.SaveChangesAsync();
@@ -435,17 +432,14 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var dbEntity = await Context.TestEntities
-            .IgnoreQueryFilters()
-            .Include(e => e.Tags)
-            .SingleAsync(e => e.Id == entity.Id);
+        var dbEntity = await Context.TestEntities.IgnoreQueryFilters().Include(e => e.Tags).SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedDate.ShouldNotBeNull();
+        dbEntity.DeletedAt.ShouldNotBeNull();
         dbEntity.Tags.Count.ShouldBe(2);
         foreach (var tag in dbEntity.Tags)
         {
-            tag.DeletedDate.ShouldNotBeNull();
-            tag.DeletedDate.ShouldBe(dbEntity.DeletedDate); // Aynı zamanda silinmiş olmalılar
+            tag.DeletedAt.ShouldNotBeNull();
+            tag.DeletedAt.ShouldBe(dbEntity.DeletedAt); // Aynı zamanda silinmiş olmalılar
         }
     }
 
@@ -458,27 +452,27 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entity = await CreateAndAddTestEntity();
-        
+
         // Add one-to-one
         var singleDetail = new SingleDetail { TestEntityId = entity.Id, Detail = "Test Detail" };
         await Context.SingleDetails.AddAsync(singleDetail);
-        
+
         // Add one-to-many
         var details = new[]
         {
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 1" },
-            new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" }
+            new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" },
         };
         await Context.Details.AddRangeAsync(details);
-        
+
         // Add many-to-many
         var tags = new[]
         {
             new TagEntity { Name = "Tag 1" },
-            new TagEntity { Name = "Tag 2" }
+            new TagEntity { Name = "Tag 2" },
         };
         await Context.Tags.AddRangeAsync(tags);
-        
+
         await Context.SaveChangesAsync();
 
         entity.SingleDetail = singleDetail;
@@ -487,8 +481,8 @@ public partial class EfRepositoryBaseTests
         await Context.SaveChangesAsync();
 
         Context.ChangeTracker.Clear();
-        entity = await Context.TestEntities
-            .Include(e => e.SingleDetail)
+        entity = await Context
+            .TestEntities.Include(e => e.SingleDetail)
             .Include(e => e.Details)
             .Include(e => e.Tags)
             .SingleAsync(e => e.Id == entity.Id);
@@ -506,23 +500,23 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var dbEntity = await Context.TestEntities
-            .IgnoreQueryFilters()
+        var dbEntity = await Context
+            .TestEntities.IgnoreQueryFilters()
             .Include(e => e.SingleDetail)
             .Include(e => e.Details)
             .Include(e => e.Tags)
             .SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedDate.ShouldNotBeNull();
-        
+        dbEntity.DeletedAt.ShouldNotBeNull();
+
         dbEntity.SingleDetail.ShouldNotBeNull();
-        dbEntity.SingleDetail.DeletedDate.ShouldNotBeNull();
-        
+        dbEntity.SingleDetail.DeletedAt.ShouldNotBeNull();
+
         dbEntity.Details.Count.ShouldBe(2);
-        dbEntity.Details.ShouldAllBe(d => d.DeletedDate != null);
-        
+        dbEntity.Details.ShouldAllBe(d => d.DeletedAt != null);
+
         dbEntity.Tags.Count.ShouldBe(2);
-        dbEntity.Tags.ShouldAllBe(t => t.DeletedDate != null);
+        dbEntity.Tags.ShouldAllBe(t => t.DeletedAt != null);
     }
 
     public class OneToOneEntity : Entity<Guid>
@@ -548,7 +542,8 @@ public partial class EfRepositoryBaseTests
         public DbSet<OneToOneEntity> OneToOneEntities { get; set; } = null!;
         public DbSet<OneToOneDependency> OneToOneDependencies { get; set; } = null!;
 
-        public TestDbContextWithOneToOne(DbContextOptions options) : base(options) { }
+        public TestDbContextWithOneToOne(DbContextOptions options)
+            : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -557,10 +552,11 @@ public partial class EfRepositoryBaseTests
                 builder.ToTable("OneToOneEntities");
                 builder.HasKey(e => e.Id);
                 builder.Property(e => e.Id).ValueGeneratedNever();
-                
-                builder.HasQueryFilter(e => !e.DeletedDate.HasValue);
 
-                builder.HasOne(e => e.Dependency)
+                builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+
+                builder
+                    .HasOne(e => e.Dependency)
                     .WithOne(d => d.Entity)
                     .HasForeignKey<OneToOneDependency>(d => d.Id)
                     .HasPrincipalKey<OneToOneEntity>(e => e.Id)
@@ -573,14 +569,15 @@ public partial class EfRepositoryBaseTests
                 builder.ToTable("OneToOneDependencies");
                 builder.HasKey(e => e.Id);
                 builder.Property(e => e.Id).ValueGeneratedNever();
-                
-                builder.HasQueryFilter(e => !e.DeletedDate.HasValue);
+
+                builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
             });
         }
     }
 
     public class OneToOneEntityRepository : EfRepositoryBase<OneToOneEntity, Guid, TestDbContextWithOneToOne>
     {
-        public OneToOneEntityRepository(TestDbContextWithOneToOne context) : base(context) { }
+        public OneToOneEntityRepository(TestDbContextWithOneToOne context)
+            : base(context) { }
     }
 }

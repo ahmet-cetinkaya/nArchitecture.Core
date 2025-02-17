@@ -13,7 +13,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     protected virtual void EditEntityPropertiesToUpdate(TEntity entity)
     {
         // Set current UTC time as update time.
-        entity.UpdatedDate = DateTime.UtcNow;
+        entity.UpdatedAt = DateTime.UtcNow;
     }
 
     /// <inheritdoc/>
@@ -59,7 +59,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     }
 
     /// <inheritdoc/>
-    public Task BulkUpdateAsync(ICollection<TEntity> entities, int batchSize = 1_000, CancellationToken cancellationToken = default)
+    public Task BulkUpdateAsync(
+        ICollection<TEntity> entities,
+        int batchSize = 1_000,
+        CancellationToken cancellationToken = default
+    )
     {
         // Validate input collection.
         if (entities == null)

@@ -8,15 +8,15 @@ public interface IEntityTimestamps
     /// <summary>
     /// Gets or sets the date and time when the entity was created.
     /// </summary>
-    DateTime CreatedDate { get; set; }
+    DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the entity was last updated.
     /// </summary>
-    DateTime? UpdatedDate { get; set; }
+    DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the entity was deleted.
     /// </summary>
-    DateTime? DeletedDate { get; set; }
+    DateTime? DeletedAt { get; set; }
 }

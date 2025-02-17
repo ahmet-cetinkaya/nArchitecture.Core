@@ -71,7 +71,7 @@ public class TestDbContext : DbContext
     {
         modelBuilder.Entity<TestEntity>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedDate.HasValue);
+            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
             builder.Property(e => e.Name).HasMaxLength(1000);
             builder.Property(e => e.Description).HasMaxLength(2000);
             builder.HasKey(e => e.Id);
@@ -105,19 +105,19 @@ public class TestDbContext : DbContext
 
         modelBuilder.Entity<SingleDetail>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedDate.HasValue);
+            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
             builder.HasKey(e => e.Id);
             builder.Property(e => e.TestEntityId);
         });
 
         modelBuilder.Entity<DetailEntity>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedDate.HasValue);
+            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
         });
 
         modelBuilder.Entity<TagEntity>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedDate.HasValue);
+            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
             builder.Property(e => e.Name).HasMaxLength(50);
         });
     }

@@ -34,8 +34,8 @@ public partial class EfRepositoryBaseTests
         _ = dbEntity.ShouldNotBeNull();
         dbEntity.Name.ShouldBe(entity.Name);
         dbEntity.Description.ShouldBe(entity.Description);
-        dbEntity.CreatedDate.ShouldBeGreaterThanOrEqualTo(beforeAdd);
-        dbEntity.CreatedDate.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
+        dbEntity.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeAdd);
+        dbEntity.CreatedAt.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
     }
 
     [Theory(DisplayName = "Add/AddAsync - Should throw when entity is null")]
@@ -84,8 +84,8 @@ public partial class EfRepositoryBaseTests
         dbEntities.Count.ShouldBe(entityCount);
         foreach (var entity in dbEntities)
         {
-            entity.CreatedDate.ShouldBeGreaterThanOrEqualTo(beforeAdd);
-            entity.CreatedDate.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
+            entity.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeAdd);
+            entity.CreatedAt.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
         }
     }
 
