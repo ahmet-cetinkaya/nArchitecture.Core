@@ -1,10 +1,15 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Claims;
 
-namespace NArchitecture.Core.Security.Extensions;
+namespace NArchitecture.Core.Security.Authorization.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
+    public static string? GetClaim(this ClaimsPrincipal claimsPrincipal, string claimType)
+    {
+        return claimsPrincipal?.FindFirst(claimType)?.Value;
+    }
+
     public static ICollection<string>? GetClaims(this ClaimsPrincipal claimsPrincipal, string claimType)
     {
         return claimsPrincipal?.FindAll(claimType)?.Select(x => x.Value).ToImmutableArray();
@@ -13,7 +18,7 @@ public static class ClaimsPrincipalExtensions
     /// <summary>
     /// Get all <see cref="ClaimTypes.Role"/> claims.
     /// </summary>
-    public static ICollection<string>? GetRoleClaims(this ClaimsPrincipal claimsPrincipal)
+    public static ICollection<string>? GetOperationClaims(this ClaimsPrincipal claimsPrincipal)
     {
         return claimsPrincipal?.GetClaims(ClaimTypes.Role);
     }
@@ -21,8 +26,8 @@ public static class ClaimsPrincipalExtensions
     /// <summary>
     /// Get the <see cref="ClaimTypes.NameIdentifier"/> claim.
     /// </summary>
-    public static string? GetIdClaim(this ClaimsPrincipal claimsPrincipal)
+    public static string? GetUserIdClaim(this ClaimsPrincipal claimsPrincipal)
     {
-        return claimsPrincipal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return claimsPrincipal?.GetClaim(ClaimTypes.NameIdentifier);
     }
 }

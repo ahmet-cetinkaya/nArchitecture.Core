@@ -43,5 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Core.Persistence.Abstractions/Core.Persistence.Abstractions.csproj" />
+    <ProjectReference Include="../Core.Mailing.Abstractions/Core.Mailing.Abstractions.csproj" />
+    <ProjectReference Include="../Core.Sms.Abstractions/Core.Sms.Abstractions.csproj" />
+    <ProjectReference Include="../Core.Security.Abstractions/Core.Security.Abstractions.csproj" />
   </ItemGroup>
 </Project>
