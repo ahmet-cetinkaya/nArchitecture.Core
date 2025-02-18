@@ -2,7 +2,7 @@
 
 public interface IOtpService
 {
-    byte[] GenerateSecretKey(byte[] secretKey, CancellationToken cancellationToken = default);
-    string ConvertSecretKeyToString(byte[] secretKey, CancellationToken cancellationToken = default);
-    string ComputeOtp(byte[] secretKey, CancellationToken cancellationToken = default);
+    byte[] GenerateSecretKey(byte[] secretKey);
+    string ConvertSecretKeyToString(byte[] secretKey);
+    string ComputeOtp(byte[] secretKey, DateTime? time = null);
 }

@@ -5,7 +5,7 @@ namespace NArchitecture.Core.Security.Authenticator.Otp.OtpNet;
 
 public class OtpNetOtpService : IOtpService
 {
-    public byte[] GenerateSecretKey(byte[] secretKey, CancellationToken cancellationToken = default)
+    public byte[] GenerateSecretKey(byte[] secretKey)
     {
         byte[] key = KeyGeneration.GenerateRandomKey(20);
         string base32String = Base32Encoding.ToString(key);
@@ -13,19 +13,24 @@ public class OtpNetOtpService : IOtpService
         return base32Bytes;
     }
 
-    public string ConvertSecretKeyToString(byte[] secretKey, CancellationToken cancellationToken = default)
+    public string ConvertSecretKeyToString(byte[] secretKey)
     {
+        if (secretKey is null)
+            throw new ArgumentNullException(nameof(secretKey));
+        if (secretKey.Length == 0)
+            return string.Empty;
+
         string base32String = Base32Encoding.ToString(secretKey);
         return base32String;
     }
 
-    public string ComputeOtp(byte[] secretKey, CancellationToken cancellationToken = default)
+    public string ComputeOtp(byte[] secretKey, DateTime? time = null)
     {
         if (secretKey is null)
             throw new ArgumentNullException(nameof(secretKey));
 
         Totp totp = new(secretKey);
-        string totpCode = totp.ComputeTotp(DateTime.UtcNow);
+        string totpCode = totp.ComputeTotp(time ?? DateTime.UtcNow);
         return totpCode;
     }
 }
