@@ -111,6 +111,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.Abstractions"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Sms.Abstractions", "src\Core.Sms.Abstractions\Core.Sms.Abstractions.csproj", "{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.WebApi", "src\Core.Security.WebApi\Core.Security.WebApi.csproj", "{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -290,6 +291,10 @@ Global
 		{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -342,6 +347,7 @@ Global
 		{52AAC52E-BF15-4427-A68E-2F19D6406D22} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
 		{D1E827BB-E5C2-46A3-8EB0-F352BAE74B7F} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
 		{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
+		{7ABAE2C8-0E4E-4AC2-866D-120056B742F3} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E988190-9FBF-4E2E-9B3A-35C418139397}
