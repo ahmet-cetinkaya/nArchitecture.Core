@@ -1,11 +1,13 @@
 {
     "scripts": {
-        "build": "dotnet build --configuration Release",
-        "test": "dotnet test --configuration Release",
+        "analyze": "dotnet roslynator analyze",
         "benchmark": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj && dotnet restore",
         "benchmark:last": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run && dotnet restore",
-        "analysis": "dotnet roslynator analyze",
+        "build": "dotnet build --configuration Release",
         "format": "dotnet csharpier .",
-        "test:ci:dotnet": "act --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/dotnet.yml"
+        "package:update-all": "dotnet outdated -u",
+        "test": "dotnet test --configuration Release",
+        "test:ci:dotnet": "act --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/dotnet.yml",
+        "tool:update-all": "dotnet tool update --all"
     }
 }
