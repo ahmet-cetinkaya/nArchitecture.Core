@@ -68,14 +68,10 @@ public interface IAuthenticatorConfiguration
     ValueTask<string> GetAuthenticatorTypeNotEnabledMessageAsync(AuthenticatorType type, CancellationToken cancellationToken = default);
 }
 
-public readonly record struct EmailTemplateConfiguration
-{
-    public string Subject { get; init; }
-    public string TextBodyTemplate { get; init; }
-    public string HtmlBodyTemplate { get; init; }
-}
+public readonly record struct EmailTemplateConfiguration(
+    string Subject,
+    string TextBodyTemplate,
+    string HtmlBodyTemplate);
 
-public readonly record struct SmsTemplateConfiguration
-{
-    public string MessageTemplate { get; init; }
-}
+public readonly record struct SmsTemplateConfiguration(
+    string MessageTemplate);
