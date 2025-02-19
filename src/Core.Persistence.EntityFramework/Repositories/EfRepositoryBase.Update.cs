@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
@@ -23,21 +23,37 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
+        try
+        {
         EditEntityPropertiesToUpdate(entity);
-        _ = Context.Update(entity);
+            Context.Entry(entity).State = EntityState.Modified;
         return entity;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            HandleConcurrencyException(ex, entity);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
-    public Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         // Validate input.
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
+        try
+        {
         EditEntityPropertiesToUpdate(entity);
-        _ = Context.Update(entity);
-        return Task.FromResult(entity);
+            Context.Entry(entity).State = EntityState.Modified;
+            return entity;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await HandleConcurrencyExceptionAsync(ex, entity, cancellationToken);
+            throw;
+        }
     }
 
     /// <inheritdoc/>

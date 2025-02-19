@@ -15,9 +15,24 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        // Delete synchronously with cascade soft-delete if not permanent.
+        try
+        {
+            if (permanent)
+            {
+                _ = Context.Remove(entity);
+            }
+            else
+            {
         SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
+                Context.Entry(entity).State = EntityState.Modified;
+            }
         return entity;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            HandleConcurrencyException(ex, entity);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
@@ -26,9 +41,24 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        // Delete asynchronously with cascade logic.
+        try
+        {
+            if (permanent)
+            {
+                _ = Context.Remove(entity);
+            }
+            else
+            {
         await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
+                Context.Entry(entity).State = EntityState.Modified;
+            }
         return entity;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await HandleConcurrencyExceptionAsync(ex, entity, cancellationToken);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
@@ -41,6 +71,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
+        try
+        {
         foreach (TEntity entity in entities)
         {
             if (permanent)
@@ -48,8 +80,18 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             else
             {
                 SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
-                _ = Context.Update(entity);
+                    Context.Entry(entity).State = EntityState.Modified;
+                }
             }
+            return entities;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Concurrency check for the last failed entity
+            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            if (failedEntity != null)
+                HandleConcurrencyException(ex, failedEntity);
+            throw;
         }
     }
 
@@ -68,6 +110,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
+        try
+        {
         foreach (TEntity entity in entities)
         {
             if (permanent)
@@ -75,8 +119,18 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             else
             {
                 await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
-                _ = Context.Update(entity);
+                    Context.Entry(entity).State = EntityState.Modified;
+                }
             }
+            return entities;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // En son başarısız olan entity için concurrency kontrolü
+            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            if (failedEntity != null)
+                await HandleConcurrencyExceptionAsync(ex, failedEntity, cancellationToken);
+            throw;
         }
     }
 

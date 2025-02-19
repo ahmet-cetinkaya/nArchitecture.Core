@@ -17,4 +17,9 @@ public abstract class BaseEntity<TId> : IEntity<TId>, IEntityTimestamps
 
     /// <inheritdoc cref="IEntityTimestamps.DeletedAt"/>
     public DateTime? DeletedAt { get; set; }
+
+    /// <summary>
+    /// Used for optimistic concurrency control.
+    /// </summary>
+    public byte[] RowVersion { get; set; } = new byte[8];
 }
