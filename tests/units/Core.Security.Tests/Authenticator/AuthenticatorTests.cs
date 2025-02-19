@@ -893,8 +893,8 @@ public class AuthenticatorTests
         capturedSms.ShouldNotBeNull();
         capturedSms.PhoneNumber.ShouldBe(phoneNumber);
         capturedSms.Priority.ShouldBe(1);
-        capturedSms.CustomParameters.ShouldContainKey("type");
-        capturedSms.CustomParameters["type"].ShouldBe("authentication");
+        capturedSms.CustomParameters!.ShouldContainKey("type");
+        capturedSms.CustomParameters!["type"].ShouldBe("authentication");
         capturedSms.CustomParameters.ShouldContainKey("expiresAt");
         capturedSms.CustomParameters["expiresAt"].ShouldBe(expiresAt.ToString("O"));
         
