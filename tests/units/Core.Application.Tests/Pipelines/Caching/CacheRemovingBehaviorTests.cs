@@ -3,17 +3,16 @@ using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;
 
 public class MockCacheRemoverRequest : IRequest<int>, ICacheRemoverRequest
 {
-    // Use a backing property for the new CacheOptions
     public CacheRemoverOptions CacheOptions { get; set; } =
         new CacheRemoverOptions(bypassCache: false, cacheKey: string.Empty, cacheGroupKey: System.Array.Empty<string>());
 }
@@ -21,7 +20,7 @@ public class MockCacheRemoverRequest : IRequest<int>, ICacheRemoverRequest
 public class CacheRemovingBehaviorTests
 {
     private readonly IDistributedCache _cache;
-    private readonly Mock<ILogger<CacheRemovingBehavior<MockCacheRemoverRequest, int>>> _loggerMock;
+    private readonly Mock<ILogger> _loggerMock;
     private readonly CacheRemovingBehavior<MockCacheRemoverRequest, int> _behavior;
     private readonly RequestHandlerDelegate<int> _nextDelegate;
 
@@ -29,7 +28,7 @@ public class CacheRemovingBehaviorTests
     {
         var options = new MemoryDistributedCacheOptions();
         _cache = new MemoryDistributedCache(Options.Create(options));
-        _loggerMock = new Mock<ILogger<CacheRemovingBehavior<MockCacheRemoverRequest, int>>>();
+        _loggerMock = new Mock<ILogger>();
         _behavior = new CacheRemovingBehavior<MockCacheRemoverRequest, int>(_cache, _loggerMock.Object);
         _nextDelegate = () => Task.FromResult(42);
     }
@@ -49,7 +48,7 @@ public class CacheRemovingBehaviorTests
         await _cache.SetAsync("test-key", Encoding.UTF8.GetBytes("test-value"));
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var result = await _cache.GetAsync("test-key");
@@ -82,7 +81,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         foreach (var key in cachedKeys)
@@ -133,7 +132,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         foreach (var key in cachedKeys1.Concat(cachedKeys2))
@@ -174,11 +173,11 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var existingValue = await _cache.GetAsync(existingKey);
-        existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
+        _ = existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
     }
 
     /// <summary>
@@ -201,14 +200,14 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var value = await _cache.GetAsync(testKey);
-        value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
+        _ = value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
 
         var groupValue = await _cache.GetAsync(groupKey);
-        groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
+        _ = groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
     }
 
     /// <summary>
@@ -228,7 +227,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, next, CancellationToken.None);
+        _ = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         nextDelegateCalled.ShouldBeTrue("Next delegate should always be called");
@@ -338,8 +337,8 @@ public class CacheRemovingBehaviorTests
         var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
 
         // Assert
-        exception.ShouldNotBeNull();
-        exception.ShouldBeOfType<JsonException>();
+        _ = exception.ShouldNotBeNull();
+        _ = exception.ShouldBeOfType<JsonException>();
     }
 
     /// <summary>
@@ -368,9 +367,9 @@ public class CacheRemovingBehaviorTests
         cts.Cancel(); // Cancel before execution
 
         // Act & Assert
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
-            await _behavior.Handle(request, _nextDelegate, cts.Token);
+            _ = await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
     }
 
@@ -406,14 +405,14 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act & Assert
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
-            await _behavior.Handle(request, next, cts.Token);
+            _ = await _behavior.Handle(request, next, cts.Token);
         });
 
         // Verify that not all groups were processed
         var lastGroupValue = await _cache.GetAsync("group3");
-        lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
+        _ = lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
     }
 
     /// <summary>
@@ -442,17 +441,8 @@ public class CacheRemovingBehaviorTests
 
         // Cancel after first group is processed
         int processedGroups = 0;
-        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
-        _loggerMock
-            .Setup(x =>
-                x.Log(
-                    LogLevel.Information,
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                )
-            )
+        _ = _loggerMock
+            .Setup(x => x.InformationAsync(It.IsAny<string>()))
             .Callback(() =>
             {
                 processedGroups++;
@@ -461,19 +451,20 @@ public class CacheRemovingBehaviorTests
                     cts.Cancel();
                     throw new OperationCanceledException(cts.Token);
                 }
-            });
+            })
+            .Returns(Task.CompletedTask);
 
         // Act & Assert
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
-            await _behavior.Handle(request, _nextDelegate, cts.Token);
+            _ = await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
 
         // Verify only first group was processed
         (await _cache.GetAsync("group1")).ShouldBeNull("First group should be processed");
-        (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
-        (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
-        (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
+        _ = (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
+        _ = (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
+        _ = (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
     }
 
     /// <summary>
@@ -498,35 +489,18 @@ public class CacheRemovingBehaviorTests
         await _cache.SetAsync("group1", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(group1Keys)));
         await _cache.SetAsync("group2", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(group2Keys)));
 
-        // Enable information logging
-        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
-
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         // Verify logger was called with correct group names and key counts
         _loggerMock.Verify(
-            x =>
-                x.Log(
-                    LogLevel.Information,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("group1") && v.ToString()!.Contains("2")),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                ),
+            x => x.InformationAsync(It.Is<string>(m => m.Contains("group1") && m.Contains("2"))),
             Times.Once
         );
 
         _loggerMock.Verify(
-            x =>
-                x.Log(
-                    LogLevel.Information,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("group2") && v.ToString()!.Contains("1")),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                ),
+            x => x.InformationAsync(It.Is<string>(m => m.Contains("group2") && m.Contains("1"))),
             Times.Once
         );
     }

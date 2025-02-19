@@ -2,8 +2,7 @@
 using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 
@@ -13,15 +12,20 @@ namespace NArchitecture.Core.Application.Pipelines.Caching;
 /// </summary>
 /// <typeparam name="TRequest">The type of request implementing ICacheableRequest</typeparam>
 /// <typeparam name="TResponse">The type of response</typeparam>
-public sealed class CachingBehavior<TRequest, TResponse>(
-    IDistributedCache cache,
-    ILogger<CachingBehavior<TRequest, TResponse>> logger,
-    IConfiguration configuration
-) : IPipelineBehavior<TRequest, TResponse>
+public sealed class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, ICacheableRequest
 {
+    private readonly IDistributedCache _cache;
+    private readonly ILogger _logger;
+    private readonly CacheSettings _cacheSettings;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private readonly CacheSettings _cacheSettings = InitializeCacheSettings(configuration);
+
+    public CachingBehavior(IDistributedCache cache, ILogger logger, CacheSettings cacheSettings)
+    {
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _cacheSettings = cacheSettings;
+    }
 
     /// <summary>
     /// Handles the request with caching support. Returns cached data if available, otherwise executes the request and caches the response.
@@ -42,7 +46,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
         if (request.CacheOptions.BypassCache)
             return await next();
 
-        byte[]? cachedResponse = await cache.GetAsync(request.CacheOptions.CacheKey, cancellationToken);
+        byte[]? cachedResponse = await _cache.GetAsync(request.CacheOptions.CacheKey, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
 
         if (cachedResponse is not null)
@@ -51,13 +55,13 @@ public sealed class CachingBehavior<TRequest, TResponse>(
             {
                 // Deserialize and return cached response
                 TResponse? response = DeserializeFromUtf8Bytes<TResponse>(cachedResponse);
-                logger.LogInformation("Cache hit: {CacheKey}", request.CacheOptions.CacheKey);
+                await _logger.InformationAsync($"Cache hit: {request.CacheOptions.CacheKey}");
                 return response;
             }
             catch
             {
                 // Log deserialization failures but continue with cache miss path
-                logger.LogWarning("Cache deserialization failed: {CacheKey}", request.CacheOptions.CacheKey);
+                await _logger.WarningAsync($"Cache deserialization failed: {request.CacheOptions.CacheKey}");
             }
         }
 
@@ -70,28 +74,6 @@ public sealed class CachingBehavior<TRequest, TResponse>(
     {
         T? result = JsonSerializer.Deserialize<T>(utf8Json, JsonOptions);
         return result!;
-    }
-
-    /// <summary>
-    /// Initializes cache settings from configuration.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when cache settings are missing or invalid</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static CacheSettings InitializeCacheSettings(IConfiguration configuration)
-    {
-        IConfigurationSection section = configuration.GetSection("CacheSettings");
-        string? slidingExpirationStr = section["SlidingExpiration"];
-
-        if (string.IsNullOrEmpty(slidingExpirationStr))
-            throw new InvalidOperationException("Cache settings are not configured: SlidingExpiration is missing");
-
-        if (!TimeSpan.TryParse(slidingExpirationStr, out TimeSpan slidingExpiration))
-            throw new InvalidOperationException("Cache settings are invalid: SlidingExpiration must be a valid TimeSpan");
-
-        if (slidingExpiration <= TimeSpan.Zero)
-            throw new InvalidOperationException("Cache settings are invalid: SlidingExpiration must be positive");
-
-        return new(slidingExpiration);
     }
 
     /// <summary>
@@ -114,7 +96,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
         // Cache the response
         var cacheOptions = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
         byte[] serializedData = JsonSerializer.SerializeToUtf8Bytes(response, JsonOptions);
-        await cache.SetAsync(request.CacheOptions.CacheKey, serializedData, cacheOptions, cancellationToken);
+        await _cache.SetAsync(request.CacheOptions.CacheKey, serializedData, cacheOptions, cancellationToken);
 
         // Add to cache group if specified
         if (request.CacheOptions.CacheGroupKey is not null)
@@ -130,7 +112,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
     {
         // Get existing group cache
         string groupKey = request.CacheOptions.CacheGroupKey!;
-        byte[]? groupCache = await cache.GetAsync(groupKey, cancellationToken);
+        byte[]? groupCache = await _cache.GetAsync(groupKey, cancellationToken);
 
         // Get or create cache keys set
         HashSet<string> cacheKeysInGroup = groupCache is not null
@@ -147,7 +129,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
             };
 
             byte[] serializedGroup = JsonSerializer.SerializeToUtf8Bytes(cacheKeysInGroup, JsonOptions);
-            await cache.SetAsync(groupKey, serializedGroup, cacheOptions, cancellationToken);
+            await _cache.SetAsync(groupKey, serializedGroup, cacheOptions, cancellationToken);
         }
     }
 
@@ -162,7 +144,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
     {
         // Get existing expiration
         string expirationKey = $"{groupKey}SlidingExpiration";
-        byte[]? existingExpirationBytes = await cache.GetAsync(expirationKey, cancellationToken);
+        byte[]? existingExpirationBytes = await _cache.GetAsync(expirationKey, cancellationToken);
 
         // Calculate final expiration (max of existing and new)
         int newSeconds = (int)newExpiration.TotalSeconds;
@@ -182,7 +164,7 @@ public sealed class CachingBehavior<TRequest, TResponse>(
         var finalExpiration = TimeSpan.FromSeconds(finalSeconds);
         byte[] secondsBytes = BitConverter.GetBytes(finalSeconds);
 
-        await cache.SetAsync(
+        await _cache.SetAsync(
             expirationKey,
             secondsBytes,
             new DistributedCacheEntryOptions { SlidingExpiration = finalExpiration },

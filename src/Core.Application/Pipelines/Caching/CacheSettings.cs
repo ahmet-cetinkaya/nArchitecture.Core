@@ -1,17 +1,13 @@
 ﻿namespace NArchitecture.Core.Application.Pipelines.Caching;
 
-/// <summary>
-/// Cache configuration options.
-/// </summary>
 public readonly record struct CacheSettings
 {
-    /// <summary>
-    /// Default sliding expiration duration.
-    /// </summary>
-    public TimeSpan SlidingExpiration { get; init; }
+    public TimeSpan SlidingExpiration { get; }
 
     public CacheSettings(TimeSpan slidingExpiration)
     {
+        if (slidingExpiration <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(slidingExpiration), "Sliding expiration must be positive");
         SlidingExpiration = slidingExpiration;
     }
 }

@@ -2,9 +2,9 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using Moq;
 
 namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Caching;
 
@@ -15,16 +15,16 @@ public class CacheRemovingBehaviorBenchmarks
     private CacheRemovingBehavior<TestRequest, string> _behavior = null!;
     private TestRequest _request = null!;
     private Mock<IDistributedCache> _cacheMock = null!;
-    private Mock<ILogger<CacheRemovingBehavior<TestRequest, string>>> _loggerMock = null!;
+    private Mock<ILogger> _loggerMock = null!;
     private readonly Consumer _consumer = new();
 
     [GlobalSetup]
     public void Setup()
     {
         _cacheMock = new Mock<IDistributedCache>();
-        _loggerMock = new Mock<ILogger<CacheRemovingBehavior<TestRequest, string>>>();
+        _loggerMock = new Mock<ILogger>();
 
-        _cacheMock
+        _ = _cacheMock
             .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(System.Text.Encoding.UTF8.GetBytes("[]"));
 
@@ -38,7 +38,7 @@ public class CacheRemovingBehaviorBenchmarks
     {
         for (int i = 0; i < 1000; i++)
         {
-            await Task.FromResult($"test-response-{i}");
+            _ = await Task.FromResult($"test-response-{i}");
         }
     }
 
@@ -48,7 +48,7 @@ public class CacheRemovingBehaviorBenchmarks
         for (int i = 0; i < 1000; i++) // Add loop to increase operation time
         {
             _request.CacheGroupKey = null;
-            await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
+            _ = await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
         }
     }
 
@@ -58,7 +58,7 @@ public class CacheRemovingBehaviorBenchmarks
         for (int i = 0; i < 1000; i++)
         {
             _request.CacheKey = null;
-            await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
+            _ = await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
         }
     }
 
@@ -67,7 +67,7 @@ public class CacheRemovingBehaviorBenchmarks
     {
         for (int i = 0; i < 1000; i++)
         {
-            await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
+            _ = await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
         }
     }
 

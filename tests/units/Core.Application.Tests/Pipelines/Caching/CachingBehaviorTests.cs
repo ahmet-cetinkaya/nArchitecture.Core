@@ -5,10 +5,9 @@ using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;
@@ -22,8 +21,7 @@ public class MockCacheableRequest : IRequest<string>, ICacheableRequest
 public class CachingBehaviorTests
 {
     private readonly IDistributedCache _cache;
-    private readonly Mock<ILogger<CachingBehavior<MockCacheableRequest, string>>> _loggerMock;
-    private readonly Mock<IConfiguration> _configurationMock;
+    private readonly Mock<ILogger> _loggerMock;
     private readonly CachingBehavior<MockCacheableRequest, string> _behavior;
     private readonly RequestHandlerDelegate<string> _nextDelegate;
 
@@ -31,17 +29,13 @@ public class CachingBehaviorTests
     {
         var options = new MemoryDistributedCacheOptions();
         _cache = new MemoryDistributedCache(Options.Create(options));
-        _loggerMock = new Mock<ILogger<CachingBehavior<MockCacheableRequest, string>>>();
-        _configurationMock = new Mock<IConfiguration>();
+        _loggerMock = new Mock<ILogger>();
 
-        // Setup configuration
-        var section = new Mock<IConfigurationSection>();
-        section.Setup(x => x.Value).Returns("2.00:00:00"); // 2 days
-        section.Setup(x => x["SlidingExpiration"]).Returns("2.00:00:00");
-
-        _configurationMock.Setup(x => x.GetSection("CacheSettings")).Returns(section.Object);
-
-        _behavior = new CachingBehavior<MockCacheableRequest, string>(_cache, _loggerMock.Object, _configurationMock.Object);
+        _behavior = new CachingBehavior<MockCacheableRequest, string>(
+            _cache, 
+            _loggerMock.Object,
+            new CacheSettings(TimeSpan.FromDays(2))
+        );
         _nextDelegate = () => Task.FromResult("test-response");
     }
 
@@ -104,7 +98,7 @@ public class CachingBehaviorTests
         // Assert
         result.ShouldBe("test-response");
         var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
-        cachedValue.ShouldNotBeNull();
+        _ = cachedValue.ShouldNotBeNull();
         var cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
         cachedResponse.ShouldBe("test-response");
     }
@@ -130,7 +124,7 @@ public class CachingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var cacheOptions = new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromMinutes(minutes) };
@@ -140,7 +134,7 @@ public class CachingBehaviorTests
             cacheOptions
         );
         var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
-        cachedValue.ShouldNotBeNull();
+        _ = cachedValue.ShouldNotBeNull();
     }
 
     /// <summary>
@@ -161,17 +155,17 @@ public class CachingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
-        groupCache.ShouldNotBeNull();
+        _ = groupCache.ShouldNotBeNull();
         var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.Default.GetString(groupCache!));
-        keys.ShouldNotBeNull();
+        _ = keys.ShouldNotBeNull();
         keys.ShouldContain(request.CacheOptions.CacheKey);
 
         var slidingExpirationCache = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
-        slidingExpirationCache.ShouldNotBeNull();
+        _ = slidingExpirationCache.ShouldNotBeNull();
     }
 
     /// <summary>
@@ -205,35 +199,6 @@ public class CachingBehaviorTests
     }
 
     /// <summary>
-    /// Verifies that invalid configuration throws appropriate exception
-    /// This test verifies different invalid configuration scenarios:
-    /// - Missing configuration (null)
-    /// - Empty configuration
-    /// - Invalid number format
-    /// - Non-positive values
-    /// </summary>
-    [Theory]
-    [InlineData(null, "Cache settings are not configured: SlidingExpiration is missing")]
-    [InlineData("", "Cache settings are not configured: SlidingExpiration is missing")]
-    [InlineData("invalid", "Cache settings are invalid: SlidingExpiration must be a valid TimeSpan")]
-    [InlineData("-1.00:00:00", "Cache settings are invalid: SlidingExpiration must be positive")]
-    [InlineData("00:00:00", "Cache settings are invalid: SlidingExpiration must be positive")]
-    public void Constructor_WithInvalidConfiguration_ShouldThrowException(string? slidingExpirationValue, string expectedMessage)
-    {
-        // Arrange
-        var section = new Mock<IConfigurationSection>();
-        section.Setup(x => x["SlidingExpiration"]).Returns(slidingExpirationValue);
-        _configurationMock.Setup(x => x.GetSection("CacheSettings")).Returns(section.Object);
-
-        // Act & Assert
-        var exception = Should.Throw<InvalidOperationException>(
-            () => new CachingBehavior<MockCacheableRequest, string>(_cache, _loggerMock.Object, _configurationMock.Object)
-        );
-
-        exception.Message.ShouldBe(expectedMessage);
-    }
-
-    /// <summary>
     /// Verifies that invalid sliding expiration values are handled properly
     /// </summary>
     [Theory]
@@ -253,7 +218,7 @@ public class CachingBehaviorTests
         };
 
         // Act & Assert
-        await Should.ThrowAsync<ArgumentOutOfRangeException>(
+        _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(
             async () => await _behavior.Handle(request, _nextDelegate, CancellationToken.None)
         );
     }
@@ -269,7 +234,9 @@ public class CachingBehaviorTests
         // Store invalid JSON data in cache to force deserialization failure
         await _cache.SetAsync(request.CacheOptions.CacheKey, Encoding.UTF8.GetBytes("invalid-json-data"));
 
-        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Warning)).Returns(true);
+        _ = _loggerMock
+            .Setup(x => x.WarningAsync(It.Is<string>(msg => msg.Contains("Cache deserialization failed"))))
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
@@ -279,14 +246,7 @@ public class CachingBehaviorTests
 
         // Verify warning was logged
         _loggerMock.Verify(
-            x =>
-                x.Log(
-                    LogLevel.Warning,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(request.CacheOptions.CacheKey)),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                ),
+            x => x.WarningAsync(It.Is<string>(msg => msg.Contains("Cache deserialization failed"))),
             Times.Once,
             "Should log warning when deserialization fails"
         );
@@ -309,7 +269,7 @@ public class CachingBehaviorTests
         // Assert
         result.ShouldBe(largeResponse);
         var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
-        cachedValue.ShouldNotBeNull();
+        _ = cachedValue.ShouldNotBeNull();
         var cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
         cachedResponse.ShouldBe(largeResponse);
     }
@@ -335,7 +295,7 @@ public class CachingBehaviorTests
         // Assert
         result.Length.ShouldBe(responseSize);
         var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
-        cachedValue.ShouldNotBeNull();
+        _ = cachedValue.ShouldNotBeNull();
         var cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
         cachedResponse!.Length.ShouldBe(responseSize);
     }
@@ -354,8 +314,8 @@ public class CachingBehaviorTests
         // Act & Assert
         var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, failingDelegate, CancellationToken.None));
 
-        exception.ShouldNotBeNull();
-        exception.ShouldBeOfType<JsonException>();
+        _ = exception.ShouldNotBeNull();
+        _ = exception.ShouldBeOfType<JsonException>();
 
         // Verify the cache wasn't modified
         var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
@@ -376,8 +336,8 @@ public class CachingBehaviorTests
         // Act & Assert
         var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, failingDelegate, CancellationToken.None));
 
-        exception.ShouldNotBeNull();
-        exception.ShouldBeOfType<JsonException>();
+        _ = exception.ShouldNotBeNull();
+        _ = exception.ShouldBeOfType<JsonException>();
 
         // Additional requests should still work
         var validRequest = new MockCacheableRequest
@@ -417,7 +377,7 @@ public class CachingBehaviorTests
         };
 
         // Act & Assert
-        await Should.ThrowAsync<JsonException>(
+        _ = await Should.ThrowAsync<JsonException>(
             async () => await _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
@@ -462,9 +422,9 @@ public class CachingBehaviorTests
 
         // Verify group was created
         var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
-        groupCache.ShouldNotBeNull();
+        _ = groupCache.ShouldNotBeNull();
         var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
-        keys.ShouldNotBeNull();
+        _ = keys.ShouldNotBeNull();
         keys.ShouldContain(request.CacheOptions.CacheKey);
     }
 
@@ -516,7 +476,7 @@ public class CachingBehaviorTests
         RequestHandlerDelegate<string> throwingDelegate = () => Task.FromResult(throwingData.ToString()!);
 
         // Act & Assert - First call will throw
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _behavior.Handle(request, throwingDelegate, CancellationToken.None)
         );
 
@@ -549,7 +509,7 @@ public class CachingBehaviorTests
         );
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
@@ -580,11 +540,11 @@ public class CachingBehaviorTests
         await _cache.SetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration", BitConverter.GetBytes(existingSeconds));
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var storedBytes = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
-        storedBytes.ShouldNotBeNull();
+        _ = storedBytes.ShouldNotBeNull();
         var storedSeconds = BitConverter.ToInt32(storedBytes);
         storedSeconds.ShouldBe(existingSeconds, "Should keep the longer expiration time");
     }
@@ -610,11 +570,11 @@ public class CachingBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         var storedBytes = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
-        storedBytes.ShouldNotBeNull();
+        _ = storedBytes.ShouldNotBeNull();
         var storedSeconds = BitConverter.ToInt32(storedBytes);
         storedSeconds.ShouldBe(expirationSeconds, "Expiration time should be stored correctly");
     }
@@ -641,7 +601,7 @@ public class CachingBehaviorTests
         RequestHandlerDelegate<string> failingDelegate = () => Task.FromResult(explodingResponse.ToString());
 
         // Act - First call should throw
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
@@ -655,7 +615,7 @@ public class CachingBehaviorTests
         // Assert
         result.ShouldBe(largeResponse, "Pool should be usable after error");
         var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
-        cachedValue.ShouldNotBeNull("Cache operation should succeed after pool error");
+        _ = cachedValue.ShouldNotBeNull("Cache operation should succeed after pool error");
     }
 
     private class ExplodingResponse
@@ -679,7 +639,7 @@ public class CachingBehaviorTests
         RequestHandlerDelegate<string> failingDelegate = () => Task.FromResult(response.ToString());
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
@@ -690,7 +650,7 @@ public class CachingBehaviorTests
         result.ShouldBe(largeData, "Pool should be usable after error");
 
         var cachedValue = await _cache.GetAsync(validRequest.CacheOptions.CacheKey);
-        cachedValue.ShouldNotBeNull("Cache should work after pool error");
+        _ = cachedValue.ShouldNotBeNull("Cache should work after pool error");
     }
 
     private class SerializationExplodingObject
@@ -709,5 +669,76 @@ public class CachingBehaviorTests
             var temp = new string((char)_data[0], _data.Length);
             throw new InvalidOperationException("Forced failure after allocation");
         }
+    }
+
+    /// <summary>
+    /// Tests that logger information is properly called
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenCacheHit_ShouldLogInformation()
+    {
+        // Arrange
+        var request = new MockCacheableRequest();
+        await _cache.SetAsync(
+            request.CacheOptions.CacheKey,
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize("cached-value"))
+        );
+
+        _ = _loggerMock
+            .Setup(x => x.InformationAsync(It.Is<string>(msg => msg.Contains("Cache hit"))))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+
+        // Assert
+        _loggerMock.Verify(
+            x => x.InformationAsync(It.Is<string>(msg => msg.Contains("Cache hit"))),
+            Times.Once
+        );
+    }
+
+    /// <summary>
+    /// Tests that logger warning is properly called on deserialization failure
+    /// </summary>
+    [Fact]
+    public async Task Handle_WhenDeserializationFails_ShouldLogWarning()
+    {
+        // Arrange
+        var request = new MockCacheableRequest();
+        await _cache.SetAsync(request.CacheOptions.CacheKey, Encoding.UTF8.GetBytes("invalid-json"));
+
+        _ = _loggerMock
+            .Setup(x => x.WarningAsync(It.Is<string>(msg => msg.Contains("Cache deserialization failed"))))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+
+        // Assert
+        _loggerMock.Verify(
+            x => x.WarningAsync(It.Is<string>(msg => msg.Contains("Cache deserialization failed"))),
+            Times.Once
+        );
+    }
+
+    /// <summary>
+    /// Verifies that invalid CacheSettings throws appropriate exception
+    /// </summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Constructor_WithInvalidCacheSettings_ShouldThrowException(int seconds)
+    {
+        // Arrange & Act & Assert
+        var exception = Should.Throw<ArgumentOutOfRangeException>(
+            () => new CachingBehavior<MockCacheableRequest, string>(
+                _cache,
+                _loggerMock.Object,
+                new CacheSettings(TimeSpan.FromSeconds(seconds))
+            )
+        );
+
+        exception.Message.ShouldContain("Sliding expiration must be positive");
     }
 }

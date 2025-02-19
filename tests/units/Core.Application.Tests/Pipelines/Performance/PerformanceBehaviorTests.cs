@@ -1,15 +1,15 @@
 using System.Diagnostics;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Performance;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Performance;
 
 public class PerformanceBehaviorTests
 {
-    private readonly Mock<ILogger<PerformanceBehavior<TestRequest, TestResponse>>> _loggerMock;
+    private readonly Mock<ILogger> _loggerMock;
     private readonly Stopwatch _stopwatch;
     private readonly PerformanceBehavior<TestRequest, TestResponse> _behavior;
 
@@ -17,7 +17,8 @@ public class PerformanceBehaviorTests
     {
         _loggerMock = new();
         _stopwatch = new();
-        _behavior = new(_loggerMock.Object, _stopwatch);
+        var options = new PerformanceOptions(TimeSpan.FromSeconds(1));
+        _behavior = new(_loggerMock.Object, _stopwatch, options);
     }
 
     /// <summary>
@@ -31,22 +32,10 @@ public class PerformanceBehaviorTests
         var response = new TestResponse();
         string? loggedMessage = null;
 
-        _loggerMock
-            .Setup(x =>
-                x.Log(
-                    It.IsAny<LogLevel>(),
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                )
-            )
-            .Callback<LogLevel, EventId, object, Exception?, Delegate>(
-                (level, id, state, ex, formatter) =>
-                {
-                    loggedMessage = formatter.DynamicInvoke(state, ex) as string;
-                }
-            );
+        _ = _loggerMock
+            .Setup(x => x.InformationAsync(It.IsAny<string>()))
+            .Callback<string>(msg => loggedMessage = msg)
+            .Returns(Task.CompletedTask);
 
         RequestHandlerDelegate<TestResponse> next = () =>
         {
@@ -59,7 +48,7 @@ public class PerformanceBehaviorTests
 
         // Assert
         result.ShouldBe(response);
-        loggedMessage.ShouldNotBeNull();
+        _ = loggedMessage.ShouldNotBeNull();
         loggedMessage.ShouldContain("Performance ->");
         loggedMessage.ShouldContain("TestRequest");
         loggedMessage.ShouldContain("took");
@@ -83,17 +72,7 @@ public class PerformanceBehaviorTests
 
         // Assert
         result.ShouldBe(response);
-        _loggerMock.Verify(
-            x =>
-                x.Log(
-                    It.IsAny<LogLevel>(),
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                ),
-            Times.Never
-        );
+        _loggerMock.Verify(x => x.InformationAsync(It.IsAny<string>()), Times.Never);
     }
 
     /// <summary>
@@ -109,7 +88,7 @@ public class PerformanceBehaviorTests
         RequestHandlerDelegate<TestResponse> next = () => throw expectedException;
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _behavior.Handle(request, next, CancellationToken.None)
         );
 
@@ -130,22 +109,10 @@ public class PerformanceBehaviorTests
         var response = new TestResponse();
         string? loggedMessage = null;
 
-        _loggerMock
-            .Setup(x =>
-                x.Log(
-                    It.IsAny<LogLevel>(),
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                )
-            )
-            .Callback<LogLevel, EventId, object, Exception?, Delegate>(
-                (level, id, state, ex, formatter) =>
-                {
-                    loggedMessage = formatter.DynamicInvoke(state, ex) as string;
-                }
-            );
+        _ = _loggerMock
+            .Setup(x => x.InformationAsync(It.IsAny<string>()))
+            .Callback<string>(msg => loggedMessage = msg)
+            .Returns(Task.CompletedTask);
 
         RequestHandlerDelegate<TestResponse> next = () =>
         {
@@ -160,7 +127,7 @@ public class PerformanceBehaviorTests
         result.ShouldBe(response);
         if (intervalSeconds == 0)
         {
-            loggedMessage.ShouldNotBeNull();
+            _ = loggedMessage.ShouldNotBeNull();
             loggedMessage.ShouldContain($"threshold of {intervalSeconds}s");
         }
     }
@@ -176,22 +143,10 @@ public class PerformanceBehaviorTests
         var response = new TestResponse();
         var loggedMessages = new List<string>();
 
-        _loggerMock
-            .Setup(x =>
-                x.Log(
-                    It.IsAny<LogLevel>(),
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                )
-            )
-            .Callback<LogLevel, EventId, object, Exception?, Delegate>(
-                (level, id, state, ex, formatter) =>
-                {
-                    loggedMessages.Add(formatter.DynamicInvoke(state, ex) as string ?? string.Empty);
-                }
-            );
+        _ = _loggerMock
+            .Setup(x => x.InformationAsync(It.IsAny<string>()))
+            .Callback<string>(msg => loggedMessages.Add(msg))
+            .Returns(Task.CompletedTask);
 
         RequestHandlerDelegate<TestResponse> fastNext = () => Task.FromResult(response);
         RequestHandlerDelegate<TestResponse> slowNext = () =>
@@ -201,9 +156,9 @@ public class PerformanceBehaviorTests
         };
 
         // Act
-        await _behavior.Handle(request, fastNext, CancellationToken.None);
-        await _behavior.Handle(request, slowNext, CancellationToken.None);
-        await _behavior.Handle(request, fastNext, CancellationToken.None);
+        _ = await _behavior.Handle(request, fastNext, CancellationToken.None);
+        _ = await _behavior.Handle(request, slowNext, CancellationToken.None);
+        _ = await _behavior.Handle(request, fastNext, CancellationToken.None);
 
         // Assert
         loggedMessages.Count.ShouldBe(1, "Only the slow request should log");

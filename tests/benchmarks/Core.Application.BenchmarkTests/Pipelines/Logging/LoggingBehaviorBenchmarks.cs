@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using System.Threading.Channels;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
@@ -49,7 +48,7 @@ public class LoggingBehaviorBenchmarks
     [Benchmark(Baseline = true)]
     public async Task Handle_BasicRequest()
     {
-        await _loggingBehavior.Handle(
+        _ = await _loggingBehavior.Handle(
             _request,
             () => Task.FromResult(new TestResponse { Success = true }),
             CancellationToken.None
@@ -66,7 +65,7 @@ public class LoggingBehaviorBenchmarks
             SensitiveData = string.Join("", Enumerable.Repeat("large-sensitive-data", 1000)),
         };
 
-        await _loggingBehavior.Handle(
+        _ = await _loggingBehavior.Handle(
             largeRequest,
             () => Task.FromResult(new TestResponse { Success = true }),
             CancellationToken.None
@@ -76,7 +75,7 @@ public class LoggingBehaviorBenchmarks
     [Benchmark]
     public async Task Handle_WithAsyncResponse()
     {
-        await _loggingBehavior.Handle(
+        _ = await _loggingBehavior.Handle(
             _request,
             async () =>
             {
@@ -92,7 +91,7 @@ public class LoggingBehaviorBenchmarks
     {
         foreach (var request in _multipleRequests)
         {
-            await _loggingBehavior.Handle(
+            _ = await _loggingBehavior.Handle(
                 request,
                 () => Task.FromResult(new TestResponse { Success = true }),
                 CancellationToken.None
@@ -107,7 +106,7 @@ public class LoggingBehaviorBenchmarks
             _loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse { Success = true }), CancellationToken.None)
         );
 
-        await Task.WhenAll(tasks);
+        _ = await Task.WhenAll(tasks);
     }
 
     [Benchmark]
@@ -129,7 +128,7 @@ public class LoggingBehaviorBenchmarks
                 )
             );
 
-            await Task.WhenAll(tasks);
+            _ = await Task.WhenAll(tasks);
         }
     }
 
@@ -147,7 +146,7 @@ public class LoggingBehaviorBenchmarks
                 {
                     try
                     {
-                        await _loggingBehavior.Handle(
+                        _ = await _loggingBehavior.Handle(
                             request,
                             () => Task.FromResult(new TestResponse { Success = true }),
                             CancellationToken.None
@@ -155,7 +154,7 @@ public class LoggingBehaviorBenchmarks
                     }
                     finally
                     {
-                        semaphore.Release();
+                        _ = semaphore.Release();
                     }
                 })
             );
@@ -187,7 +186,7 @@ public class LoggingBehaviorBenchmarks
                 {
                     await foreach (var request in channel.Reader.ReadAllAsync())
                     {
-                        await _loggingBehavior.Handle(
+                        _ = await _loggingBehavior.Handle(
                             request,
                             () => Task.FromResult(new TestResponse { Success = true }),
                             CancellationToken.None
@@ -222,4 +221,15 @@ internal class TestRequest : IRequest<TestResponse>, ILoggableRequest
 public class TestResponse
 {
     public bool Success { get; set; }
+
+    public static implicit operator int(TestResponse v)
+    {
+        switch (v.Success)
+        {
+            case true:
+                return 1;
+            case false:
+                return 0;
+        }
+    }
 }

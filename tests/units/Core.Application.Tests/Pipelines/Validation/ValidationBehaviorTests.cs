@@ -28,7 +28,7 @@ public class ValidationBehaviorTests
         // Arrange
         var validResult = new ValidationResult { IsValid = true, Errors = Array.Empty<ValidationError>() };
         var validatorMock = new Mock<IValidator<DummyRequest>>();
-        validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(validResult);
+        _ = validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(validResult);
 
         var behavior = new ValidationBehavior<DummyRequest, DummyResponse>(validatorMock.Object);
         var dummyRequest = new DummyRequest { Data = "Test" };
@@ -42,7 +42,7 @@ public class ValidationBehaviorTests
         );
 
         // Assert
-        response.ShouldNotBeNull();
+        _ = response.ShouldNotBeNull();
         response.Result.ShouldBe("OK");
         validatorMock.Verify(v => v.Validate(It.IsAny<DummyRequest>()), Times.Once);
     }
@@ -62,7 +62,7 @@ public class ValidationBehaviorTests
             Errors = new[] { new ValidationError(propertyName, new[] { errorMessage }) },
         };
         var validatorMock = new Mock<IValidator<DummyRequest>>();
-        validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(invalidResult);
+        _ = validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(invalidResult);
 
         var behavior = new ValidationBehavior<DummyRequest, DummyResponse>(validatorMock.Object);
         var dummyRequest = new DummyRequest { Data = "Test Fail" };
@@ -99,7 +99,7 @@ public class ValidationBehaviorTests
         var response = await behavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
 
         // Assert
-        response.ShouldNotBeNull();
+        _ = response.ShouldNotBeNull();
         response.Result.ShouldBe("OK");
     }
 
@@ -111,7 +111,7 @@ public class ValidationBehaviorTests
     {
         // Arrange
         var validatorMock = new Mock<IValidator<DummyRequest>>();
-        validatorMock
+        _ = validatorMock
             .Setup(v => v.Validate(It.IsAny<DummyRequest>()))
             .Returns(new ValidationResult { IsValid = true, Errors = null });
 
@@ -123,7 +123,7 @@ public class ValidationBehaviorTests
         var response = await behavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
 
         // Assert
-        response.ShouldNotBeNull();
+        _ = response.ShouldNotBeNull();
         response.Result.ShouldBe("OK");
     }
 
@@ -140,7 +140,7 @@ public class ValidationBehaviorTests
         var validationResult = new ValidationResult { IsValid = false, Errors = new[] { error1, error2 } };
 
         var validatorMock = new Mock<IValidator<DummyRequest>>();
-        validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(validationResult);
+        _ = validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(validationResult);
 
         var behavior = new ValidationBehavior<DummyRequest, DummyResponse>(validatorMock.Object);
         var request = new DummyRequest();

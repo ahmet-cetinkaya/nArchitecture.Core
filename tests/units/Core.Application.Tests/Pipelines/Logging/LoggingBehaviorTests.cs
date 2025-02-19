@@ -67,13 +67,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         logDetail!.Parameters.Count.ShouldBe(1);
         logDetail.Parameters[0].Type.ShouldBe(nameof(TestRequest));
@@ -94,13 +94,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         logDetail!.User.ShouldBe(expectedUsername);
     }
@@ -118,7 +118,7 @@ public class LoggingBehaviorTests
         RequestHandlerDelegate<TestResponse> next = () => throw new InvalidOperationException("Test exception");
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await loggingBehavior.Handle(request, next, CancellationToken.None)
         );
 
@@ -136,19 +136,19 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(
+        _ = await loggingBehavior.Handle(
             request,
             () => Task.FromResult(new TestResponse { Result = "Test" }),
             CancellationToken.None
         );
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
-        logDetail!.MethodName.ShouldNotBeNull();
+        _ = logDetail!.MethodName.ShouldNotBeNull();
         logDetail.MethodName.ShouldContain("RequestHandlerDelegate");
     }
 
@@ -168,13 +168,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequestWithExclusion, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         capturedLogMessage.ShouldNotContain("secret");
         capturedLogMessage.ShouldContain("Test"); // Name should still be included
     }
@@ -192,13 +192,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequestWithMasking, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
         parameters!["SensitiveData"].ToString().ShouldBe(expected);
@@ -249,13 +249,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequestWithResponseLogging, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         capturedLogMessage.ShouldContain("Success");
     }
 
@@ -315,13 +315,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<ComplexMaskingRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
         parameters!["SensitiveData"].ToString().ShouldBe(expected);
@@ -345,13 +345,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<MultipleExclusionRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
 
@@ -380,10 +380,10 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<ComplexResponseRequest, ComplexResponse>(_loggerMock.Object);
 
         var logMessages = new List<string>();
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => logMessages.Add(msg));
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => logMessages.Add(msg));
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(complexResponse), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(complexResponse), CancellationToken.None);
 
         // Assert
         logMessages.Count.ShouldBe(2); // Should have request and response logs
@@ -465,13 +465,13 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestDefaultMaskingRequest, TestResponse>(_loggerMock.Object);
 
         string? capturedLogMessage = null;
-        _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => capturedLogMessage = msg);
 
         // Act
-        await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
+        _ = await loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse()), CancellationToken.None);
 
         // Assert
-        capturedLogMessage.ShouldNotBeNull();
+        _ = capturedLogMessage.ShouldNotBeNull();
         var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
         parameters!["MaskedData"].ToString().ShouldBe("ab-----hi");

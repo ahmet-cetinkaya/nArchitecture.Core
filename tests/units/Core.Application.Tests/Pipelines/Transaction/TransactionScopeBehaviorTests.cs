@@ -29,7 +29,7 @@ public class TransactionScopeBehaviorTests
         var result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldBe(expectedResponse);
     }
 

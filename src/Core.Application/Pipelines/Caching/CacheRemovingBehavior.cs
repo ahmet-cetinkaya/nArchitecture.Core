@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 
@@ -17,14 +17,14 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
     where TRequest : IRequest<TResponse>, ICacheRemoverRequest
 {
     private readonly IDistributedCache _cache;
-    private readonly ILogger<CacheRemovingBehavior<TRequest, TResponse>> _logger;
+    private readonly ILogger _logger;
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> Locks = new();
     private static readonly ObjectPool<HashSet<string>> HashSetPool = ObjectPool.Create(
         new DefaultPooledObjectPolicy<HashSet<string>>()
     );
     private static readonly int _bufferSize = 4096;
 
-    public CacheRemovingBehavior(IDistributedCache cache, ILogger<CacheRemovingBehavior<TRequest, TResponse>> logger)
+    public CacheRemovingBehavior(IDistributedCache cache, ILogger logger)
     {
         _cache = cache;
         _logger = logger;
@@ -145,8 +145,9 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                     pendingTasks.Clear();
 
                     // Log the operation
-                    if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation("Removed cache group {Group} with {Count} keys", groupKey, keySet.Count);
+                    await _logger.InformationAsync(
+                        $"Removed cache group {groupKey} with {keySet.Count} keys"
+                    );
                 }
                 finally
                 {

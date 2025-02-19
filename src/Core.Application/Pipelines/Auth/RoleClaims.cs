@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using NArchitecture.Core.Security.Constants;
 
 namespace NArchitecture.Core.Application.Pipelines.Authorization;
 
@@ -26,11 +25,12 @@ public readonly ref struct RoleClaims(string[]? identityRoles, string[]? require
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool ContainsAdmin(string[] roles)
     {
+        const string adminRole = "Admin";
         foreach (var role in roles)
         {
             if (string.IsNullOrWhiteSpace(role))
                 continue;
-            if (role.AsSpan().Trim().Equals(GeneralOperationClaims.Admin, StringComparison.OrdinalIgnoreCase))
+            if (role.AsSpan().Trim().Equals(adminRole, StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;

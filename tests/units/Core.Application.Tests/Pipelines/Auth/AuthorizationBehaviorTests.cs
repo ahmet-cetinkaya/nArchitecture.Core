@@ -53,7 +53,7 @@ public class AuthorizationBehaviorTests
         var request = new MockSecuredRequest().SetRoles(null!, Array.Empty<string>());
 
         // Act & Assert
-        await Should.ThrowAsync<AuthenticationException>(
+        _ = await Should.ThrowAsync<AuthenticationException>(
             async () => await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
@@ -177,7 +177,7 @@ public class AuthorizationBehaviorTests
         else
         {
             // Act & Assert
-            await Should.ThrowAsync<AuthorizationException>(
+            _ = await Should.ThrowAsync<AuthorizationException>(
                 async () => await _behavior.Handle(request, _next, CancellationToken.None)
             );
         }
@@ -193,7 +193,7 @@ public class AuthorizationBehaviorTests
         var request = new MockSecuredRequest().SetRoles(Array.Empty<string>(), ["editor"]);
 
         // Act & Assert
-        await Should.ThrowAsync<AuthorizationException>(
+        _ = await Should.ThrowAsync<AuthorizationException>(
             async () => await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
