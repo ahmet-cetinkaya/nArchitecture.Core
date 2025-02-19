@@ -10,12 +10,15 @@ namespace NArchitecture.Core.Validation.FluentValidation;
 public class FluentValidatorAdapter<T>(global::FluentValidation.IValidator<T> fluentValidator) : IValidator<T>
     where T : class
 {
+    private readonly global::FluentValidation.IValidator<T> _fluentValidator =
+        fluentValidator ?? throw new ArgumentNullException(nameof(fluentValidator));
+
     /// <inheritdoc/>
-    public ValidationResult Validate(T instance)
+    public virtual ValidationResult Validate(T instance)
     {
         // Create validation context and execute FluentValidation
         var context = new global::FluentValidation.ValidationContext<T>(instance);
-        var result = fluentValidator.Validate(context);
+        var result = _fluentValidator.Validate(context);
 
         // Map FluentValidation result to application's ValidationResult
         return new ValidationResult

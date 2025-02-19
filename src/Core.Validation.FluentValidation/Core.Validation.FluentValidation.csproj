@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="../Core.CrossCuttingConcerns.Exception/Core.CrossCuttingConcerns.Exception.csproj" />
+    <ProjectReference
+      Include="../Core.CrossCuttingConcerns.Exception/Core.CrossCuttingConcerns.Exception.csproj" />
     <ProjectReference Include="../Core.Validation.Abstractions/Core.Validation.Abstractions.csproj" />
   </ItemGroup>
 
@@ -13,6 +14,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>NArchitecture.$(AssemblyName)</RootNamespace>
   </PropertyGroup>
 
 </Project>

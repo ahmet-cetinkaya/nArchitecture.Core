@@ -59,7 +59,7 @@ public class ValidationBehaviorTests
         var invalidResult = new ValidationResult
         {
             IsValid = false,
-            Errors = new[] { new ValidationError(propertyName, errorMessage) },
+            Errors = new[] { new ValidationError(propertyName, new[] { errorMessage }) },
         };
         var validatorMock = new Mock<IValidator<DummyRequest>>();
         validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(invalidResult);
@@ -77,7 +77,7 @@ public class ValidationBehaviorTests
         // Assert
         exception.Errors.ShouldNotBeEmpty();
         var validationError = exception.Errors.FirstOrDefault();
-        validationError.ShouldNotBeNull();
+        validationError.ShouldNotBe(default(ValidationError));
         validationError.PropertyName.ShouldBe(propertyName);
         validationError.Errors!.ShouldContain(errorMessage);
 
@@ -134,8 +134,8 @@ public class ValidationBehaviorTests
     public async Task Handle_WithMultipleValidationErrors_ShouldCollectAllErrors()
     {
         // Arrange
-        var error1 = new ValidationError("Property1", "Error1");
-        var error2 = new ValidationError("Property2", "Error2");
+        var error1 = new ValidationError("Property1", new[] { "Error1" });
+        var error2 = new ValidationError("Property2", new[] { "Error2" });
 
         var validationResult = new ValidationResult { IsValid = false, Errors = new[] { error1, error2 } };
 

@@ -71,7 +71,7 @@ public class ExceptionMiddlewareTests
     public async Task Invoke_WhenValidationException_ShouldReturn400StatusCode()
     {
         // Arrange
-        var validationErrors = new List<ValidationError> { new("Property", "Error message") };
+        var validationErrors = new List<ValidationError> { new("Property", new List<string> { "Error message" }) };
         RequestDelegate next = _ => throw new ValidationException(validationErrors);
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
