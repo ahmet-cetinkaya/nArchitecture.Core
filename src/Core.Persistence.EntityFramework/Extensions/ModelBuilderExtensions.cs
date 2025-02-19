@@ -38,11 +38,22 @@ public static class ModelBuilderExtensions
     /// <returns>The configured model builder instance.</returns>
     public static ModelBuilder UseOptimisticConcurrency<TId>(this ModelBuilder modelBuilder)
     {
-        var entityTypes = modelBuilder.Model.GetEntityTypes().Where(e => typeof(BaseEntity<TId>).IsAssignableFrom(e.ClrType));
+        var entityTypes = modelBuilder.Model.GetEntityTypes()
+            .Where(e => typeof(BaseEntity<TId>).IsAssignableFrom(e.ClrType));
 
         foreach (var entityType in entityTypes)
         {
-            modelBuilder.Entity(entityType.ClrType).Property<byte[]>("RowVersion").IsRowVersion().IsConcurrencyToken();
+            // Configure RowVersion for optimistic concurrency
+            modelBuilder.Entity(entityType.ClrType)
+                .Property(nameof(BaseEntity<TId>.RowVersion))
+                .IsRowVersion()
+                .IsConcurrencyToken()
+                .HasColumnType("rowversion");
+
+            // Configure UpdatedAt as additional concurrency token
+            modelBuilder.Entity(entityType.ClrType)
+                .Property(nameof(BaseEntity<TId>.UpdatedAt))
+                .IsConcurrencyToken();
         }
 
         return modelBuilder;

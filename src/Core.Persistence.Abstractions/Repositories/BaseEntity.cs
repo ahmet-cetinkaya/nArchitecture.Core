@@ -19,7 +19,7 @@ public abstract class BaseEntity<TId> : IEntity<TId>, IEntityTimestamps
     public DateTime? DeletedAt { get; set; }
 
     /// <summary>
-    /// Used for optimistic concurrency control.
+    /// Used for optimistic concurrency control. This property is automatically updated by the database.
     /// </summary>
-    public byte[] RowVersion { get; set; } = new byte[8];
+    public byte[] RowVersion { get; set; } = [];
 }

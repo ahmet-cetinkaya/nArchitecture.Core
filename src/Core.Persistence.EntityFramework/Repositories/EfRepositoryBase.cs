@@ -37,49 +37,93 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     }
 
     /// <summary>
-    /// Handles the concurrency exception by reloading the entity and checking if it was deleted.
+    /// Gets the entity values from the database and checks its status.
     /// </summary>
-    protected virtual void HandleConcurrencyException(DbUpdateConcurrencyException ex, TEntity entity)
+    protected virtual async Task<TEntity> GetAndCheckEntityStatusAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        var entry = ex.Entries.Single();
-        var databaseValues = entry.GetDatabaseValues();
-
-        if (databaseValues == null)
-            throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        var entry = Context.Entry(entity);
+        var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken) 
+            ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
 
         var databaseEntity = (TEntity)databaseValues.ToObject();
+        
         if (databaseEntity.DeletedAt.HasValue)
             throw new InvalidOperationException($"The entity with id {entity.Id} has been deleted by another user.");
 
-        throw new DbUpdateConcurrencyException(
-            $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again.",
-            ex
-        );
+        // Check both RowVersion and UpdatedAt for concurrency
+        if (!databaseEntity.RowVersion.SequenceEqual(entity.RowVersion) || databaseEntity.UpdatedAt != entity.UpdatedAt)
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
+
+        return databaseEntity;
     }
 
     /// <summary>
-    /// Handles the concurrency exception asynchronously by reloading the entity and checking if it was deleted.
+    /// Gets the entity values from the database and checks its status.
+    /// </summary>
+    protected virtual TEntity GetAndCheckEntityStatus(TEntity entity)
+    {
+        var entry = Context.Entry(entity);
+        var databaseValues = entry.GetDatabaseValues() 
+            ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+
+        var databaseEntity = (TEntity)databaseValues.ToObject();
+        
+        if (databaseEntity.DeletedAt.HasValue)
+            throw new InvalidOperationException($"The entity with id {entity.Id} has been deleted by another user.");
+
+        // Check both RowVersion and UpdatedAt for concurrency
+        if (!databaseEntity.RowVersion.SequenceEqual(entity.RowVersion) || databaseEntity.UpdatedAt != entity.UpdatedAt)
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
+
+        return databaseEntity;
+    }
+
+    /// <summary>
+    /// Handles the concurrency exception by checking entity status and throwing appropriate exception.
+    /// </summary>
+    protected virtual void HandleConcurrencyException(DbUpdateConcurrencyException ex, TEntity entity)
+    {
+        try
+        {
+            var databaseEntity = GetAndCheckEntityStatus(entity);
+
+            if (databaseEntity.UpdatedAt != entity.UpdatedAt)
+                throw new DbUpdateConcurrencyException(
+                    $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+                );
+        }
+        catch (InvalidOperationException)
+        {
+            throw; // Re-throw if entity not found or deleted
+        }
+    }
+
+    /// <summary>
+    /// Handles the concurrency exception asynchronously by checking entity status and throwing appropriate exception.
     /// </summary>
     protected virtual async Task HandleConcurrencyExceptionAsync(
         DbUpdateConcurrencyException ex,
         TEntity entity,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
-        var entry = ex.Entries.Single();
-        var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
+        try
+        {
+            var databaseEntity = await GetAndCheckEntityStatusAsync(entity, cancellationToken);
 
-        if (databaseValues == null)
-            throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
-
-        var databaseEntity = (TEntity)databaseValues.ToObject();
-        if (databaseEntity.DeletedAt.HasValue)
-            throw new InvalidOperationException($"The entity with id {entity.Id} has been deleted by another user.");
-
-        throw new DbUpdateConcurrencyException(
-            $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again.",
-            ex
-        );
+            if (databaseEntity.UpdatedAt != entity.UpdatedAt)
+                throw new DbUpdateConcurrencyException(
+                    $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+                );
+        }
+        catch (InvalidOperationException)
+        {
+            throw; // Re-throw if entity not found or deleted
+        }
     }
 
     /// <summary>

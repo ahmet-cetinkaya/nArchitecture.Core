@@ -15,6 +15,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
+        // Check if entity is already deleted before proceeding
+        var existingEntity = Context.Set<TEntity>().IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefault(e => e.Id!.Equals(entity.Id)) ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        if (!permanent && existingEntity.DeletedAt.HasValue)
+            throw new InvalidOperationException($"The entity with id {entity.Id} has already been deleted.");
+
         try
         {
             if (permanent)
@@ -40,6 +46,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
+
+        // Check if entity is already deleted before proceeding
+        var existingEntity = await Context.Set<TEntity>().IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id!.Equals(entity.Id), cancellationToken) ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        if (!permanent && existingEntity.DeletedAt.HasValue)
+            throw new InvalidOperationException($"The entity with id {entity.Id} has already been deleted.");
 
         try
         {

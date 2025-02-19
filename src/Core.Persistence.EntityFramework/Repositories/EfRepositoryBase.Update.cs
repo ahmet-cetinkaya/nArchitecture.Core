@@ -19,41 +19,35 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     /// <inheritdoc/>
     public TEntity Update(TEntity entity)
     {
-        // Validate input.
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        try
-        {
-            EditEntityPropertiesToUpdate(entity);
-            Context.Entry(entity).State = EntityState.Modified;
-            return entity;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            HandleConcurrencyException(ex, entity);
-            throw;
-        }
+        var databaseEntity = GetAndCheckEntityStatus(entity);
+        if (databaseEntity.UpdatedAt != entity.UpdatedAt)
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
+
+        EditEntityPropertiesToUpdate(entity);
+        Context.Entry(entity).State = EntityState.Modified;
+        return entity;
     }
 
     /// <inheritdoc/>
     public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        // Validate input.
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        try
-        {
-            EditEntityPropertiesToUpdate(entity);
-            Context.Entry(entity).State = EntityState.Modified;
-            return entity;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await HandleConcurrencyExceptionAsync(ex, entity, cancellationToken);
-            throw;
-        }
+        var databaseEntity = await GetAndCheckEntityStatusAsync(entity, cancellationToken);
+        if (databaseEntity.UpdatedAt != entity.UpdatedAt)
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
+
+        EditEntityPropertiesToUpdate(entity);
+        Context.Entry(entity).State = EntityState.Modified;
+        return entity;
     }
 
     /// <inheritdoc/>
