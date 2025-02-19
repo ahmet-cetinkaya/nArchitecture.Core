@@ -1,14 +1,17 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace NArchitecture.Core.Security.WebApi.Swagger.Extensions;
+namespace NArchitecture.Core.Security.WebApi.Swagger;
 
-public class BearerSecurityRequirementOperationFilter : IOperationFilter
+public class BearerTokenSecurityOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         const string openApiSecurityScheme = "oauth2",
             openApiSecurityName = "Bearer";
+
+        operation.Security ??= [];
+
         OpenApiSecurityRequirement openApiSecurityRequirement = new()
         {
             {
