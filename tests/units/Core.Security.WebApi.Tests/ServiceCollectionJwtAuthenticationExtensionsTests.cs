@@ -13,7 +13,7 @@ namespace NArchitecture.Core.Security.WebApi.Tests;
 public class ServiceCollectionJwtAuthenticationExtensionsTests
 {
     [Fact(DisplayName = "ConfigureJwtAuthentication should add JWT authentication with valid configuration")]
-    public void ConfigureJwtAuthentication_ShouldAddJwtAuthentication_WithValidConfiguration()
+    public async Task ConfigureJwtAuthentication_ShouldAddJwtAuthentication_WithValidConfiguration()
     {
         // Arrange
         IServiceCollection services = new ServiceCollection();
@@ -36,7 +36,7 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         var authenticationScheme = provider.GetRequiredService<IAuthenticationSchemeProvider>();
 
         // Assert
-        var scheme = authenticationScheme.GetDefaultAuthenticateSchemeAsync().Result;
+        var scheme = await authenticationScheme.GetDefaultAuthenticateSchemeAsync();
         scheme.ShouldNotBeNull();
         scheme.Name.ShouldBe(JwtBearerDefaults.AuthenticationScheme);
     }
@@ -102,7 +102,7 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey);
+        mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey!);
 
         // Act & Assert
         var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));

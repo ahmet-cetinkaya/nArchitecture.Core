@@ -127,9 +127,9 @@ public class ClaimsPrincipalExtensionsTests
         ClaimsPrincipal? nullPrincipal = null;
 
         // Act & Assert
-        nullPrincipal.GetClaim(ClaimTypes.Role).ShouldBeNull();
-        nullPrincipal.GetClaims(ClaimTypes.Role).ShouldBeNull();
-        nullPrincipal.GetOperationClaims().ShouldBeNull();
-        nullPrincipal.GetUserIdClaim().ShouldBeNull();
+        nullPrincipal!.GetClaim(ClaimTypes.Role).ShouldBeNull();
+        nullPrincipal!.GetClaims(ClaimTypes.Role).ShouldBeNull();
+        nullPrincipal!.GetOperationClaims().ShouldBeNull();
+        nullPrincipal!.GetUserIdClaim().ShouldBeNull();
     }
 }
