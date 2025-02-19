@@ -13,7 +13,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     : IAsyncRepository<TEntity, TEntityId>,
         IRepository<TEntity, TEntityId>,
         IQuery<TEntity>
-    where TEntity : Entity<TEntityId>
+    where TEntity : BaseEntity<TEntityId>
     where TContext : DbContext
 {
     protected readonly TContext Context = context;

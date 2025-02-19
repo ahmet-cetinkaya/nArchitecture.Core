@@ -519,7 +519,7 @@ public partial class EfRepositoryBaseTests
         dbEntity.Tags.ShouldAllBe(t => t.DeletedAt != null);
     }
 
-    public class OneToOneEntity : Entity<Guid>
+    public class OneToOneEntity : BaseEntity<Guid>
     {
         public virtual OneToOneDependency? Dependency { get; set; }
 
@@ -532,7 +532,7 @@ public partial class EfRepositoryBaseTests
         }
     }
 
-    public class OneToOneDependency : Entity<Guid>
+    public class OneToOneDependency : BaseEntity<Guid>
     {
         public virtual OneToOneEntity? Entity { get; set; }
     }

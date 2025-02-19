@@ -3,7 +3,7 @@ using NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 
 namespace NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
-public class UserOperationClaim<TId, TUserId, TOperationClaimId> : Entity<TId>
+public class UserOperationClaim<TId, TUserId, TOperationClaimId> : BaseEntity<TId>
 {
     public TUserId UserId { get; set; }
     public TOperationClaimId OperationClaimId { get; set; }

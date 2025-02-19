@@ -9,7 +9,7 @@ using NArchitecture.Core.Test.Application.Helpers;
 namespace NArchitecture.Core.Test.Application.Repositories;
 
 public abstract class BaseMockRepository<TRepository, TEntity, TEntityId, TMappingProfile, TBusinessRules, TFakeData>
-    where TEntity : Entity<TEntityId>, new()
+    where TEntity : BaseEntity<TEntityId>, new()
     where TRepository : class, IAsyncRepository<TEntity, TEntityId>, IRepository<TEntity, TEntityId>
     where TMappingProfile : Profile, new()
     where TBusinessRules : BaseBusinessRules

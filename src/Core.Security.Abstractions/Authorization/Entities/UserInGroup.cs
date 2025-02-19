@@ -3,7 +3,7 @@ using NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 
 namespace NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
-public class UserInGroup<TId, TUserId, TUserAuthenticatorId, TUserGroupId> : Entity<TId>
+public class UserInGroup<TId, TUserId, TUserAuthenticatorId, TUserGroupId> : BaseEntity<TId>
 {
     public required TUserId UserId { get; set; }
     public required TUserGroupId GroupId { get; set; }

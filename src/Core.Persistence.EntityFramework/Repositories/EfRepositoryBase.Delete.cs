@@ -6,7 +6,7 @@ using NArchitecture.Core.Persistence.Abstractions.Repositories;
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
 
 public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
-    where TEntity : Entity<TEntityId>
+    where TEntity : BaseEntity<TEntityId>
     where TContext : DbContext
 {
     /// <inheritdoc/>

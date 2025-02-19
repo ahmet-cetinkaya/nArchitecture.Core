@@ -2,7 +2,7 @@ using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
-public class UserGroup<TId, TUserId, TUserAuthenticatorId, TUserInGroupId> : Entity<TId>
+public class UserGroup<TId, TUserId, TUserAuthenticatorId, TUserInGroupId> : BaseEntity<TId>
 {
     public string Name { get; set; }
 

@@ -5,7 +5,7 @@ using NArchitecture.Core.Persistence.EntityFramework.Repositories;
 
 namespace Core.Persistence.EntityFramework.Tests.Repositories;
 
-public class TestEntity : Entity<Guid>
+public class TestEntity : BaseEntity<Guid>
 {
     public TestEntity()
     {
@@ -31,21 +31,21 @@ public class TestEntity : Entity<Guid>
     public virtual ICollection<TagEntity> Tags { get; set; }
 }
 
-public class SingleDetail : Entity<Guid>
+public class SingleDetail : BaseEntity<Guid>
 {
     public required Guid TestEntityId { get; set; }
     public string Detail { get; set; } = string.Empty;
     public virtual TestEntity TestEntity { get; set; } = null!;
 }
 
-public class DetailEntity : Entity<Guid>
+public class DetailEntity : BaseEntity<Guid>
 {
     public Guid TestEntityId { get; set; }
     public string Detail { get; set; } = string.Empty;
     public virtual TestEntity TestEntity { get; set; } = null!;
 }
 
-public class TagEntity : Entity<Guid>
+public class TagEntity : BaseEntity<Guid>
 {
     public TagEntity()
     {

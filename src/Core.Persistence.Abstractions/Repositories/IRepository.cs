@@ -10,7 +10,7 @@ namespace NArchitecture.Core.Persistence.Abstractions.Repositories;
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TEntityId">The type of the entity identifier.</typeparam>
 public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
-    where TEntity : Entity<TEntityId>
+    where TEntity : BaseEntity<TEntityId>
 {
     #region Create Methods
     /// <summary>
