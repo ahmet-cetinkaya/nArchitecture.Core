@@ -24,32 +24,16 @@ public class DefaultJwtAuthenticationConfiguration : IJwtAuthenticationConfigura
     )
     {
         if (string.IsNullOrEmpty(securityKey))
-            throw new ArgumentException(
-                string.Format("Authentication configuration validation error: Security key cannot be null or empty."),
-                nameof(securityKey)
-            );
+            throw new ArgumentException("Security key cannot be null or empty.", nameof(securityKey));
         if (string.IsNullOrEmpty(issuer))
-            throw new ArgumentException(
-                string.Format("Authentication configuration validation error: Issuer cannot be null or empty."),
-                nameof(issuer)
-            );
+            throw new ArgumentException("Issuer cannot be null or empty.", nameof(issuer));
         if (string.IsNullOrEmpty(audience))
-            throw new ArgumentException(
-                string.Format("Authentication configuration validation error: Audience cannot be null or empty."),
-                nameof(audience)
-            );
+            throw new ArgumentException("Audience cannot be null or empty.", nameof(audience));
         if (accessTokenExpiration <= TimeSpan.Zero)
-            throw new ArgumentException(
-                string.Format(
-                    "Authentication configuration validation error: Access token expiration must be greater than zero."
-                ),
-                nameof(accessTokenExpiration)
-            );
+            throw new ArgumentException("Access token expiration must be greater than zero.", nameof(accessTokenExpiration));
         if (securityKey.Length < 32)
             throw new ArgumentException(
-                string.Format(
-                    "Authentication configuration validation error: Security key must be at least 32 characters long for adequate security."
-                ),
+                "Security key must be at least 32 characters long for adequate security.",
                 nameof(securityKey)
             );
 

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.Security.Abstractions.Authentication;
 using NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 using NArchitecture.Core.Security.Abstractions.Authentication.Models;
@@ -30,16 +31,17 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         ICollection<OperationClaim<TOperationClaimId>> operationClaims
     )
     {
-        DateTime expiresAt = DateTime.UtcNow.Add(Configuration.AccessTokenExpiration);
+        DateTime issuedAt = DateTime.UtcNow;
+        DateTime expiresAt = issuedAt.Add(Configuration.AccessTokenExpiration);
         SecurityKey securityKey = CreateSecurityKey(Configuration.SecurityKey);
         SigningCredentials signingCredentials = CreateSigningCredentials(securityKey);
 
         JwtSecurityToken jwt = new(
-            Configuration.Issuer,
-            Configuration.Audience,
-            expires: expiresAt,
-            notBefore: DateTime.UtcNow,
+            issuer: Configuration.Issuer,
+            audience: Configuration.Audience,
             claims: GetClaims(user, operationClaims),
+            notBefore: issuedAt,
+            expires: expiresAt,
             signingCredentials: signingCredentials
         );
 
@@ -93,7 +95,7 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
     )
     {
         if (!CheckPassword(request.User, request.Password))
-            throw new InvalidOperationException(await Configuration.GetInvalidPasswordMessageAsync(cancellationToken));
+            throw new BusinessException(await Configuration.GetInvalidPasswordMessageAsync(cancellationToken));
 
         ICollection<OperationClaim<TOperationClaimId>> operationClaims = await AuthorizationService.GetUserOperationClaimsAsync(
             request.User.Id!,
@@ -119,16 +121,16 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
     {
         RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> token =
             await RefreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken)
-            ?? throw new InvalidOperationException(await Configuration.GetInvalidRefreshTokenMessageAsync(cancellationToken));
+            ?? throw new BusinessException(await Configuration.GetInvalidRefreshTokenMessageAsync(cancellationToken));
 
         if (token.RevokedAt.HasValue)
-            throw new InvalidOperationException(await Configuration.GetTokenRevokedMessageAsync(cancellationToken));
+            throw new BusinessException(await Configuration.GetTokenRevokedMessageAsync(cancellationToken));
         if (token.ExpiresAt <= DateTime.UtcNow)
-            throw new InvalidOperationException(await Configuration.GetTokenExpiredMessageAsync(cancellationToken));
+            throw new BusinessException(await Configuration.GetTokenExpiredMessageAsync(cancellationToken));
 
         User<TUserId, TUserAuthenticatorId> user =
             await UserRepository.GetByIdAsync(token.UserId, cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException(await Configuration.GetUserNotFoundMessageAsync(cancellationToken));
+            ?? throw new BusinessException(await Configuration.GetUserNotFoundMessageAsync(cancellationToken));
 
         ICollection<OperationClaim<TOperationClaimId>> operationClaims = await AuthorizationService.GetUserOperationClaimsAsync(
             user.Id!,
@@ -157,10 +159,10 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
     {
         RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> token =
             await RefreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken)
-            ?? throw new InvalidOperationException(await Configuration.GetInvalidRefreshTokenMessageAsync(cancellationToken));
+            ?? throw new BusinessException(await Configuration.GetInvalidRefreshTokenMessageAsync(cancellationToken));
 
         if (token.RevokedAt.HasValue)
-            throw new InvalidOperationException(await Configuration.GetTokenAlreadyRevokedMessageAsync(cancellationToken));
+            throw new BusinessException(await Configuration.GetTokenAlreadyRevokedMessageAsync(cancellationToken));
 
         token.RevokedAt = DateTime.UtcNow;
         token.RevokedByIp = ipAddress;

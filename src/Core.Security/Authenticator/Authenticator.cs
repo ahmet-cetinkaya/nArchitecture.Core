@@ -1,3 +1,4 @@
+using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.Mailing.Abstractions;
 using NArchitecture.Core.Security.Abstractions.Authenticator;
 using NArchitecture.Core.Security.Abstractions.Authenticator.Entities;
@@ -31,7 +32,7 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
             CodeExpiresAt = DateTime.UtcNow.Add(configuration.CodeExpiration),
             CodeSeed =
                 type == AuthenticatorType.Otp
-                    ? otpAuthenticator!.GenerateSecretKey([], cancellationToken)
+                    ? otpAuthenticator!.GenerateSecretKey([])
                     : Convert.FromBase64String(codeGenerator.GenerateBase64(configuration.CodeSeedLength)),
         };
         authenticator.Code = type switch
@@ -52,15 +53,15 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
     {
         UserAuthenticator<TUserAuthenticatorId, TUserId> authenticator =
             await userAuthenticatorRepository.GetAsync(ua => ua.Id!.Equals(userId), cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException(await configuration.GetAuthenticatorNotFoundMessageAsync(cancellationToken));
+            ?? throw new BusinessException(await configuration.GetAuthenticatorNotFoundMessageAsync(cancellationToken));
 
         await ValidateAuthenticatorType(authenticator.Type, cancellationToken);
 
         if (authenticator.CodeExpiresAt < DateTime.UtcNow)
-            throw new InvalidOperationException(await configuration.GetCodeExpiredMessageAsync(cancellationToken));
+            throw new BusinessException(await configuration.GetCodeExpiredMessageAsync(cancellationToken));
 
         if (string.IsNullOrEmpty(destination) && authenticator.Type != AuthenticatorType.Otp)
-            throw new ArgumentException(await configuration.GetDestinationRequiredMessageAsync(cancellationToken));
+            throw new BusinessException(await configuration.GetDestinationRequiredMessageAsync(cancellationToken));
 
         // Regenerate code using the same seed for verification
         if (authenticator.Type is AuthenticatorType.Email or AuthenticatorType.Sms)
@@ -121,9 +122,7 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
     protected virtual async Task ValidateAuthenticatorType(AuthenticatorType type, CancellationToken cancellationToken = default)
     {
         if (!configuration.EnabledAuthenticatorTypes.Contains(type))
-            throw new InvalidOperationException(
-                await configuration.GetAuthenticatorTypeNotEnabledMessageAsync(type, cancellationToken)
-            );
+            throw new BusinessException(await configuration.GetAuthenticatorTypeNotEnabledMessageAsync(type, cancellationToken));
 
         switch (type)
         {
@@ -149,22 +148,22 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
     {
         UserAuthenticator<TUserAuthenticatorId, TUserId> authenticator =
             await userAuthenticatorRepository.GetAsync(ua => ua.Id!.Equals(userId), cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException(await configuration.GetAuthenticatorNotFoundMessageAsync(cancellationToken));
+            ?? throw new BusinessException(await configuration.GetAuthenticatorNotFoundMessageAsync(cancellationToken));
 
         await ValidateAuthenticatorType(authenticator.Type, cancellationToken);
         if (authenticator.CodeExpiresAt != null && authenticator.CodeExpiresAt < DateTime.UtcNow)
-            throw new InvalidOperationException(await configuration.GetCodeExpiredMessageAsync(cancellationToken));
+            throw new BusinessException(await configuration.GetCodeExpiredMessageAsync(cancellationToken));
 
         bool isValid = authenticator.Type switch
         {
             AuthenticatorType.Email or AuthenticatorType.Sms => authenticator.Code == code,
-            AuthenticatorType.Otp => otpAuthenticator!.ComputeOtp(authenticator.CodeSeed!, cancellationToken) == code,
+            AuthenticatorType.Otp => otpAuthenticator!.ComputeOtp(authenticator.CodeSeed!) == code,
             _ => throw new NotSupportedException(
                 await configuration.GetUnsupportedTypeMessageAsync(authenticator.Type, cancellationToken)
             ),
         };
         if (!isValid)
-            throw new InvalidOperationException(await configuration.GetInvalidCodeMessageAsync(cancellationToken));
+            throw new BusinessException(await configuration.GetInvalidCodeMessageAsync(cancellationToken));
 
         if (!authenticator.IsVerified)
         {

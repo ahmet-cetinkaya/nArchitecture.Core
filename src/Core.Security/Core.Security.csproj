@@ -46,5 +46,6 @@
     <ProjectReference Include="../Core.Mailing.Abstractions/Core.Mailing.Abstractions.csproj" />
     <ProjectReference Include="../Core.Sms.Abstractions/Core.Sms.Abstractions.csproj" />
     <ProjectReference Include="../Core.Security.Abstractions/Core.Security.Abstractions.csproj" />
+    <ProjectReference Include="../Core.CrossCuttingConcerns.Exception/Core.CrossCuttingConcerns.Exception.csproj" />
   </ItemGroup>
 </Project>
