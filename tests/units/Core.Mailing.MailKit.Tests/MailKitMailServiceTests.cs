@@ -182,14 +182,10 @@ public class MailKitMailServiceTests
             Subject = "Test Subject",
             TextBody = "Test Body",
             ToList = [new("Primary", "primary@example.com")],
+            CcList = includeCc ? [new("CC", "cc@example.com")] : [],
+            BccList = includeBcc ? [new("BCC", "bcc@example.com")] : [],
+            ReplyTo = includeReplyTo ? [new("Reply", "reply@example.com")] : []
         };
-
-        if (includeCc)
-            mail.CcList = [new("CC", "cc@example.com")];
-        if (includeBcc)
-            mail.BccList = [new("BCC", "bcc@example.com")];
-        if (includeReplyTo)
-            mail.ReplyTo = [new("Reply", "reply@example.com")];
 
         _ = _smtpClientMock
             .Setup(x => x.ConnectAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
