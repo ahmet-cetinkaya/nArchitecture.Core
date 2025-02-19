@@ -2,7 +2,7 @@
 
 namespace NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
-public class OperationClaim<TId> : Entity<TId>
+public class OperationClaim<TId> : BaseEntity<TId>
 {
     public string Name { get; set; }
 

@@ -4,7 +4,7 @@ using NArchitecture.Core.Persistence.Abstractions.Repositories;
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
 
 public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
-    where TEntity : Entity<TEntityId>
+    where TEntity : BaseEntity<TEntityId>
     where TContext : DbContext
 {
     /// <summary>
@@ -19,35 +19,45 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     /// <inheritdoc/>
     public TEntity Update(TEntity entity)
     {
-        // Validate input.
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
+        var databaseEntity = GetAndCheckEntityStatus(entity);
+        if (databaseEntity.UpdatedAt != entity.UpdatedAt)
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
+
         EditEntityPropertiesToUpdate(entity);
-        _ = Context.Update(entity);
+        Context.Entry(entity).State = EntityState.Modified;
         return entity;
     }
 
     /// <inheritdoc/>
-    public Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        // Validate input.
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
+        var databaseEntity = await GetAndCheckEntityStatusAsync(entity, cancellationToken);
+        if (databaseEntity.UpdatedAt != entity.UpdatedAt)
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
+
         EditEntityPropertiesToUpdate(entity);
-        _ = Context.Update(entity);
-        return Task.FromResult(entity);
+        Context.Entry(entity).State = EntityState.Modified;
+        return entity;
     }
 
     /// <inheritdoc/>
-    public void BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000)
+    public ICollection<TEntity> BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000)
     {
         // Validate input collection.
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
@@ -56,10 +66,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             EditEntityPropertiesToUpdate(entity);
             _ = Context.Update(entity);
         }
+
+        return entities;
     }
 
     /// <inheritdoc/>
-    public Task BulkUpdateAsync(
+    public Task<ICollection<TEntity>> BulkUpdateAsync(
         ICollection<TEntity> entities,
         int batchSize = 1_000,
         CancellationToken cancellationToken = default
@@ -69,7 +81,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return Task.CompletedTask;
+            return Task.FromResult<ICollection<TEntity>>(entities);
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
@@ -79,6 +91,6 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             _ = Context.Update(entity);
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult<ICollection<TEntity>>(entities);
     }
 }

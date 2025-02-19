@@ -230,12 +230,14 @@ public partial class EfRepositoryBaseTests
     //     // ...existing code...
     // }
 
-    [Theory(DisplayName = "Delete - Should skip already soft deleted entities")]
+    [Theory(DisplayName = "Delete - Should handle soft deleted entity properly")]
     [Trait("Category", "Delete")]
     [Trait("Method", "Delete")]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task Delete_ShouldSkipAlreadySoftDeletedEntities(bool isAsync)
+    [InlineData(true, true)]   // isAsync, permanent
+    [InlineData(false, true)]  // sync, permanent
+    [InlineData(true, false)]  // isAsync, not permanent
+    [InlineData(false, false)] // sync, not permanent
+    public async Task Delete_ShouldHandleSoftDeletedEntity(bool isAsync, bool permanent)
     {
         // Arrange
         var entity = await CreateAndAddTestEntity();
@@ -243,22 +245,59 @@ public partial class EfRepositoryBaseTests
         entity.DeletedAt = initialDeleteTime;
         await Repository.SaveChangesAsync();
 
-        // Act
-        if (isAsync)
+        // Clear change tracker and reload entity to ensure fresh state
+        Context.ChangeTracker.Clear();
+        entity = await Context.TestEntities.IgnoreQueryFilters().SingleAsync(e => e.Id == entity.Id);
+
+        // Act & Assert
+        if (!permanent)
         {
-            await Repository.DeleteAsync(entity);
-            await Repository.SaveChangesAsync();
+            // Should throw when attempting non-permanent delete
+            var expectedMessage = $"The entity with id {entity.Id} has already been deleted.";
+
+            if (isAsync)
+                await Should.ThrowAsync<InvalidOperationException>(
+                    async () =>
+                    {
+                        _ = await Repository.DeleteAsync(entity);
+                        _ = await Repository.SaveChangesAsync();
+                    },
+                    expectedMessage
+                );
+            else
+                Should.Throw<InvalidOperationException>(
+                    () =>
+                    {
+                        _ = Repository.Delete(entity);
+                        _ = Repository.SaveChanges();
+                    },
+                    expectedMessage
+                );
+
+            // Verify the original deletion time wasn't changed
+            var dbEntity = await Context.TestEntities.IgnoreQueryFilters().SingleAsync(e => e.Id == entity.Id);
+            dbEntity.DeletedAt.ShouldBe(initialDeleteTime);
         }
         else
         {
-            Repository.Delete(entity);
-            Repository.SaveChanges();
-        }
+            // Should allow permanent delete
+            if (isAsync)
+                await Should.NotThrowAsync(async () =>
+                {
+                    _ = await Repository.DeleteAsync(entity, permanent: true);
+                    _ = await Repository.SaveChangesAsync();
+                });
+            else
+                Should.NotThrow(() =>
+                {
+                    _ = Repository.Delete(entity, permanent: true);
+                    _ = Repository.SaveChanges();
+                });
 
-        // Assert
-        var dbEntity = await Repository.GetByIdAsync(entity.Id, withDeleted: true);
-        dbEntity.ShouldNotBeNull();
-        dbEntity.DeletedAt.ShouldBe(initialDeleteTime);
+            // Verify the entity is permanently deleted
+            var dbEntity = await Context.TestEntities.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == entity.Id);
+            dbEntity.ShouldBeNull();
+        }
     }
 
     [Theory(DisplayName = "Delete - Should handle null navigation properties")]
@@ -519,7 +558,77 @@ public partial class EfRepositoryBaseTests
         dbEntity.Tags.ShouldAllBe(t => t.DeletedAt != null);
     }
 
-    public class OneToOneEntity : Entity<Guid>
+    [Theory(DisplayName = "Delete - Should handle permanent delete and re-delete of soft-deleted entity")]
+    [Trait("Category", "Delete")]
+    [Trait("Method", "Delete")]
+    [InlineData(true, true)]   // isAsync, permanent
+    [InlineData(false, true)]  // sync, permanent
+    [InlineData(true, false)]  // isAsync, not permanent
+    [InlineData(false, false)] // sync, not permanent
+    public async Task Delete_ShouldHandlePermanentAndReDeleteOfSoftDeletedEntity(bool isAsync, bool permanent)
+    {
+        // Arrange
+        var entity = await CreateAndAddTestEntity();
+        var initialDeleteTime = DateTime.UtcNow.AddMinutes(-5);
+        entity.DeletedAt = initialDeleteTime;
+        await Repository.SaveChangesAsync();
+
+        // Clear change tracker and reload entity to ensure fresh state
+        Context.ChangeTracker.Clear();
+        entity = await Context.TestEntities.IgnoreQueryFilters().SingleAsync(e => e.Id == entity.Id);
+
+        // Act & Assert
+        if (!permanent)
+        {
+            // Should throw when attempting non-permanent delete
+            var expectedMessage = $"The entity with id {entity.Id} has already been deleted.";
+
+            if (isAsync)
+                await Should.ThrowAsync<InvalidOperationException>(
+                    async () =>
+                    {
+                        _ = await Repository.DeleteAsync(entity);
+                        _ = await Repository.SaveChangesAsync();
+                    },
+                    expectedMessage
+                );
+            else
+                Should.Throw<InvalidOperationException>(
+                    () =>
+                    {
+                        _ = Repository.Delete(entity);
+                        _ = Repository.SaveChanges();
+                    },
+                    expectedMessage
+                );
+
+            // Verify the original deletion time wasn't changed
+            var dbEntity = await Context.TestEntities.IgnoreQueryFilters().SingleAsync(e => e.Id == entity.Id);
+            dbEntity.DeletedAt.ShouldBe(initialDeleteTime);
+        }
+        else
+        {
+            // Should allow permanent delete
+            if (isAsync)
+                await Should.NotThrowAsync(async () =>
+                {
+                    _ = await Repository.DeleteAsync(entity, permanent: true);
+                    _ = await Repository.SaveChangesAsync();
+                });
+            else
+                Should.NotThrow(() =>
+                {
+                    _ = Repository.Delete(entity, permanent: true);
+                    _ = Repository.SaveChanges();
+                });
+
+            // Verify the entity is permanently deleted
+            var dbEntity = await Context.TestEntities.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == entity.Id);
+            dbEntity.ShouldBeNull();
+        }
+    }
+
+    public class OneToOneEntity : BaseEntity<Guid>
     {
         public virtual OneToOneDependency? Dependency { get; set; }
 
@@ -532,7 +641,7 @@ public partial class EfRepositoryBaseTests
         }
     }
 
-    public class OneToOneDependency : Entity<Guid>
+    public class OneToOneDependency : BaseEntity<Guid>
     {
         public virtual OneToOneEntity? Entity { get; set; }
     }

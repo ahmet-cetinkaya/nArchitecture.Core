@@ -10,7 +10,7 @@ namespace NArchitecture.Core.Persistence.Abstractions.Repositories;
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 /// <typeparam name="TEntityId">The type of the entity identifier.</typeparam>
 public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
-    where TEntity : Entity<TEntityId>
+    where TEntity : BaseEntity<TEntityId>
 {
     #region Create Methods
     /// <summary>
@@ -25,7 +25,8 @@ public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
     /// </summary>
     /// <param name="entities">The entities to add.</param>
     /// <param name="batchSize">The batch size for bulk operations.</param>
-    void BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000);
+    /// <returns>The collection of added entities.</returns>
+    ICollection<TEntity> BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000);
     #endregion
 
     #region Update Methods
@@ -41,7 +42,8 @@ public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
     /// </summary>
     /// <param name="entities">The entities to update.</param>
     /// <param name="batchSize">The batch size for bulk operations.</param>
-    void BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000);
+    /// <returns>The collection of updated entities.</returns>
+    ICollection<TEntity> BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000);
     #endregion
 
     #region Delete Methods
@@ -59,7 +61,8 @@ public interface IRepository<TEntity, TEntityId> : IQuery<TEntity>
     /// <param name="entities">The entities to delete.</param>
     /// <param name="permanent">if set to <c>true</c> [permanent].</param>
     /// <param name="batchSize">The batch size for bulk operations.</param>
-    void BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000);
+    /// <returns>The collection of deleted entities.</returns>
+    ICollection<TEntity> BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000);
     #endregion
 
     #region General Methods

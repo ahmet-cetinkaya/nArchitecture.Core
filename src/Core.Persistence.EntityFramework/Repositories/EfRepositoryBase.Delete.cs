@@ -6,7 +6,7 @@ using NArchitecture.Core.Persistence.Abstractions.Repositories;
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
 
 public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
-    where TEntity : Entity<TEntityId>
+    where TEntity : BaseEntity<TEntityId>
     where TContext : DbContext
 {
     /// <inheritdoc/>
@@ -15,9 +15,30 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        // Delete synchronously with cascade soft-delete if not permanent.
-        SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
-        return entity;
+        // Check if entity is already deleted before proceeding
+        var existingEntity = Context.Set<TEntity>().IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefault(e => e.Id!.Equals(entity.Id)) ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        if (!permanent && existingEntity.DeletedAt.HasValue)
+            throw new InvalidOperationException($"The entity with id {entity.Id} has already been deleted.");
+
+        try
+        {
+            if (permanent)
+            {
+                _ = Context.Remove(entity);
+            }
+            else
+            {
+                SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
+                Context.Entry(entity).State = EntityState.Modified;
+            }
+            return entity;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            HandleConcurrencyException(ex, entity);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
@@ -26,35 +47,68 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        // Delete asynchronously with cascade logic.
-        await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
-        return entity;
-    }
+        // Check if entity is already deleted before proceeding
+        var existingEntity = await Context.Set<TEntity>().IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id!.Equals(entity.Id), cancellationToken) ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        if (!permanent && existingEntity.DeletedAt.HasValue)
+            throw new InvalidOperationException($"The entity with id {entity.Id} has already been deleted.");
 
-    /// <inheritdoc/>
-    public void BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000)
-    {
-        if (entities == null)
-            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
-        if (entities.Count == 0)
-            return;
-        if (entities.Any(e => e == null))
-            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
-
-        foreach (TEntity entity in entities)
+        try
         {
             if (permanent)
+            {
                 _ = Context.Remove(entity);
+            }
             else
             {
-                SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
-                _ = Context.Update(entity);
+                await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
+                Context.Entry(entity).State = EntityState.Modified;
             }
+            return entity;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await HandleConcurrencyExceptionAsync(ex, entity, cancellationToken);
+            throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task BulkDeleteAsync(
+    public ICollection<TEntity> BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000)
+    {
+        if (entities == null)
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
+        if (entities.Count == 0)
+            return entities;
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
+
+        try
+        {
+            foreach (TEntity entity in entities)
+            {
+                if (permanent)
+                    _ = Context.Remove(entity);
+                else
+                {
+                    SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
+                    Context.Entry(entity).State = EntityState.Modified;
+                }
+            }
+            return entities;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Concurrency check for the last failed entity
+            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            if (failedEntity != null)
+                HandleConcurrencyException(ex, failedEntity);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<ICollection<TEntity>> BulkDeleteAsync(
         ICollection<TEntity> entities,
         bool permanent = false,
         int batchSize = 1_000,
@@ -64,19 +118,31 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
-        foreach (TEntity entity in entities)
+        try
         {
-            if (permanent)
-                _ = Context.Remove(entity);
-            else
+            foreach (TEntity entity in entities)
             {
-                await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
-                _ = Context.Update(entity);
+                if (permanent)
+                    _ = Context.Remove(entity);
+                else
+                {
+                    await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
+                    Context.Entry(entity).State = EntityState.Modified;
+                }
             }
+            return entities;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // En son başarısız olan entity için concurrency kontrolü
+            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            if (failedEntity != null)
+                await HandleConcurrencyExceptionAsync(ex, failedEntity, cancellationToken);
+            throw;
         }
     }
 

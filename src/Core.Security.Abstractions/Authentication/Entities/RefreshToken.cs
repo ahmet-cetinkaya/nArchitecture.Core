@@ -2,7 +2,7 @@
 
 namespace NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 
-public class RefreshToken<TId, TUserId, TUserAuthenticatorId> : Entity<TId>
+public class RefreshToken<TId, TUserId, TUserAuthenticatorId> : BaseEntity<TId>
 {
     public TUserId UserId { get; set; }
     public string Token { get; set; }

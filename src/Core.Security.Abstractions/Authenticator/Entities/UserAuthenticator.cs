@@ -4,7 +4,7 @@ using NArchitecture.Core.Security.Abstractions.Authenticator.Enums;
 
 namespace NArchitecture.Core.Security.Abstractions.Authenticator.Entities;
 
-public class UserAuthenticator<TId, TUserId> : Entity<TId>
+public class UserAuthenticator<TId, TUserId> : BaseEntity<TId>
 {
     public TUserId UserId { get; set; }
     public AuthenticatorType Type { get; set; }

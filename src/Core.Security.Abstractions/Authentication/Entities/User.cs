@@ -3,7 +3,7 @@ using NArchitecture.Core.Security.Abstractions.Authenticator.Entities;
 
 namespace NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 
-public class User<TId, TUserAuthenticatorId> : Entity<TId>
+public class User<TId, TUserAuthenticatorId> : BaseEntity<TId>
 {
     public byte[] PasswordSalt { get; set; }
     public byte[] PasswordHash { get; set; }
