@@ -15,18 +15,13 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        // Check if entity is already deleted before proceeding
-        var existingEntity = Context.Set<TEntity>().IgnoreQueryFilters().AsNoTracking()
-            .FirstOrDefault(e => e.Id!.Equals(entity.Id)) ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
-        if (!permanent && existingEntity.DeletedAt.HasValue)
-            throw new InvalidOperationException($"The entity with id {entity.Id} has already been deleted.");
-
         try
         {
+            var (databaseEntity, _) = GetDatabaseValues(entity);
+            ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
+
             if (permanent)
-            {
                 _ = Context.Remove(entity);
-            }
             else
             {
                 SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
@@ -34,9 +29,10 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             }
             return entity;
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException)
         {
-            HandleConcurrencyException(ex, entity);
+            var (databaseEntity, _) = GetDatabaseValues(entity);
+            ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
             throw;
         }
     }
@@ -47,18 +43,13 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        // Check if entity is already deleted before proceeding
-        var existingEntity = await Context.Set<TEntity>().IgnoreQueryFilters().AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id!.Equals(entity.Id), cancellationToken) ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
-        if (!permanent && existingEntity.DeletedAt.HasValue)
-            throw new InvalidOperationException($"The entity with id {entity.Id} has already been deleted.");
-
         try
         {
+            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
+
             if (permanent)
-            {
                 _ = Context.Remove(entity);
-            }
             else
             {
                 await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
@@ -66,9 +57,10 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             }
             return entity;
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException)
         {
-            await HandleConcurrencyExceptionAsync(ex, entity, cancellationToken);
+            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
             throw;
         }
     }
@@ -87,6 +79,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         {
             foreach (TEntity entity in entities)
             {
+                var (databaseEntity, _) = GetDatabaseValues(entity);
+                ValidateEntityState(entity, databaseEntity);
+
                 if (permanent)
                     _ = Context.Remove(entity);
                 else
@@ -99,10 +94,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            // Concurrency check for the last failed entity
             var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
             if (failedEntity != null)
-                HandleConcurrencyException(ex, failedEntity);
+            {
+                var (databaseEntity, _) = GetDatabaseValues(failedEntity);
+                ValidateEntityState(failedEntity, databaseEntity);
+            }
             throw;
         }
     }
@@ -126,6 +123,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         {
             foreach (TEntity entity in entities)
             {
+                var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+                ValidateEntityState(entity, databaseEntity);
+
                 if (permanent)
                     _ = Context.Remove(entity);
                 else
@@ -138,10 +138,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            // En son başarısız olan entity için concurrency kontrolü
             var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
             if (failedEntity != null)
-                await HandleConcurrencyExceptionAsync(ex, failedEntity, cancellationToken);
+            {
+                var (databaseEntity, _) = await GetDatabaseValuesAsync(failedEntity, cancellationToken);
+                ValidateEntityState(failedEntity, databaseEntity);
+            }
             throw;
         }
     }

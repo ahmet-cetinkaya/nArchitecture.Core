@@ -8,7 +8,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     where TContext : DbContext
 {
     /// <summary>
-    /// Sets the creation timestamp on the entity.
+    /// Sets required properties before adding the entity to the database.
+    /// Currently sets CreatedAt to current UTC time.
     /// </summary>
     protected virtual void EditEntityPropertiesToAdd(TEntity entity)
     {
