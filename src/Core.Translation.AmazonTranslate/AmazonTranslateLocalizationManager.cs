@@ -4,15 +4,18 @@ using NArchitecture.Core.Translation.Abstraction;
 
 namespace NArchitecture.Core.Translation.AmazonTranslate;
 
-public class AmazonTranslateLocalizationManager : ITranslationService
+/// <summary>
+/// Implements translation services using Amazon Translate.
+/// </summary>
+public class AmazonTranslateLocalizationManager(AmazonTranslateConfiguration configuration) : ITranslationService
 {
-    private readonly AmazonTranslateClient _client;
+    private readonly AmazonTranslateClient _client = new(
+        configuration.AccessKey,
+        configuration.SecretKey,
+        configuration.RegionEndpoint
+    );
 
-    public AmazonTranslateLocalizationManager(AmazonTranslateConfiguration configuration)
-    {
-        _client = new AmazonTranslateClient(configuration.AccessKey, configuration.SecretKey, configuration.RegionEndpoint);
-    }
-
+    /// <inheritdoc/>
     public async Task<string> TranslateAsync(string text, string to, string from = "en")
     {
         TranslateTextRequest request = new()
