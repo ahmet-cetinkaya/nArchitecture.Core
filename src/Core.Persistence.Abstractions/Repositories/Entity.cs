@@ -9,12 +9,12 @@ public abstract class Entity<TId> : IEntity<TId>, IEntityTimestamps
     /// <inheritdoc cref="IEntity{T}.Id"/>
     public TId? Id { get; set; }
 
-    /// <inheritdoc cref="IEntityTimestamps.CreatedDate"/>
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    /// <inheritdoc cref="IEntityTimestamps.CreatedAt"/>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    /// <inheritdoc cref="IEntityTimestamps.UpdatedDate"/>
-    public DateTime? UpdatedDate { get; set; }
+    /// <inheritdoc cref="IEntityTimestamps.UpdatedAt"/>
+    public DateTime? UpdatedAt { get; set; }
 
-    /// <inheritdoc cref="IEntityTimestamps.DeletedDate"/>
-    public DateTime? DeletedDate { get; set; }
+    /// <inheritdoc cref="IEntityTimestamps.DeletedAt"/>
+    public DateTime? DeletedAt { get; set; }
 }

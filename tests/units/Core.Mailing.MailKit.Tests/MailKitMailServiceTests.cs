@@ -4,6 +4,7 @@ using MimeKit;
 using Moq;
 using NArchitecture.Core.Mailing.Abstractions;
 using NArchitecture.Core.Mailing.MailKit;
+using NArchitecture.Core.Mailing.MailKit.Models;
 using Shouldly;
 using Xunit;
 
@@ -61,7 +62,7 @@ public class MailKitMailServiceTests
             .Returns(Task.FromResult(""));
 
         // Act
-        await _sut.SendEmailAsync(mail);
+        await _sut.SendAsync(mail);
 
         // Assert
         _smtpClientMock.Verify(
@@ -82,7 +83,7 @@ public class MailKitMailServiceTests
         };
 
         // Act
-        await _sut.SendEmailAsync(mail);
+        await _sut.SendAsync(mail);
 
         // Assert
         _smtpClientMock.Verify(x => x.SendAsync(It.IsAny<MimeMessage>(), It.IsAny<CancellationToken>(), null), Times.Never);
@@ -119,7 +120,7 @@ public class MailKitMailServiceTests
         // Act & Assert
         await Should.ThrowAsync<ServiceNotConnectedException>(async () =>
         {
-            await _sut.SendEmailAsync(mail);
+            await _sut.SendAsync(mail);
         });
     }
 
@@ -159,7 +160,7 @@ public class MailKitMailServiceTests
         // Act & Assert
         await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
-            await _sut.SendEmailAsync(mail, cts.Token);
+            await _sut.SendAsync(mail, cts.Token);
         });
     }
 
@@ -181,21 +182,17 @@ public class MailKitMailServiceTests
             Subject = "Test Subject",
             TextBody = "Test Body",
             ToList = [new("Primary", "primary@example.com")],
+            CcList = includeCc ? [new("CC", "cc@example.com")] : [],
+            BccList = includeBcc ? [new("BCC", "bcc@example.com")] : [],
+            ReplyTo = includeReplyTo ? [new("Reply", "reply@example.com")] : []
         };
-
-        if (includeCc)
-            mail.CcList = [new("CC", "cc@example.com")];
-        if (includeBcc)
-            mail.BccList = [new("BCC", "bcc@example.com")];
-        if (includeReplyTo)
-            mail.ReplyTo = [new("Reply", "reply@example.com")];
 
         _ = _smtpClientMock
             .Setup(x => x.ConnectAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.SendEmailAsync(mail);
+        await _sut.SendAsync(mail);
 
         // Assert
         _smtpClientMock.Verify(

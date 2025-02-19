@@ -13,7 +13,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     protected virtual void EditEntityPropertiesToAdd(TEntity entity)
     {
         // Set current UTC time as creation time.
-        entity.CreatedDate = DateTime.UtcNow;
+        entity.CreatedAt = DateTime.UtcNow;
     }
 
     /// <inheritdoc/>

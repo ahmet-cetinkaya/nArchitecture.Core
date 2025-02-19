@@ -374,7 +374,7 @@ public class LoggingBehaviorTests
             Id = 1,
             Name = "Test",
             Details = new() { "detail1", "detail2" },
-            Timestamp = DateTime.Now,
+            Timestamp = DateTime.UtcNow,
         };
 
         var loggingBehavior = new LoggingBehavior<ComplexResponseRequest, ComplexResponse>(_loggerMock.Object);

@@ -114,7 +114,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     /// <param name="deletionTime">Optional deletion time.</param>
     protected virtual void EditEntityPropertiesToDelete(IEntityTimestamps entity, DateTime? deletionTime = null)
     {
-        entity.DeletedDate = deletionTime ?? DateTime.UtcNow;
+        entity.DeletedAt = deletionTime ?? DateTime.UtcNow;
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     /// <returns>True if soft-deleted; otherwise, false.</returns>
     protected virtual bool IsSoftDeleted(IEntityTimestamps entity)
     {
-        return entity.DeletedDate.HasValue;
+        return entity.DeletedAt.HasValue;
     }
 
     /// <summary>

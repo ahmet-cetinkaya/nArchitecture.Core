@@ -15,7 +15,7 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entity = await CreateAndAddTestEntity();
-        var originalCreatedDate = entity.CreatedDate;
+        var originalCreatedDate = entity.CreatedAt;
         var beforeUpdate = DateTime.UtcNow;
 
         entity.Name = "Updated Name";
@@ -33,10 +33,10 @@ public partial class EfRepositoryBaseTests
         _ = updatedEntity.ShouldNotBeNull();
         updatedEntity.Name.ShouldBe("Updated Name");
         updatedEntity.Description.ShouldBe("Updated Description");
-        updatedEntity.CreatedDate.ShouldBe(originalCreatedDate);
-        updatedEntity.UpdatedDate.ShouldNotBeNull();
-        updatedEntity.UpdatedDate!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
-        updatedEntity.UpdatedDate!.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
+        updatedEntity.CreatedAt.ShouldBe(originalCreatedDate);
+        updatedEntity.UpdatedAt.ShouldNotBeNull();
+        updatedEntity.UpdatedAt!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
+        updatedEntity.UpdatedAt!.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
     }
 
     [Theory(DisplayName = "Update/UpdateAsync - Should throw when entity is null")]
@@ -84,8 +84,8 @@ public partial class EfRepositoryBaseTests
         updatedChild.Name.ShouldBe("Updated Child");
         updatedChild.ParentId.ShouldBe(parent.Id);
         updatedChild.Parent.ShouldNotBeNull();
-        updatedChild.UpdatedDate.ShouldNotBeNull();
-        updatedChild.UpdatedDate!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
+        updatedChild.UpdatedAt.ShouldNotBeNull();
+        updatedChild.UpdatedAt!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 
     [Theory(DisplayName = "BulkUpdate - Should update multiple entities")]
@@ -128,8 +128,8 @@ public partial class EfRepositoryBaseTests
         {
             entity.Name.ShouldStartWith("Updated");
             entity.Description.ShouldStartWith("Updated");
-            entity.UpdatedDate.ShouldNotBeNull();
-            entity.UpdatedDate!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
+            entity.UpdatedAt.ShouldNotBeNull();
+            entity.UpdatedAt!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
         }
     }
 
