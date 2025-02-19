@@ -209,21 +209,15 @@ public partial class EfRepositoryBaseTests
         await Repository.BulkAddAsync(entities);
         await Repository.SaveChangesAsync();
 
-        var dynamic = new DynamicQuery
+        var dynamicQuery = new DynamicQuery
         {
-            Filter = new()
-            {
-                Field = "name",
-                Operator = "contains",
-                Value = "Priority",
-                Logic = "and",
-            },
+            Filter = new Filter("name", "contains") { Value = "Priority", Logic = "and" },
         };
 
         // Act
         var result = isAsync
-            ? await Repository.GetListByDynamicAsync(dynamic, index: 0, size: 10)
-            : Repository.GetListByDynamic(dynamic, index: 0, size: 10);
+            ? await Repository.GetListByDynamicAsync(dynamicQuery, index: 0, size: 10)
+            : Repository.GetListByDynamic(dynamicQuery, index: 0, size: 10);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -380,13 +374,7 @@ public partial class EfRepositoryBaseTests
         // Arrange
         var invalidDynamic = new DynamicQuery
         {
-            Filter = new()
-            {
-                Field = "name",
-                Operator = "invalidOperator", // Invalid operator
-                Value = "someValue",
-                Logic = "and",
-            },
+            Filter = new("name", "invalidOperator") { Value = "someValue", Logic = "and" },
         };
 
         // Act & Assert
@@ -451,13 +439,7 @@ public partial class EfRepositoryBaseTests
 
         var dynamicQuery = new DynamicQuery
         {
-            Filter = new()
-            {
-                Field = "nonexistentField",
-                Operator = "eq",
-                Value = "someValue",
-                Logic = "and",
-            },
+            Filter = new("nonexistentField", "eq") { Value = "someValue", Logic = "and" },
         };
 
         // Act & Assert
@@ -678,13 +660,7 @@ public partial class EfRepositoryBaseTests
         await Repository.BulkAddAsync(entities);
         await Repository.SaveChangesAsync();
 
-        var dynamicQuery = new DynamicQuery
-        {
-            Sort = new[]
-            {
-                new Sort { Field = "name", Dir = "asc" },
-            },
-        };
+        var dynamicQuery = new DynamicQuery { Sort = new[] { new Sort("name", "asc") } };
 
         // Act
         var result = isAsync ? await Repository.GetListByDynamicAsync(dynamicQuery) : Repository.GetListByDynamic(dynamicQuery);
