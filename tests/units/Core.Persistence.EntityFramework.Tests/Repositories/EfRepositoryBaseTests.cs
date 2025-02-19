@@ -21,6 +21,16 @@ public partial class EfRepositoryBaseTests : IDisposable
         Repository = new TestEntityRepository(Context);
     }
 
+    protected TestDbContext CreateTestDbContext()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlite(_connection)
+            .EnableSensitiveDataLogging()
+            .Options;
+
+        return new TestDbContext(options);
+    }
+
     protected TestEntity CreateTestEntity(string? name = null) =>
         new() { Name = name ?? $"Test Entity {Guid.NewGuid()}", Description = "Test Description" };
 

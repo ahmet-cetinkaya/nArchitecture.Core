@@ -77,6 +77,9 @@ public class TestDbContext : DbContext
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).ValueGeneratedNever();
 
+            // Add concurrency token
+            builder.Property(e => e.UpdatedAt).IsConcurrencyToken();
+
             // One-to-One
             builder
                 .HasOne(e => e.SingleDetail)
