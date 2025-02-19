@@ -65,7 +65,7 @@ public class HttpExceptionHandlerTests
         // Arrange
         var validationErrors = new List<ValidationError>
         {
-            new("Email", "Invalid email format"),
+            new("Email", new[] { "Invalid email format" }),
             new("Age", new[] { "Must be positive", "Must be less than 150" }),
         };
         var exception = new ValidationException(validationErrors);

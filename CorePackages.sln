@@ -122,6 +122,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.WebApi.Swagge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Translation.AmazonTranslate.Tests", "tests\units\Core.Translation.AmazonTranslate.Tests\Core.Translation.AmazonTranslate.Tests.csproj", "{C1E11B8D-B608-446A-8B86-BA0E146C7087}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Validation.FluentValidation.Tests", "tests\units\Core.Validation.FluentValidation.Tests\Core.Validation.FluentValidation.Tests.csproj", "{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -320,6 +322,10 @@ Global
 		{C1E11B8D-B608-446A-8B86-BA0E146C7087}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1E11B8D-B608-446A-8B86-BA0E146C7087}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1E11B8D-B608-446A-8B86-BA0E146C7087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -377,6 +383,7 @@ Global
 		{82D594C7-71DE-4093-A3DF-E9AFCAD48BE7} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
 		{4A9C3E1D-26D1-4DD3-A25E-E7BEE08BDDFF} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
 		{C1E11B8D-B608-446A-8B86-BA0E146C7087} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
+		{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9} = {682859CA-F4D5-4078-930F-00D3E608D6A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E988190-9FBF-4E2E-9B3A-35C418139397}
