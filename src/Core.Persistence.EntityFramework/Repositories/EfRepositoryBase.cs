@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
@@ -27,26 +28,46 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     /// <inheritdoc/>
     public int SaveChanges()
     {
-        return Context.SaveChanges();
+        try 
+        {
+            return Context.SaveChanges();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            HandleAnyConcurrencyException(ex);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await Context.SaveChangesAsync(cancellationToken);
+        try 
+        {
+            return await Context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await HandleAnyConcurrencyExceptionAsync(ex, cancellationToken);
+            throw;
+        }
     }
 
     /// <summary>
     /// Gets the entity values from the database and checks its status.
     /// </summary>
-    protected virtual async Task<TEntity> GetAndCheckEntityStatusAsync(TEntity entity, CancellationToken cancellationToken = default)
+    protected virtual async Task<TEntity> GetAndCheckEntityStatusAsync(
+        TEntity entity,
+        CancellationToken cancellationToken = default
+    )
     {
         var entry = Context.Entry(entity);
-        var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken) 
+        var databaseValues =
+            await entry.GetDatabaseValuesAsync(cancellationToken)
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
 
         var databaseEntity = (TEntity)databaseValues.ToObject();
-        
+
         if (databaseEntity.DeletedAt.HasValue)
             throw new InvalidOperationException($"The entity with id {entity.Id} has been deleted by another user.");
 
@@ -65,11 +86,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     protected virtual TEntity GetAndCheckEntityStatus(TEntity entity)
     {
         var entry = Context.Entry(entity);
-        var databaseValues = entry.GetDatabaseValues() 
+        var databaseValues =
+            entry.GetDatabaseValues()
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
 
         var databaseEntity = (TEntity)databaseValues.ToObject();
-        
+
         if (databaseEntity.DeletedAt.HasValue)
             throw new InvalidOperationException($"The entity with id {entity.Id} has been deleted by another user.");
 
@@ -124,6 +146,69 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         {
             throw; // Re-throw if entity not found or deleted
         }
+    }
+
+    protected virtual void HandleAnyConcurrencyException(DbUpdateConcurrencyException ex)
+    {
+        foreach (var entry in ex.Entries)
+        {
+            if (entry.Entity is TEntity entity)
+            {
+                var (databaseEntity, _) = GetDatabaseValues(entity);
+                ValidateEntityState(entity, databaseEntity);
+                throw new DbUpdateConcurrencyException(
+                    $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+                );
+            }
+        }
+    }
+
+    protected virtual async Task HandleAnyConcurrencyExceptionAsync(
+        DbUpdateConcurrencyException ex,
+        CancellationToken cancellationToken
+    )
+    {
+        foreach (var entry in ex.Entries)
+        {
+            if (entry.Entity is TEntity entity)
+            {
+                var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+                ValidateEntityState(entity, databaseEntity);
+                throw new DbUpdateConcurrencyException(
+                    $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+                );
+            }
+        }
+    }
+
+    protected virtual (TEntity DatabaseEntity, PropertyValues Values) GetDatabaseValues(TEntity entity)
+    {
+        var entry = Context.Entry(entity);
+        var values = entry.GetDatabaseValues() 
+            ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        return ((TEntity)values.ToObject(), values);
+    }
+
+    protected virtual async Task<(TEntity DatabaseEntity, PropertyValues Values)> GetDatabaseValuesAsync(
+        TEntity entity,
+        CancellationToken cancellationToken
+    )
+    {
+        var entry = Context.Entry(entity);
+        var values = await entry.GetDatabaseValuesAsync(cancellationToken)
+            ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
+        return ((TEntity)values.ToObject(), values);
+    }
+
+    protected virtual void ValidateEntityState(TEntity entity, TEntity databaseEntity, bool ignoreSoftDelete = false)
+    {
+        if (!ignoreSoftDelete && databaseEntity.DeletedAt.HasValue)
+            throw new InvalidOperationException($"The entity with id {entity.Id} has been deleted by another user.");
+
+        if (!databaseEntity.RowVersion.SequenceEqual(entity.RowVersion))
+            throw new DbUpdateConcurrencyException(
+                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
+            );
     }
 
     /// <summary>

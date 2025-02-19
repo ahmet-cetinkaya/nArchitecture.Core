@@ -22,15 +22,20 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        var databaseEntity = GetAndCheckEntityStatus(entity);
-        if (databaseEntity.UpdatedAt != entity.UpdatedAt)
-            throw new DbUpdateConcurrencyException(
-                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
-            );
-
-        EditEntityPropertiesToUpdate(entity);
-        Context.Entry(entity).State = EntityState.Modified;
-        return entity;
+        try
+        {
+            var (databaseEntity, _) = GetDatabaseValues(entity);
+            ValidateEntityState(entity, databaseEntity);
+            EditEntityPropertiesToUpdate(entity);
+            Context.Entry(entity).State = EntityState.Modified;
+            return entity;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            var (databaseEntity, _) = GetDatabaseValues(entity);
+            ValidateEntityState(entity, databaseEntity);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
@@ -39,21 +44,25 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entity == null)
             throw new ArgumentNullException(nameof(entity), Messages.EntityCannotBeNull);
 
-        var databaseEntity = await GetAndCheckEntityStatusAsync(entity, cancellationToken);
-        if (databaseEntity.UpdatedAt != entity.UpdatedAt)
-            throw new DbUpdateConcurrencyException(
-                $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
-            );
-
-        EditEntityPropertiesToUpdate(entity);
-        Context.Entry(entity).State = EntityState.Modified;
-        return entity;
+        try
+        {
+            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            ValidateEntityState(entity, databaseEntity);
+            EditEntityPropertiesToUpdate(entity);
+            Context.Entry(entity).State = EntityState.Modified;
+            return entity;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            ValidateEntityState(entity, databaseEntity);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
     public ICollection<TEntity> BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000)
     {
-        // Validate input collection.
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
@@ -61,36 +70,63 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
-        foreach (TEntity entity in entities)
+        try
         {
-            EditEntityPropertiesToUpdate(entity);
-            _ = Context.Update(entity);
+            foreach (TEntity entity in entities)
+            {
+                var (databaseEntity, _) = GetDatabaseValues(entity);
+                ValidateEntityState(entity, databaseEntity);
+                EditEntityPropertiesToUpdate(entity);
+                Context.Entry(entity).State = EntityState.Modified;
+            }
+            return entities;
         }
-
-        return entities;
+        catch (DbUpdateConcurrencyException ex)
+        {
+            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            if (failedEntity != null)
+            {
+                var (databaseEntity, _) = GetDatabaseValues(failedEntity);
+                ValidateEntityState(failedEntity, databaseEntity);
+            }
+            throw;
+        }
     }
 
     /// <inheritdoc/>
-    public Task<ICollection<TEntity>> BulkUpdateAsync(
+    public async Task<ICollection<TEntity>> BulkUpdateAsync(
         ICollection<TEntity> entities,
         int batchSize = 1_000,
         CancellationToken cancellationToken = default
     )
     {
-        // Validate input collection.
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return Task.FromResult<ICollection<TEntity>>(entities);
+            return entities;
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
-        foreach (TEntity entity in entities)
+        try
         {
-            EditEntityPropertiesToUpdate(entity);
-            _ = Context.Update(entity);
+            foreach (TEntity entity in entities)
+            {
+                var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+                ValidateEntityState(entity, databaseEntity);
+                EditEntityPropertiesToUpdate(entity);
+                Context.Entry(entity).State = EntityState.Modified;
+            }
+            return entities;
         }
-
-        return Task.FromResult<ICollection<TEntity>>(entities);
+        catch (DbUpdateConcurrencyException ex)
+        {
+            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            if (failedEntity != null)
+            {
+                var (databaseEntity, _) = await GetDatabaseValuesAsync(failedEntity, cancellationToken);
+                ValidateEntityState(failedEntity, databaseEntity);
+            }
+            throw;
+        }
     }
 }
