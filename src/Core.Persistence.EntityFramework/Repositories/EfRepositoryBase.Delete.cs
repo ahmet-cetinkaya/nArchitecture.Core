@@ -23,10 +23,10 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             }
             else
             {
-        SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
+                SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
                 Context.Entry(entity).State = EntityState.Modified;
             }
-        return entity;
+            return entity;
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -49,10 +49,10 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             }
             else
             {
-        await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
+                await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
                 Context.Entry(entity).State = EntityState.Modified;
             }
-        return entity;
+            return entity;
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -62,24 +62,24 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     }
 
     /// <inheritdoc/>
-    public void BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000)
+    public ICollection<TEntity> BulkDelete(ICollection<TEntity> entities, bool permanent = false, int batchSize = 1_000)
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         try
         {
-        foreach (TEntity entity in entities)
-        {
-            if (permanent)
-                _ = Context.Remove(entity);
-            else
+            foreach (TEntity entity in entities)
             {
-                SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
+                if (permanent)
+                    _ = Context.Remove(entity);
+                else
+                {
+                    SetEntityAsDeleted(entity, permanent, isAsync: false).GetAwaiter().GetResult();
                     Context.Entry(entity).State = EntityState.Modified;
                 }
             }
@@ -96,7 +96,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     }
 
     /// <inheritdoc/>
-    public async Task BulkDeleteAsync(
+    public async Task<ICollection<TEntity>> BulkDeleteAsync(
         ICollection<TEntity> entities,
         bool permanent = false,
         int batchSize = 1_000,
@@ -106,19 +106,19 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         try
         {
-        foreach (TEntity entity in entities)
-        {
-            if (permanent)
-                _ = Context.Remove(entity);
-            else
+            foreach (TEntity entity in entities)
             {
-                await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
+                if (permanent)
+                    _ = Context.Remove(entity);
+                else
+                {
+                    await SetEntityAsDeleted(entity, permanent, isAsync: true, cancellationToken);
                     Context.Entry(entity).State = EntityState.Modified;
                 }
             }

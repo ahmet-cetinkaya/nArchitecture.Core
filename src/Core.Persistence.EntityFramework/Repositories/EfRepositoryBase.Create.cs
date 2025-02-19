@@ -39,40 +39,44 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     }
 
     /// <inheritdoc/>
-    public virtual void BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000)
+    public virtual ICollection<TEntity> BulkAdd(ICollection<TEntity> entities, int batchSize = 1_000)
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         foreach (TEntity entity in entities)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
             EditEntityPropertiesToAdd(entity);
             _ = Context.Add(entity);
         }
+
+        return entities;
     }
 
     /// <inheritdoc/>
-    public virtual async Task BulkAddAsync(
+    public virtual async Task<ICollection<TEntity>> BulkAddAsync(
         ICollection<TEntity> entities,
         int batchSize = 1_000,
         CancellationToken cancellationToken = default
     )
     {
         if (entities == null)
-            throw new ArgumentNullException(nameof(entities));
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
+        if (entities.Any(e => e == null))
+            throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
         foreach (TEntity entity in entities)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
             EditEntityPropertiesToAdd(entity);
             _ = await Context.AddAsync(entity, cancellationToken);
         }
+
+        return entities;
     }
 }

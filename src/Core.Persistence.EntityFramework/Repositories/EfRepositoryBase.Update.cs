@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
@@ -25,9 +25,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         try
         {
-        EditEntityPropertiesToUpdate(entity);
+            EditEntityPropertiesToUpdate(entity);
             Context.Entry(entity).State = EntityState.Modified;
-        return entity;
+            return entity;
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -45,7 +45,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         try
         {
-        EditEntityPropertiesToUpdate(entity);
+            EditEntityPropertiesToUpdate(entity);
             Context.Entry(entity).State = EntityState.Modified;
             return entity;
         }
@@ -57,13 +57,13 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
     }
 
     /// <inheritdoc/>
-    public void BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000)
+    public ICollection<TEntity> BulkUpdate(ICollection<TEntity> entities, int batchSize = 1_000)
     {
         // Validate input collection.
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return;
+            return entities;
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
@@ -72,10 +72,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             EditEntityPropertiesToUpdate(entity);
             _ = Context.Update(entity);
         }
+
+        return entities;
     }
 
     /// <inheritdoc/>
-    public Task BulkUpdateAsync(
+    public Task<ICollection<TEntity>> BulkUpdateAsync(
         ICollection<TEntity> entities,
         int batchSize = 1_000,
         CancellationToken cancellationToken = default
@@ -85,7 +87,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         if (entities == null)
             throw new ArgumentNullException(nameof(entities), Messages.CollectionCannotBeNull);
         if (entities.Count == 0)
-            return Task.CompletedTask;
+            return Task.FromResult<ICollection<TEntity>>(entities);
         if (entities.Any(e => e == null))
             throw new ArgumentNullException(nameof(entities), Messages.CollectionContainsNullEntity);
 
@@ -95,6 +97,6 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             _ = Context.Update(entity);
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult<ICollection<TEntity>>(entities);
     }
 }
