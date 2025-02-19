@@ -1,7 +1,8 @@
 namespace NArchitecture.Core.Validation.Abstractions;
 
-public struct ValidationResult
-{
-    public bool IsValid { get; set; }
-    public IEnumerable<ValidationError>? Errors { get; set; }
-}
+/// <summary>
+/// Represents the result of a validation operation.
+/// </summary>
+/// <param name="IsValid">Indicates whether the validation was successful.</param>
+/// <param name="Errors">Collection of validation errors if validation failed, null otherwise.</param>
+public readonly record struct ValidationResult(bool IsValid, IEnumerable<ValidationError>? Errors);
