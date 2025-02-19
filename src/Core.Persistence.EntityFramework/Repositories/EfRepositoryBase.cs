@@ -5,11 +5,12 @@ using NArchitecture.Core.Persistence.Abstractions.Repositories;
 namespace NArchitecture.Core.Persistence.EntityFramework.Repositories;
 
 /// <summary>
-/// Provides a base implementation for repository operations using Entity Framework.
+/// Base implementation for Entity Framework Core based repositories that provides CRUD and query operations.
+/// Implements optimistic concurrency control using RowVersion and UpdatedAt properties.
 /// </summary>
-/// <typeparam name="TEntity">The entity type.</typeparam>
-/// <typeparam name="TEntityId">The type of the entity identifier.</typeparam>
-/// <typeparam name="TContext">The DbContext type.</typeparam>
+/// <typeparam name="TEntity">The entity type that inherits from BaseEntity</typeparam>
+/// <typeparam name="TEntityId">The type of the entity's primary key</typeparam>
+/// <typeparam name="TContext">The Entity Framework DbContext type</typeparam>
 public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext context)
     : IAsyncRepository<TEntity, TEntityId>,
         IRepository<TEntity, TEntityId>,
@@ -181,6 +182,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         }
     }
 
+    /// <summary>
+    /// Gets the entity's current database values and validates its state.
+    /// Throws appropriate exceptions if the entity is deleted or modified by another user.
+    /// </summary>
+    /// <returns>Tuple containing the database entity and its property values</returns>
     protected virtual (TEntity DatabaseEntity, PropertyValues Values) GetDatabaseValues(TEntity entity)
     {
         var entry = Context.Entry(entity);
@@ -189,6 +195,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         return ((TEntity)values.ToObject(), values);
     }
 
+    /// <summary>
+    /// Asynchronously gets the entity's current database values and validates its state.
+    /// Throws appropriate exceptions if the entity is deleted or modified by another user.
+    /// </summary>
+    /// <returns>Tuple containing the database entity and its property values</returns>
     protected virtual async Task<(TEntity DatabaseEntity, PropertyValues Values)> GetDatabaseValuesAsync(
         TEntity entity,
         CancellationToken cancellationToken
@@ -200,6 +211,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         return ((TEntity)values.ToObject(), values);
     }
 
+    /// <summary>
+    /// Validates the entity's state by comparing with database values.
+    /// Checks for soft deletion and concurrency conflicts.
+    /// </summary>
+    /// <param name="ignoreSoftDelete">When true, skips the soft delete check</param>
     protected virtual void ValidateEntityState(TEntity entity, TEntity databaseEntity, bool ignoreSoftDelete = false)
     {
         if (!ignoreSoftDelete && databaseEntity.DeletedAt.HasValue)
