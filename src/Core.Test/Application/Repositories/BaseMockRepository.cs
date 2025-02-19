@@ -15,25 +15,28 @@ public abstract class BaseMockRepository<TRepository, TEntity, TEntityId, TMappi
     where TBusinessRules : BaseBusinessRules
     where TFakeData : BaseFakeData<TEntity, TEntityId>, new()
 {
-    public IMapper Mapper;
-    public Mock<TRepository> MockRepository;
-    public TBusinessRules BusinessRules;
+    public IMapper Mapper { get; }
+    public Mock<TRepository> MockRepository { get; }
+    public TBusinessRules BusinessRules { get; }
+    protected TFakeData FakeData { get; }
 
-    public BaseMockRepository(TFakeData fakeData)
+    protected BaseMockRepository(TFakeData? fakeData = null, string[]? acceptLocales = null)
     {
-        MapperConfiguration mapperConfig = new(c =>
-        {
-            c.AddProfile<TMappingProfile>();
-        });
+        FakeData = fakeData ?? new TFakeData();
+        MapperConfiguration mapperConfig = new(c => c.AddProfile<TMappingProfile>());
         Mapper = mapperConfig.CreateMapper();
 
-        MockRepository = MockRepositoryHelper.GetRepository<TRepository, TEntity, TEntityId>(fakeData.Data);
-        BusinessRules =
-            (TBusinessRules)
-                Activator.CreateInstance(
-                    type: typeof(TBusinessRules),
-                    MockRepository.Object,
-                    new ResourceLocalizationManager(resources: []) { AcceptLocales = new[] { "en" } }
-                )! ?? throw new InvalidOperationException($"Cannot create an instance of {typeof(TBusinessRules).FullName}.");
+        MockRepository = MockRepositoryHelper.GetRepository<TRepository, TEntity, TEntityId>(FakeData.Data);
+        
+        var resourceManager = new ResourceLocalizationManager(resources: []) 
+        { 
+            AcceptLocales = acceptLocales ?? new[] { "en" } 
+        };
+
+        BusinessRules = (TBusinessRules)Activator.CreateInstance(
+            typeof(TBusinessRules),
+            MockRepository.Object,
+            resourceManager
+        )! ?? throw new InvalidOperationException($"Cannot create an instance of {typeof(TBusinessRules).FullName}.");
     }
 }

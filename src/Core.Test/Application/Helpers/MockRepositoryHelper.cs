@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq;
+using NArchitecture.Core.Persistence.Abstractions.Dynamic;
 using NArchitecture.Core.Persistence.Abstractions.Paging;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
@@ -28,6 +29,11 @@ public static class MockRepositoryHelper
         SetupUpdateAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
         SetupDeleteAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
         SetupAnyAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
+        SetupGetListByDynamicAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
+        SetupGetRandomAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
+        SetupGetRandomListAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
+        SetupCountAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
+        SetupCountLongAsync<TRepository, TEntity, TEntityId>(mockRepo, entityList);
     }
 
     private static void SetupGetListAsync<TRepository, TEntity, TEntityId>(Mock<TRepository> mockRepo, List<TEntity> entityList)
@@ -186,5 +192,173 @@ public static class MockRepositoryHelper
                     return entityList.Any(expression.Compile());
                 }
             );
+    }
+
+    private static void SetupGetListByDynamicAsync<TRepository, TEntity, TEntityId>(Mock<TRepository> mockRepo, List<TEntity> entityList)
+        where TEntity : BaseEntity<TEntityId>, new()
+        where TRepository : class, IAsyncRepository<TEntity, TEntityId>, IRepository<TEntity, TEntityId>
+    {
+        mockRepo
+            .Setup(s => s.GetListByDynamicAsync(
+                It.IsAny<DynamicQuery>(),
+                It.IsAny<Expression<Func<TEntity, bool>>>(),
+                It.IsAny<Func<IQueryable<TEntity>, IQueryable<TEntity>>>(),
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync((
+                DynamicQuery dynamic,
+                Expression<Func<TEntity, bool>>? expression,
+                Func<IQueryable<TEntity>, IQueryable<TEntity>>? include,
+                int index,
+                int size,
+                bool withDeleted,
+                bool enableTracking,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                IList<TEntity> list = entityList;
+                if (!withDeleted)
+                    list = list.Where(e => !e.DeletedAt.HasValue).ToList();
+                if (expression != null)
+                    list = list.Where(expression.Compile()).ToList();
+
+                var paginatedList = list.Skip(index * size).Take(size).ToList();
+                return new Paginate<TEntity>
+                {
+                    Index = index,
+                    Size = size,
+                    Count = list.Count,
+                    Pages = (int)Math.Ceiling(list.Count / (double)size),
+                    Items = paginatedList
+                };
+            });
+    }
+
+    private static void SetupGetRandomAsync<TRepository, TEntity, TEntityId>(Mock<TRepository> mockRepo, List<TEntity> entityList)
+        where TEntity : BaseEntity<TEntityId>, new()
+        where TRepository : class, IAsyncRepository<TEntity, TEntityId>, IRepository<TEntity, TEntityId>
+    {
+        mockRepo
+            .Setup(s => s.GetRandomAsync(
+                It.IsAny<Expression<Func<TEntity, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync((
+                Expression<Func<TEntity, bool>>? expression,
+                bool withDeleted,
+                bool enableTracking,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                IList<TEntity> list = entityList;
+                if (!withDeleted)
+                    list = list.Where(e => !e.DeletedAt.HasValue).ToList();
+                if (expression != null)
+                    list = list.Where(expression.Compile()).ToList();
+
+                return list.Count > 0 
+                    ? list[new Random().Next(list.Count)] 
+                    : null;
+            });
+    }
+
+    private static void SetupGetRandomListAsync<TRepository, TEntity, TEntityId>(Mock<TRepository> mockRepo, List<TEntity> entityList)
+        where TEntity : BaseEntity<TEntityId>, new()
+        where TRepository : class, IAsyncRepository<TEntity, TEntityId>, IRepository<TEntity, TEntityId>
+    {
+        mockRepo
+            .Setup(s => s.GetRandomListAsync(
+                It.IsAny<Expression<Func<TEntity, bool>>>(),
+                It.IsAny<Func<IQueryable<TEntity>, IQueryable<TEntity>>>(),
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync((
+                Expression<Func<TEntity, bool>>? expression,
+                Func<IQueryable<TEntity>, IQueryable<TEntity>>? include,
+                int index,
+                int size,
+                bool withDeleted,
+                bool enableTracking,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                IList<TEntity> list = entityList;
+                if (!withDeleted)
+                    list = list.Where(e => !e.DeletedAt.HasValue).ToList();
+                if (expression != null)
+                    list = list.Where(expression.Compile()).ToList();
+
+                var randomList = list.OrderBy(_ => Guid.NewGuid()).Take(size).ToList();
+                return new Paginate<TEntity>
+                {
+                    Index = index,
+                    Size = size,
+                    Count = list.Count,
+                    Pages = (int)Math.Ceiling(list.Count / (double)size),
+                    Items = randomList
+                };
+            });
+    }
+
+    private static void SetupCountAsync<TRepository, TEntity, TEntityId>(Mock<TRepository> mockRepo, List<TEntity> entityList)
+        where TEntity : BaseEntity<TEntityId>, new()
+        where TRepository : class, IAsyncRepository<TEntity, TEntityId>, IRepository<TEntity, TEntityId>
+    {
+        mockRepo
+            .Setup(s => s.CountAsync(
+                It.IsAny<Expression<Func<TEntity, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync((
+                Expression<Func<TEntity, bool>>? expression,
+                bool withDeleted,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                IList<TEntity> list = entityList;
+                if (!withDeleted)
+                    list = list.Where(e => !e.DeletedAt.HasValue).ToList();
+                if (expression != null)
+                    list = list.Where(expression.Compile()).ToList();
+
+                return list.Count;
+            });
+    }
+
+    private static void SetupCountLongAsync<TRepository, TEntity, TEntityId>(Mock<TRepository> mockRepo, List<TEntity> entityList)
+        where TEntity : BaseEntity<TEntityId>, new()
+        where TRepository : class, IAsyncRepository<TEntity, TEntityId>, IRepository<TEntity, TEntityId>
+    {
+        mockRepo
+            .Setup(s => s.CountLongAsync(
+                It.IsAny<Expression<Func<TEntity, bool>>>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()
+            ))
+            .ReturnsAsync((
+                Expression<Func<TEntity, bool>>? expression,
+                bool withDeleted,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                IList<TEntity> list = entityList;
+                if (!withDeleted)
+                    list = list.Where(e => !e.DeletedAt.HasValue).ToList();
+                if (expression != null)
+                    list = list.Where(expression.Compile()).ToList();
+
+                return list.LongCount();
+            });
     }
 }
