@@ -3,31 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Application", "src\Core.Application\Core.Application.csproj", "{0542DF94-63CD-430F-9AF5-AE84D88319BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Application", "src\Application\NArchitecture.Core.Application.csproj", "{0542DF94-63CD-430F-9AF5-AE84D88319BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Exception", "src\Core.CrossCuttingConcerns.Exception\Core.CrossCuttingConcerns.Exception.csproj", "{D5B3C51B-75DF-4A33-BCBB-BAF2BF076617}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.CrossCuttingConcerns.Exception", "src\CrossCuttingConcerns.Exception\NArchitecture.Core.CrossCuttingConcerns.Exception.csproj", "{D5B3C51B-75DF-4A33-BCBB-BAF2BF076617}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Mailing.Abstractions", "src\Core.Mailing.Abstractions\Core.Mailing.Abstractions.csproj", "{B5C9694A-C714-465D-836A-8C77366B4E03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Mailing.Abstractions", "src\Mailing.Abstractions\NArchitecture.Core.Mailing.Abstractions.csproj", "{B5C9694A-C714-465D-836A-8C77366B4E03}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence.EntityFramework", "src\Core.Persistence.EntityFramework\Core.Persistence.EntityFramework.csproj", "{03D3D1A1-1C07-41CA-8B02-DB5394A874A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Persistence.EntityFramework", "src\Persistence.EntityFramework\NArchitecture.Core.Persistence.EntityFramework.csproj", "{03D3D1A1-1C07-41CA-8B02-DB5394A874A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Security", "src\Core.Security\Core.Security.csproj", "{826DEEBC-A67D-4448-A339-A04E0ED36F52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Security", "src\Security\NArchitecture.Core.Security.csproj", "{826DEEBC-A67D-4448-A339-A04E0ED36F52}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Resource.Yaml.DependencyInjection", "src\Core.Localization.Resource.Yaml.DependencyInjection\Core.Localization.Resource.Yaml.DependencyInjection.csproj", "{17D0496A-7C3D-435D-85E2-80E7363004E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection", "src\Localization.Resource.Yaml.DependencyInjection\NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection.csproj", "{17D0496A-7C3D-435D-85E2-80E7363004E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Resource.Yaml", "src\Core.Localization.Resource.Yaml\Core.Localization.Resource.Yaml.csproj", "{1A9C6A1D-F585-411F-A8D5-361E63EE7E02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Localization.Resource.Yaml", "src\Localization.Resource.Yaml\NArchitecture.Core.Localization.Resource.Yaml.csproj", "{1A9C6A1D-F585-411F-A8D5-361E63EE7E02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Abstractions", "src\Core.Localization.Abstractions\Core.Localization.Abstractions.csproj", "{D337AB65-0D90-494C-A372-A238AA7E74E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Localization.Abstractions", "src\Localization.Abstractions\NArchitecture.Core.Localization.Abstractions.csproj", "{D337AB65-0D90-494C-A372-A238AA7E74E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Translation", "src\Core.Localization.Translation\Core.Localization.Translation.csproj", "{0C272CE1-12D7-47D8-98FD-4DDBEB6A294C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Localization.Translation", "src\Localization.Translation\NArchitecture.Core.Localization.Translation.csproj", "{0C272CE1-12D7-47D8-98FD-4DDBEB6A294C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.WebApi", "src\Core.Localization.WebApi\Core.Localization.WebApi.csproj", "{A874FBD0-5655-4A29-AD05-3C57A1B6BA31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Localization.WebApi", "src\Localization.WebApi\NArchitecture.Core.Localization.WebApi.csproj", "{A874FBD0-5655-4A29-AD05-3C57A1B6BA31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.Abstractions", "src\Core.Translation.Abstractions\Core.Translation.Abstractions.csproj", "{B00C777E-A6C5-4ED4-86F1-61408B3D0926}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Translation.Abstractions", "src\Translation.Abstractions\NArchitecture.Core.Translation.Abstractions.csproj", "{B00C777E-A6C5-4ED4-86F1-61408B3D0926}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.AmazonTranslate", "src\Core.Translation.AmazonTranslate\Core.Translation.AmazonTranslate.csproj", "{C4D96ACD-171A-4B37-8736-51366B98B9E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Translation.AmazonTranslate", "src\Translation.AmazonTranslate\NArchitecture.Core.Translation.AmazonTranslate.csproj", "{C4D96ACD-171A-4B37-8736-51366B98B9E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.AmazonTranslate.DependencyInjection", "src\Core.Translation.AmazonTranslate.DependencyInjection\Core.Translation.AmazonTranslate.DependencyInjection.csproj", "{326AEEBB-7767-4FB2-84FE-12B47C065526}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection", "src\Translation.AmazonTranslate.DependencyInjection\NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection.csproj", "{326AEEBB-7767-4FB2-84FE-12B47C065526}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{349CE34D-A942-422C-943A-DE4BEC1E39B3}"
 	ProjectSection(SolutionItems) = preProject
@@ -44,83 +44,83 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{0EDE05
 		docs\images\n-architecture-logo.png = docs\images\n-architecture-logo.png
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Serilog", "src\Core.CrossCuttingConcerns.Logging.Serilog\Core.CrossCuttingConcerns.Logging.Serilog.csproj", "{570EB8D5-8D08-4026-BB52-684E7F599422}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog", "src\CrossCuttingConcerns.Logging.Serilog\NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.csproj", "{570EB8D5-8D08-4026-BB52-684E7F599422}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Exception.WebApi", "src\Core.CrossCuttingConcerns.Exception.WebApi\Core.CrossCuttingConcerns.Exception.WebApi.csproj", "{E9F71091-42BA-42FA-B3ED-83042C813780}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi", "src\CrossCuttingConcerns.Exception.WebApi\NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.csproj", "{E9F71091-42BA-42FA-B3ED-83042C813780}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Abstractions", "src\Core.CrossCuttingConcerns.Logging.Abstractions\Core.CrossCuttingConcerns.Logging.Abstractions.csproj", "{4DDE97CF-FC8C-4333-A7AE-80B68E55927F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions", "src\CrossCuttingConcerns.Logging.Abstractions\NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.csproj", "{4DDE97CF-FC8C-4333-A7AE-80B68E55927F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Serilog.File", "src\Core.CrossCuttingConcerns.Logging.Serilog.File\Core.CrossCuttingConcerns.Logging.Serilog.File.csproj", "{769BF223-862F-4D87-B2A2-6C5148FF2D91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File", "src\CrossCuttingConcerns.Logging.Serilog.File\NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.csproj", "{769BF223-862F-4D87-B2A2-6C5148FF2D91}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.DependencyInjection", "src\Core.CrossCuttingConcerns.Logging.DependencyInjection\Core.CrossCuttingConcerns.Logging.DependencyInjection.csproj", "{3318A669-D271-41B5-88E4-BEAF5B67DE97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection", "src\CrossCuttingConcerns.Logging.DependencyInjection\NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection.csproj", "{3318A669-D271-41B5-88E4-BEAF5B67DE97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Mailing.MailKit", "src\Core.Mailing.MailKit\Core.Mailing.MailKit.csproj", "{147A9AD4-5D71-47A6-BD1A-B0A7CFE5FEBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Mailing.MailKit", "src\Mailing.MailKit\NArchitecture.Core.Mailing.MailKit.csproj", "{147A9AD4-5D71-47A6-BD1A-B0A7CFE5FEBD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Security.DependencyInjection", "src\Core.Security.DependencyInjection\Core.Security.DependencyInjection.csproj", "{8ED08D8F-DAC6-4BD1-9A1F-69704AD8368F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Security.DependencyInjection", "src\Security.DependencyInjection\NArchitecture.Core.Security.DependencyInjection.csproj", "{8ED08D8F-DAC6-4BD1-9A1F-69704AD8368F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Security.WebApi.Swagger", "src\Core.Security.WebApi.Swagger\Core.Security.WebApi.Swagger.csproj", "{5F448267-A147-4C86-9BEA-797AE93B0BBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Security.WebApi.Swagger", "src\Security.WebApi.Swagger\NArchitecture.Core.Security.WebApi.Swagger.csproj", "{5F448267-A147-4C86-9BEA-797AE93B0BBA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Persistence.EntityFramework.DependencyInjection", "src\Core.Persistence.EntityFramework.DependencyInjection\Core.Persistence.EntityFramework.DependencyInjection.csproj", "{21482084-82B8-41FA-8477-ED78B3037375}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NArchitecture.Core.Persistence.EntityFramework.DependencyInjection", "src\Persistence.EntityFramework.DependencyInjection\NArchitecture.Core.Persistence.EntityFramework.DependencyInjection.csproj", "{21482084-82B8-41FA-8477-ED78B3037375}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CB1FFAF8-1946-40AF-AF0F-7FD37E2A7AC6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{BCB5B13C-20C0-49EF-9F6B-940BEE7AAD43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Benchmarks", "tests\benchmarks\Core.Benchmarks\Core.Benchmarks.csproj", "{414C545A-A147-41D9-BEC0-8555EF9CFD9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Benchmarks", "tests\benchmarks\Benchmarks\NArchitecture.Core.Benchmarks.csproj", "{414C545A-A147-41D9-BEC0-8555EF9CFD9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Application.BenchmarkTests", "tests\benchmarks\Core.Application.BenchmarkTests\Core.Application.BenchmarkTests.csproj", "{CD40EB4F-DD72-45D3-9328-D1D5F240356F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Application.BenchmarkTests", "tests\benchmarks\Application.BenchmarkTests\NArchitecture.Core.Application.BenchmarkTests.csproj", "{CD40EB4F-DD72-45D3-9328-D1D5F240356F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "units", "units", "{682859CA-F4D5-4078-930F-00D3E608D6A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Application.Tests", "tests\units\Core.Application.Tests\Core.Application.Tests.csproj", "{3AF7E32B-DEFD-45C1-866C-214810EC8E62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Application.Tests", "tests\units\Application.Tests\NArchitecture.Core.Application.Tests.csproj", "{3AF7E32B-DEFD-45C1-866C-214810EC8E62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Validation.Abstractions", "src\Core.Validation.Abstractions\Core.Validation.Abstractions.csproj", "{A77CB1D6-ED02-40D6-9505-BBF230A78A3F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Validation.Abstractions", "src\Validation.Abstractions\NArchitecture.Core.Validation.Abstractions.csproj", "{A77CB1D6-ED02-40D6-9505-BBF230A78A3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Validation.FluentValidation", "src\Core.Validation.FluentValidation\Core.Validation.FluentValidation.csproj", "{2073F742-F5F2-4529-9B81-D9E57775908F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Validation.FluentValidation", "src\Validation.FluentValidation\NArchitecture.Core.Validation.FluentValidation.csproj", "{2073F742-F5F2-4529-9B81-D9E57775908F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.CrossCuttingConcerns.Exception.WebApi.Tests", "tests\units\Core.CrossCuttingConcerns.Exception.WebApi.Tests\Core.CrossCuttingConcerns.Exception.WebApi.Tests.csproj", "{49FF4B66-8032-4AF9-BECA-565FF1D04F0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Tests", "tests\units\CrossCuttingConcerns.Exception.WebApi.Tests\NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Tests.csproj", "{49FF4B66-8032-4AF9-BECA-565FF1D04F0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.CrossCuttingConcerns.Logging.Serilog.File.Tests", "tests\units\Core.CrossCuttingConcerns.Logging.Serilog.File.Tests\Core.CrossCuttingConcerns.Logging.Serilog.File.Tests.csproj", "{CE84D36F-EE8C-46A1-BC5B-4BD3B564092C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.Tests", "tests\units\CrossCuttingConcerns.Logging.Serilog.File.Tests\NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.Tests.csproj", "{CE84D36F-EE8C-46A1-BC5B-4BD3B564092C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.SearchEngine.Abstractions", "src\Core.SearchEngine.Abstractions\Core.SearchEngine.Abstractions.csproj", "{074E6F5A-CE51-434F-BEB1-1BFEF8649E98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.SearchEngine.Abstractions", "src\SearchEngine.Abstractions\NArchitecture.Core.SearchEngine.Abstractions.csproj", "{074E6F5A-CE51-434F-BEB1-1BFEF8649E98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.SearchEngine.ElasticSearch", "src\Core.SearchEngine.ElasticSearch\Core.SearchEngine.ElasticSearch.csproj", "{9412F3C4-5F63-427D-B95A-8596292C13B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.SearchEngine.ElasticSearch", "src\SearchEngine.ElasticSearch\NArchitecture.Core.SearchEngine.ElasticSearch.csproj", "{9412F3C4-5F63-427D-B95A-8596292C13B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.SearchEngine.ElasticSearch.Tests", "tests\units\Core.SearchEngine.ElasticSearch.Tests\Core.SearchEngine.ElasticSearch.Tests.csproj", "{5D939798-7279-4D1C-A8CE-26F4DACDC9AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.SearchEngine.ElasticSearch.Tests", "tests\units\SearchEngine.ElasticSearch.Tests\NArchitecture.Core.SearchEngine.ElasticSearch.Tests.csproj", "{5D939798-7279-4D1C-A8CE-26F4DACDC9AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Localization.Resource.Yaml.Tests", "tests\units\Core.Localization.Resource.Yaml.Tests\Core.Localization.Resource.Yaml.Tests.csproj", "{5A1BF067-A155-4D22-838D-4B691A23E557}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Localization.Resource.Yaml.Tests", "tests\units\Localization.Resource.Yaml.Tests\NArchitecture.Core.Localization.Resource.Yaml.Tests.csproj", "{5A1BF067-A155-4D22-838D-4B691A23E557}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Localization.Translation.Tests", "tests\units\Core.Localization.Translation.Tests\Core.Localization.Translation.Tests.csproj", "{E8B4CCDB-0ACC-4626-8470-EFA529CD356B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Localization.Translation.Tests", "tests\units\Localization.Translation.Tests\NArchitecture.Core.Localization.Translation.Tests.csproj", "{E8B4CCDB-0ACC-4626-8470-EFA529CD356B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Localization.Resource.Yaml.DependencyInjection.Tests", "tests\units\Core.Localization.Resource.Yaml.DependencyInjection.Tests\Core.Localization.Resource.Yaml.DependencyInjection.Tests.csproj", "{2E15C423-FA41-48B5-A257-3EEDB4C2E573}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection.Tests", "tests\units\Localization.Resource.Yaml.DependencyInjection.Tests\NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection.Tests.csproj", "{2E15C423-FA41-48B5-A257-3EEDB4C2E573}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Localization.WebApi.Tests", "tests\units\Core.Localization.WebApi.Tests\Core.Localization.WebApi.Tests.csproj", "{E23A6792-8D43-4D25-B2B3-5FB5FA9F9E90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Localization.WebApi.Tests", "tests\units\Localization.WebApi.Tests\NArchitecture.Core.Localization.WebApi.Tests.csproj", "{E23A6792-8D43-4D25-B2B3-5FB5FA9F9E90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Mailing.MailKit.Tests", "tests\units\Core.Mailing.MailKit.Tests\Core.Mailing.MailKit.Tests.csproj", "{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mailing.MailKit.Tests", "tests\units\Mailing.MailKit.Tests\NArchitecture.Core.Mailing.MailKit.Tests.csproj", "{28C1FDD7-B6A4-4F5B-9BA4-0901C367716F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Persistence.Abstractions", "src\Core.Persistence.Abstractions\Core.Persistence.Abstractions.csproj", "{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Persistence.Abstractions", "src\Persistence.Abstractions\NArchitecture.Core.Persistence.Abstractions.csproj", "{5BEB45AD-5D0C-4096-9797-ECF34BB2B338}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Persistence.EntityFramework.Tests", "tests\units\Core.Persistence.EntityFramework.Tests\Core.Persistence.EntityFramework.Tests.csproj", "{52AAC52E-BF15-4427-A68E-2F19D6406D22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Persistence.EntityFramework.Tests", "tests\units\Persistence.EntityFramework.Tests\NArchitecture.Core.Persistence.EntityFramework.Tests.csproj", "{52AAC52E-BF15-4427-A68E-2F19D6406D22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Sms.Abstractions", "src\Core.Sms.Abstractions\Core.Sms.Abstractions.csproj", "{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Sms.Abstractions", "src\Sms.Abstractions\NArchitecture.Core.Sms.Abstractions.csproj", "{0DAA3BE8-5218-43F9-9BC6-8E0A75E0C3B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.WebApi", "src\Core.Security.WebApi\Core.Security.WebApi.csproj", "{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Security.WebApi", "src\Security.WebApi\NArchitecture.Core.Security.WebApi.csproj", "{7ABAE2C8-0E4E-4AC2-866D-120056B742F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.Tests", "tests\units\Core.Security.Tests\Core.Security.Tests.csproj", "{AE6B7F86-DD68-48A3-8C2F-BBEB5073E579}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Security.Tests", "tests\units\Security.Tests\NArchitecture.Core.Security.Tests.csproj", "{AE6B7F86-DD68-48A3-8C2F-BBEB5073E579}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.Abstractions", "src\Core.Security.Abstractions\Core.Security.Abstractions.csproj", "{B9018884-F84F-46C7-8A41-388653B67166}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Security.Abstractions", "src\Security.Abstractions\NArchitecture.Core.Security.Abstractions.csproj", "{B9018884-F84F-46C7-8A41-388653B67166}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.DependencyInjection.Tests", "tests\units\Core.Security.DependencyInjection.Tests\Core.Security.DependencyInjection.Tests.csproj", "{BC636CFD-4203-4E93-8BB1-5185D763DEDF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Security.DependencyInjection.Tests", "tests\units\Security.DependencyInjection.Tests\NArchitecture.Core.Security.DependencyInjection.Tests.csproj", "{BC636CFD-4203-4E93-8BB1-5185D763DEDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.WebApi.Tests", "tests\units\Core.Security.WebApi.Tests\Core.Security.WebApi.Tests.csproj", "{82D594C7-71DE-4093-A3DF-E9AFCAD48BE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Security.WebApi.Tests", "tests\units\Security.WebApi.Tests\NArchitecture.Core.Security.WebApi.Tests.csproj", "{82D594C7-71DE-4093-A3DF-E9AFCAD48BE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Security.WebApi.Swagger.Tests", "tests\units\Core.Security.WebApi.Swagger.Tests\Core.Security.WebApi.Swagger.Tests.csproj", "{4A9C3E1D-26D1-4DD3-A25E-E7BEE08BDDFF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Security.WebApi.Swagger.Tests", "tests\units\Security.WebApi.Swagger.Tests\NArchitecture.Core.Security.WebApi.Swagger.Tests.csproj", "{4A9C3E1D-26D1-4DD3-A25E-E7BEE08BDDFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Translation.AmazonTranslate.Tests", "tests\units\Core.Translation.AmazonTranslate.Tests\Core.Translation.AmazonTranslate.Tests.csproj", "{C1E11B8D-B608-446A-8B86-BA0E146C7087}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Translation.AmazonTranslate.Tests", "tests\units\Translation.AmazonTranslate.Tests\NArchitecture.Core.Translation.AmazonTranslate.Tests.csproj", "{C1E11B8D-B608-446A-8B86-BA0E146C7087}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Validation.FluentValidation.Tests", "tests\units\Core.Validation.FluentValidation.Tests\Core.Validation.FluentValidation.Tests.csproj", "{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Validation.FluentValidation.Tests", "tests\units\Validation.FluentValidation.Tests\NArchitecture.Core.Validation.FluentValidation.Tests.csproj", "{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

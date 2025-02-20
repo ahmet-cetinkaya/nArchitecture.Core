@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Project Configuration -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>NArchitecture.Core.$(AssemblyName)</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Build Configuration -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Package Configuration -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0</Version>
+    <Authors>Kodlama.io, Contributors</Authors>
+    <Company>Kodlama.io</Company>
+    <Product>NArchitecture</Product>
+    <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <!-- Package Metadata -->
+  <PropertyGroup>
+    <PackageId>NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection</PackageId>
+    <Title>NArchitecture Amazon Translate DI Extensions</Title>
+    <Description>Dependency injection extensions for Amazon Translate integration in Clean
+      Architecture applications.</Description>
+    <PackageTags>amazon-translate; aws; dependency-injection; di; clean-architecture; narchitecture</PackageTags>
+    <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+    <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- Package Files -->
+  <ItemGroup>
+    <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+    <None Include="./README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+  </ItemGroup>
+
+  <!-- Project References -->
+  <ItemGroup>
+    <ProjectReference Include="../Translation.AmazonTranslate/NArchitecture.Core.Translation.AmazonTranslate.csproj" />
+  </ItemGroup>
+
+</Project>
