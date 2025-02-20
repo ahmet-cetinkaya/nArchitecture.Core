@@ -2,7 +2,7 @@ using System.Diagnostics;
 using MediatR;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Performance;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Performance;

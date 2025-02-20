@@ -1,42 +1,63 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Project Configuration -->
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>NArchitecture.$(AssemblyName)</RootNamespace>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>NArchitecture.$(AssemblyName)</PackageId>
-    <Version>1.0.1</Version>
-    <Title>NArchitecture $(AssemblyName)</Title>
-    <Description>Provide a translation localization manager for efficient multilingual content
-      management.</Description>
-    <Product>NArchitecture</Product>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>NArchitecture.Core</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Build Configuration -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Package Configuration -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0</Version>
     <Authors>Kodlama.io, Contributors</Authors>
     <Company>Kodlama.io</Company>
-    <PackageTags>Clean Architecture, Union Architecture, Core, NArchitecture, Localization,
-      Translation, Internationalization</PackageTags>
-    <PackageIcon>n-architecture-logo.png</PackageIcon>
-    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Product>NArchitecture</Product>
+    <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
   </PropertyGroup>
+
+  <!-- Package Metadata -->
+  <PropertyGroup>
+    <PackageId>NArchitecture.Core.Localization.Translation</PackageId>
+    <Title>NArchitecture Translation Integration</Title>
+    <Description>Translation-based localization for Clean Architecture applications with dynamic language support.</Description>
+    <PackageTags>translation; localization; i18n; clean-architecture; narchitecture</PackageTags>
+    <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+    <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- Package Files -->
   <ItemGroup>
-    <None Include="..\..\docs\images\n-architecture-logo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include=".\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+    <None Include="./README.md" Pack="true" PackagePath="" />
   </ItemGroup>
+
+  <!-- Project References -->
   <ItemGroup>
-    <ProjectReference
-      Include="..\Core.Localization.Abstraction\Core.Localization.Abstraction.csproj" />
-    <ProjectReference Include="..\Core.Translation.Abstraction\Core.Translation.Abstraction.csproj" />
+    <ProjectReference Include="..\Core.Localization.Abstractions\Core.Localization.Abstractions.csproj" />
+    <ProjectReference Include="..\Core.Translation.Abstractions\Core.Translation.Abstractions.csproj" />
   </ItemGroup>
 </Project>

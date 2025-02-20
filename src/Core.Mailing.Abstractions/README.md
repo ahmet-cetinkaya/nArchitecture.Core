@@ -1,15 +1,68 @@
-# NArchitecture.Core.Mailing
+# 📧 NArchitecture Mailing Abstractions
 
-This library provides various classes for email sending capabilities for kodlama.io projects. The `NArchitecture.Core.Mailing.Abstractions` package offers utilities to send emails programmatically from applications. It includes core classes and utilities for sending emails in both clean and union architectures, with support for configuring SMTP servers, defining email templates, sending HTML and plain text emails, and essential utilities for email sending management.
+Essential mailing abstractions for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 📥 Email sending abstractions
+- 🔄 Async operations
+- 📨 Bulk mail support
+- 🎯 Template support
+- ⚡ High-performance design
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Mailing.Abstractions
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Mailing.Abstractions GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Implement mail service
+public class SmtpMailService : IMailService
+{
+    public async Task SendAsync(Mail mail, CancellationToken cancellationToken = default)
+    {
+        // Implementation for sending single email
+    }
+
+    public async Task SendBulkAsync(IEnumerable<Mail> mailList, CancellationToken cancellationToken = default)
+    {
+        // Implementation for sending multiple emails
+    }
+}
+
+// Register in DI
+services.AddScoped<IMailService, SmtpMailService>();
+
+// Usage
+public class NotificationService
+{
+    private readonly IMailService _mailService;
+
+    public NotificationService(IMailService mailService)
+    {
+        _mailService = mailService;
+    }
+
+    public async Task SendWelcomeEmail(string to)
+    {
+        var mail = new Mail
+        {
+            ToEmail = to,
+            Subject = "Welcome!",
+            TextBody = "Welcome to our platform."
+        };
+
+        await _mailService.SendAsync(mail);
+    }
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Mailing.Abstractions)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

@@ -12,7 +12,7 @@ public static class ApplicationBuilderLocalizationMiddlewareExtensions
     /// </summary>
     /// <param name="builder">The IApplicationBuilder instance.</param>
     /// <returns>The updated IApplicationBuilder.</returns>
-    public static IApplicationBuilder UseResponseLocalization(this IApplicationBuilder builder)
+    public static IApplicationBuilder UseLocalization(this IApplicationBuilder builder)
     {
         return builder.UseMiddleware<LocalizationMiddleware>();
     }

@@ -1,15 +1,54 @@
-# NArchitecture.Core.Localization.WebApi
+# 🌐 NArchitecture Web API Localization
 
-This library provides localization support for ASP.NET Web API projects in kodlama.io projects. The `NArchitecture.Core.Localization.WebApi` package offers utilities to enable localization of API responses and error messages. It includes core classes and extensions for integrating localization into ASP.NET Web API projects, with support for attribute-based and resource-based localization, culture-specific responses, and essential utilities for localization management.
+ASP.NET Web API localization support for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 Auto language detection
+- 🌍 Accept-Language support
+- 🎯 Middleware integration
+- ⚡ High-performance design
+- 🛡️ Thread-safe operations
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Localization.WebApi
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Localization.WebApi GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Program.cs or Startup.cs
+public void Configure(IApplicationBuilder app)
+{
+    // Add the localization middleware
+    app.UseLocalization();
+}
+
+// Controller
+public class UsersController : ControllerBase
+{
+    private readonly ILocalizationService _localization;
+
+    public UsersController(ILocalizationService localization)
+    {
+        _localization = localization;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        // Will use Accept-Language header automatically
+        string message = await _localization.GetLocalizedAsync("Welcome");
+        return Ok(message);
+    }
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Localization.WebApi)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

@@ -1,15 +1,71 @@
-# NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection
+# 🌐 NArchitecture Amazon Translate DI Extensions
 
-This library provides dependency injection extensions for integrating Amazon Translate with translation services in kodlama.io projects. The `NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection` package offers utilities to configure and use Amazon Translate services within the dependency injection framework effectively. It includes core classes and extensions for integrating Amazon Translate service into the dependency injection container in both clean and union architectures, supporting the registration of Amazon Translate service and related dependencies, configuration of options, and management of translation services using dependency injection in applications.
+Dependency injection extensions for Amazon Translate in Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 Service Registration
+- ⚙️ AWS Configuration
+- 🔐 Secure Credentials
+- 🌍 Region Selection
+- ⚡ Easy Integration
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Program.cs or Startup.cs
+public void ConfigureServices(IServiceCollection services)
+{
+    // Configure Amazon Translate
+    services.AddAmazonTranslate(config =>
+    {
+        config.AccessKey = Configuration["AWS:AccessKey"];
+        config.SecretKey = Configuration["AWS:SecretKey"];
+        config.RegionEndpoint = Amazon.RegionEndpoint.USEast1;
+    });
+
+    // Register translation service
+    services.AddScoped<ITranslationService, AmazonTranslateLocalizationManager>();
+}
+
+// Usage
+public class TranslationService
+{
+    private readonly ITranslationService _translationService;
+
+    public TranslationService(ITranslationService translationService)
+    {
+        _translationService = translationService;
+    }
+
+    public async Task<string> TranslateToSpanish(string text)
+    {
+        return await _translationService.TranslateAsync(
+            text: text,
+            to: "es",
+            from: "en"
+        );
+    }
+}
+```
+
+## 🔐 AWS Configuration
+
+Make sure to:
+- Set up AWS credentials securely
+- Configure appropriate IAM permissions
+- Select the correct region endpoint
+- Store sensitive data in user secrets or environment variables
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

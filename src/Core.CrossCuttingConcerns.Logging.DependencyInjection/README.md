@@ -1,15 +1,30 @@
-# NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection
+# 📝 NArchitecture Logging DI Extensions
 
-This library provides dependency injection extensions for logging in kodlama.io projects. The `NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection` package offers utilities to effectively configure and use logging services within the dependency injection framework. It includes core classes and extensions for integrating logging dependencies into both clean and union architectures, supporting the configuration and registration of logging providers, definition of logging options, and essential utilities for logging dependency management.
+Dependency injection extensions for logging services in Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 Easy logging service registration
+- 🎯 Clean DI configuration
+- 📦 Built-in logging abstractions
+- ⚡ Performance optimized
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Register your logger
+services.AddLogging(new CustomLogger());
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

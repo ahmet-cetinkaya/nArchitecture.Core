@@ -1,15 +1,38 @@
-# NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File
+# 📝 NArchitecture Serilog File Integration
 
-This library provides integration with Serilog for file logging in kodlama.io projects. The `NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File` package offers utilities to effectively configure Serilog for logging to files within applications. It includes core classes and extensions for integrating Serilog file logging into both clean and union architectures, supporting the configuration and registration of Serilog file sinks, log file rolling policies, file format options, and essential utilities for Serilog file logging integration and management.
+File-based logging implementation with Serilog for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 📁 File-based logging
+- 🔄 Log file rotation
+- 📊 Structured log format
+- ⚡ High-performance logging
+- 🛡️ Thread-safe operations
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Configure file logger
+var config = new SerilogFileLogConfiguration(
+    folderPath: "logs",
+    rollingInterval: RollingInterval.Day,
+    fileSizeLimitBytes: 10_000_000
+);
+
+// Create and register logger
+services.AddLogging(new SerilogFileLogger(config));
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

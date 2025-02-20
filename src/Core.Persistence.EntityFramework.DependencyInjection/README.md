@@ -1,15 +1,46 @@
-# NArchitecture.Core.Persistence.DependencyInjection
+# 💉 NArchitecture Entity Framework DI Extensions
 
-This library provides dependency injection extensions for persistence utilities in kodlama.io projects. The `NArchitecture.Core.Persistence.DependencyInjection` package offers utilities to configure and use persistence services within the dependency injection framework effectively. It includes core classes and extensions for integrating data access and persistence services into the dependency injection container in both clean and union architectures, supporting the configuration and registration of repositories, unit of work pattern, and essential utilities for data access and persistence dependency injection across various data storage technologies such as relational databases, NoSQL databases, and file systems.
+Dependency injection extensions for Entity Framework Core in Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 Database Migration Support
+- 🏭 Automatic Service Registration
+- 📦 Context Registration
+- ⚡ Performance Optimizations
+- 🛡️ Scoped Lifetime Management
+
+## 📥 Installation
 
 ```bash
-dotnet add package NArchitecture.Core.Persistence.DependencyInjection
+dotnet add package NArchitecture.Core.Persistence.EntityFramework.DependencyInjection
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Persistence.DependencyInjection GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Program.cs or Startup.cs
+public void ConfigureServices(IServiceCollection services)
+{
+    // Register your DbContext
+    services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+    // Register migration applier
+    services.AddDbMigrationApplier<AppDbContext>(sp => 
+        sp.GetRequiredService<AppDbContext>());
+}
+
+public void Configure(IApplicationBuilder app)
+{
+    // Apply migrations on startup
+    app.ApplicationServices.UseDbMigrationApplier();
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Persistence.EntityFramework.DependencyInjection)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

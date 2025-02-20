@@ -29,7 +29,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     /// <inheritdoc/>
     public int SaveChanges()
     {
-        try 
+        try
         {
             return Context.SaveChanges();
         }
@@ -43,7 +43,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     /// <inheritdoc/>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        try 
+        try
         {
             return await Context.SaveChangesAsync(cancellationToken);
         }
@@ -190,7 +190,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     protected virtual (TEntity DatabaseEntity, PropertyValues Values) GetDatabaseValues(TEntity entity)
     {
         var entry = Context.Entry(entity);
-        var values = entry.GetDatabaseValues() 
+        var values =
+            entry.GetDatabaseValues()
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
         return ((TEntity)values.ToObject(), values);
     }
@@ -206,7 +207,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     )
     {
         var entry = Context.Entry(entity);
-        var values = await entry.GetDatabaseValuesAsync(cancellationToken)
+        var values =
+            await entry.GetDatabaseValuesAsync(cancellationToken)
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
         return ((TEntity)values.ToObject(), values);
     }
@@ -215,7 +217,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     /// Validates the entity's state by comparing with database values.
     /// Checks for soft deletion and concurrency conflicts.
     /// </summary>
+    /// <param name="entity">The entity to validate</param>
+    /// <param name="databaseEntity">The entity's database values</param>
     /// <param name="ignoreSoftDelete">When true, skips the soft delete check</param>
+    /// <exception cref="InvalidOperationException">Thrown when the entity is deleted or modified by another user</exception>
+    /// <exception cref="DbUpdateConcurrencyException">Thrown when the entity is modified by another user</exception>
     protected virtual void ValidateEntityState(TEntity entity, TEntity databaseEntity, bool ignoreSoftDelete = false)
     {
         if (!ignoreSoftDelete && databaseEntity.DeletedAt.HasValue)

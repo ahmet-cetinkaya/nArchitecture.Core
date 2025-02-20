@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using NArchitecture.Core.Localization.Abstraction;
+using NArchitecture.Core.Localization.Abstractions;
 using NArchitecture.Core.Localization.Resource.Yaml;
 using NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection;
 using Shouldly;

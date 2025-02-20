@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;

@@ -17,13 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Resource.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Resource.Yaml", "src\Core.Localization.Resource.Yaml\Core.Localization.Resource.Yaml.csproj", "{1A9C6A1D-F585-411F-A8D5-361E63EE7E02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Abstraction", "src\Core.Localization.Abstraction\Core.Localization.Abstraction.csproj", "{D337AB65-0D90-494C-A372-A238AA7E74E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Abstractions", "src\Core.Localization.Abstractions\Core.Localization.Abstractions.csproj", "{D337AB65-0D90-494C-A372-A238AA7E74E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.Translation", "src\Core.Localization.Translation\Core.Localization.Translation.csproj", "{0C272CE1-12D7-47D8-98FD-4DDBEB6A294C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Localization.WebApi", "src\Core.Localization.WebApi\Core.Localization.WebApi.csproj", "{A874FBD0-5655-4A29-AD05-3C57A1B6BA31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.Abstraction", "src\Core.Translation.Abstraction\Core.Translation.Abstraction.csproj", "{B00C777E-A6C5-4ED4-86F1-61408B3D0926}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.Abstractions", "src\Core.Translation.Abstractions\Core.Translation.Abstractions.csproj", "{B00C777E-A6C5-4ED4-86F1-61408B3D0926}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Translation.AmazonTranslate", "src\Core.Translation.AmazonTranslate\Core.Translation.AmazonTranslate.csproj", "{C4D96ACD-171A-4B37-8736-51366B98B9E8}"
 EndProject
@@ -44,11 +44,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{0EDE05
 		docs\images\n-architecture-logo.png = docs\images\n-architecture-logo.png
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Serilog", "src\Core.CrossCuttingConcerns.Logging.SeriLog\Core.CrossCuttingConcerns.Logging.Serilog.csproj", "{570EB8D5-8D08-4026-BB52-684E7F599422}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Serilog", "src\Core.CrossCuttingConcerns.Logging.Serilog\Core.CrossCuttingConcerns.Logging.Serilog.csproj", "{570EB8D5-8D08-4026-BB52-684E7F599422}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Exception.WebApi", "src\Core.CrossCuttingConcerns.Exception.WebApi\Core.CrossCuttingConcerns.Exception.WebApi.csproj", "{E9F71091-42BA-42FA-B3ED-83042C813780}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Abstraction", "src\Core.CrossCuttingConcerns.Logging.Abstraction\Core.CrossCuttingConcerns.Logging.Abstraction.csproj", "{4DDE97CF-FC8C-4333-A7AE-80B68E55927F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Abstractions", "src\Core.CrossCuttingConcerns.Logging.Abstractions\Core.CrossCuttingConcerns.Logging.Abstractions.csproj", "{4DDE97CF-FC8C-4333-A7AE-80B68E55927F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.CrossCuttingConcerns.Logging.Serilog.File", "src\Core.CrossCuttingConcerns.Logging.Serilog.File\Core.CrossCuttingConcerns.Logging.Serilog.File.csproj", "{769BF223-862F-4D87-B2A2-6C5148FF2D91}"
 EndProject

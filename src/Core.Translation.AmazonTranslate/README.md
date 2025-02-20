@@ -1,15 +1,67 @@
-# NArchitecture.Core.Translation.AmazonTranslate
+# 🌐 NArchitecture Amazon Translate Integration
 
-This library provides integration with Amazon Translate for translation services in kodlama.io projects. The `NArchitecture.Core.Translation.AmazonTranslate` package offers utilities to translate text using the Amazon Translate service. It includes core classes and extensions for integrating Amazon Translate service as a translation provider in both clean and union architectures, supporting the configuration of Amazon Translate clients, translating text, and managing translations using the Amazon Translate service in applications.
+Amazon Translate integration for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 AWS Translation Service
+- 🌍 Multiple Language Support
+- 🔐 Secure Authentication
+- 🎯 Region Configuration
+- ⚡ High Performance
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Translation.AmazonTranslate
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Translation.AmazonTranslate GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Configure AWS settings
+var config = new AmazonTranslateConfiguration(
+    AccessKey: configuration["AWS:AccessKey"],
+    SecretKey: configuration["AWS:SecretKey"],
+    RegionEndpoint: RegionEndpoint.USEast1
+);
+
+// Register in DI
+services.AddSingleton(config);
+services.AddScoped<ITranslationService, AmazonTranslateLocalizationManager>();
+
+// Usage
+public class TranslationService
+{
+    private readonly ITranslationService _translationService;
+
+    public TranslationService(ITranslationService translationService)
+    {
+        _translationService = translationService;
+    }
+
+    public async Task<string> TranslateContent(string content, string targetLanguage)
+    {
+        return await _translationService.TranslateAsync(
+            text: content,
+            to: targetLanguage,
+            from: "en"
+        );
+    }
+}
+```
+
+## 🔑 AWS Configuration
+
+Ensure you have:
+- AWS Account with Amazon Translate access
+- IAM user with appropriate permissions
+- Access key and secret key
+- Selected AWS region endpoint
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Translation.AmazonTranslate)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

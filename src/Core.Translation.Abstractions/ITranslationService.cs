@@ -1,4 +1,4 @@
-﻿namespace NArchitecture.Core.Translation.Abstraction;
+﻿namespace NArchitecture.Core.Translation.Abstractions;
 
 /// <summary>
 /// Defines methods for translating text between different languages.

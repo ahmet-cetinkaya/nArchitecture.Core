@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using MediatR;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Performance;
 

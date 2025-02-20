@@ -1,15 +1,51 @@
-# NArchitecture.Core.Localization.Translation
+# 🌐 NArchitecture Translation Integration
 
-This library provides translation services for localization in kodlama.io projects. The `NArchitecture.Core.Localization.Translation` package offers utilities to manage translations for different languages within applications. It includes core classes and utilities for managing translations in both clean and union architectures, supporting the definition of translation dictionaries, retrieval of translations by key and culture, and essential utilities for translation management.
+Translation-based localization for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 Dynamic translation support
+- 🌍 Multiple language handling
+- 🎯 Fallback language support
+- ⚡ High-performance translation
+- 🛡️ Thread-safe operations
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Localization.Translation
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Localization.Translation GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Configure translation service
+services.AddScoped<ITranslationService, CustomTranslationService>();
+
+// Configure localization
+services.AddScoped<ILocalizationService, TranslateLocalizationManager>();
+
+// Usage
+public class TranslatedService
+{
+    private readonly ILocalizationService _localization;
+
+    public TranslatedService(ILocalizationService localization)
+    {
+        _localization = localization;
+        _localization.AcceptLocales = ["tr-TR", "en-US"];
+    }
+
+    public async Task<string> GetGreeting()
+    {
+        return await _localization.GetLocalizedAsync("Hello");
+    }
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Localization.Translation)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

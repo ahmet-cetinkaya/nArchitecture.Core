@@ -1,15 +1,72 @@
-# NArchitecture.Core.Persistence.EntityFramework
+# 💾 NArchitecture Entity Framework Core Integration
 
-This library provides persistence utilities for data access using Entity Framework Core in kodlama.io projects. The `NArchitecture.Core.Persistence.EntityFramework` package offers common interfaces, base classes, and utilities to simplify database operations with Entity Framework Core. It includes core interfaces and abstractions for data access and persistence in both clean and union architectures, supporting the definition of repositories, unit of work pattern, and essential utilities for data access and persistence management across various data storage technologies such as relational databases, NoSQL databases, and file systems.
+High-performance Entity Framework Core integration for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🏭 Generic Repository Implementation
+- 📑 Advanced Pagination
+- 🎯 Dynamic Query Support
+- 🔄 Optimistic Concurrency
+- ⚡ Bulk Operations
+- 🛡️ Soft Delete Support
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Persistence.EntityFramework
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Persistence.EntityFramework GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Define your DbContext
+public class AppDbContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
+}
+
+// Implement repository
+public class UserRepository : EfRepositoryBase<User, Guid, AppDbContext>
+{
+    public UserRepository(AppDbContext context) : base(context)
+    {
+    }
+}
+
+// Register in DI
+services.AddDbContext<AppDbContext>();
+services.AddScoped<IAsyncRepository<User, Guid>, UserRepository>();
+
+// Usage
+public class UserService
+{
+    private readonly IAsyncRepository<User, Guid> _userRepository;
+
+    public UserService(IAsyncRepository<User, Guid> userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
+    public async Task<IPaginate<User>> GetActiveUsers(int page, int size)
+    {
+        return await _userRepository.GetListAsync(
+            predicate: u => !u.DeletedAt.HasValue,
+            orderBy: q => q.OrderByDescending(u => u.CreatedAt),
+            index: page,
+            size: size
+        );
+    }
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Persistence.EntityFramework)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

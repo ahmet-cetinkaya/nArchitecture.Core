@@ -1,15 +1,46 @@
-# NArchitecture.Core.Localization.Resource.Yaml
+# 🌐 NArchitecture YAML Resource Provider
 
-This library provides YAML-based resource management for localization in kodlama.io projects. The `NArchitecture.Core.Localization.Resource.Yaml` package offers utilities to manage localized resources using YAML files within applications. It includes core classes and extensions for using YAML files as resource files for localization in both clean and union architectures, supporting the reading and parsing of YAML files, culture-specific translations, and essential utilities for YAML-based localization management.
+YAML-based resource management for localization in Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 📄 YAML resource support
+- 🔄 Dynamic resource loading
+- 📦 Section-based organization
+- 🎯 Lazy loading optimization
+- ⚡ High-performance parsing
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Localization.Resource.Yaml
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Localization.Resource.Yaml GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Configure resource paths
+var resources = new Dictionary<string, Dictionary<string, string>>
+{
+    ["en"] = new()
+    {
+        ["messages"] = "Resources/en/messages.yaml",
+        ["errors"] = "Resources/en/errors.yaml"
+    },
+    ["tr"] = new()
+    {
+        ["messages"] = "Resources/tr/messages.yaml",
+        ["errors"] = "Resources/tr/errors.yaml"
+    }
+};
+
+// Create and register localization service
+services.AddSingleton<ILocalizationService>(new ResourceLocalizationManager(resources));
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Localization.Resource.Yaml)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

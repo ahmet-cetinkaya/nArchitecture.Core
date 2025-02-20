@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Moq;
-using NArchitecture.Core.Localization.Abstraction;
+using NArchitecture.Core.Localization.Abstractions;
 using NArchitecture.Core.Localization.WebApi;
 using Shouldly;
 

@@ -1,6 +1,6 @@
 using System.Data;
 using Moq;
-using NArchitecture.Core.Translation.Abstraction;
+using NArchitecture.Core.Translation.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Localization.Translation.Tests;

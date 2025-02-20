@@ -1,4 +1,4 @@
-﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 
 /// <summary>
 /// Defines a contract for asynchronous logging operations at different severity levels.

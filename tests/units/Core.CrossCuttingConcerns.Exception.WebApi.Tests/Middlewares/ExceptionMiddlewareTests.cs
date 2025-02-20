@@ -5,7 +5,7 @@ using Moq;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Middleware;
 using NArchitecture.Core.CrossCuttingConcerns.Logging;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 using NArchitecture.Core.Validation.Abstractions;
 using Shouldly;
 

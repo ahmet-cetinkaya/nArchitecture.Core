@@ -1,7 +1,7 @@
 using Amazon.Translate;
 using Amazon.Translate.Model;
 using Moq;
-using NArchitecture.Core.Translation.Abstraction;
+using NArchitecture.Core.Translation.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Translation.AmazonTranslate.Tests;

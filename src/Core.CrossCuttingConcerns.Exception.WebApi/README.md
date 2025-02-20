@@ -1,15 +1,35 @@
-# NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi
+# 🛡️ NArchitecture Exception Handling for Web API
 
-This library contains exception handling components specifically tailored for ASP.NET Web API projects within kodlama.io. The `NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi` package offers utilities to effectively handle exceptions in Web API applications. It includes core classes for exception filters, exception handling middleware, and essential utilities for exception management in ASP.NET Web API projects.
+Exception handling middleware and components for ASP.NET Web API applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔄 Global exception middleware
+- 🎯 Automatic exception handling
+- 📝 Structured error responses
+- 🔍 Detailed logging support
+- ⚡ High-performance handlers
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Program.cs or Startup.cs
+public void Configure(IApplicationBuilder app)
+{
+    // Add the exception middleware to the pipeline
+    app.ConfigureCustomExceptionMiddleware();
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

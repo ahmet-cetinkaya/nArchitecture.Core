@@ -1,4 +1,4 @@
-﻿using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+﻿using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 using PackageSerilog = Serilog;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog;

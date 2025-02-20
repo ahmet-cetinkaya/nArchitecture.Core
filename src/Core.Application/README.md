@@ -1,15 +1,60 @@
-# NArchitecture.Core.Application
+# 🚀 NArchitecture.Core.Application
 
-This library contains application layer components utilized in kodlama.io projects. The `NArchitecture.Core.Application` package offers commonly used features and structures in the application layer, aimed at streamlining the software development process. It includes core classes for both clean and union architectures, providing support for CQRS, MediatR, Pipelines, request models, response models, and essential security features.
+Essential application layer components for Clean Architecture with built-in MediatR pipeline behaviors.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🛡️ Validation Pipeline
+- 📦 Caching Pipeline (with distributed cache support)
+- 💾 Transaction Management
+- 🔐 Authorization Pipeline
+- ⚡ Performance Monitoring
+- 📝 Structured Logging
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Application
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Application GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+1. Register the pipeline behaviors:
+
+```csharp
+services.AddMediatR(cfg => {
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(TransactionScopeBehavior<,>));
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
+});
+```
+
+2. Use in your requests:
+
+```csharp
+// Cacheable request
+public class GetUserQuery : IRequest<UserDto>, ICacheableRequest
+{
+    public string UserId { get; set; }
+    public CacheableOptions CacheOptions => new() 
+    { 
+        CacheKey = $"user-{UserId}",
+        SlidingExpiration = TimeSpan.FromMinutes(10)
+    };
+}
+
+// Secured request
+public class DeleteUserCommand : IRequest<bool>, ISecuredRequest
+{
+    public string UserId { get; set; }
+    public RoleClaims RoleClaims => new(CurrentUser.Roles, ["Admin"]);
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Application)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

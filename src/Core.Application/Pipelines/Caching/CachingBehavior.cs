@@ -2,7 +2,7 @@
 using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 

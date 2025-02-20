@@ -1,6 +1,6 @@
 ﻿using Amazon.Translate;
 using Amazon.Translate.Model;
-using NArchitecture.Core.Translation.Abstraction;
+using NArchitecture.Core.Translation.Abstractions;
 
 namespace NArchitecture.Core.Translation.AmazonTranslate;
 

@@ -1,49 +1,76 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>NArchitecture.$(AssemblyName)</RootNamespace>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>NArchitecture.$(AssemblyName)</PackageId>
-    <Version>1.1.2</Version>
-    <Title>NArchitecture $(AssemblyName)</Title>
-    <Description>Provide exception handling components specifically tailored for ASP.NET Web API
-      projects.</Description>
-    <Product>NArchitecture</Product>
-    <Authors>Kodlama.io, Contributors</Authors>
-    <Company>Kodlama.io</Company>
-    <PackageTags>Clean Architecture, Union Architecture, Core, NArchitecture, Web API, Exception
-      Handling, Cross Cutting Concerns</PackageTags>
-    <PackageIcon>n-architecture-logo.png</PackageIcon>
-    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Include="..\..\docs\images\n-architecture-logo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include=".\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.2" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Core.CrossCuttingConcerns.Logging.Abstraction\Core.CrossCuttingConcerns.Logging.Abstraction.csproj" />
-    <ProjectReference Include="..\Core.CrossCuttingConcerns.Exception\Core.CrossCuttingConcerns.Exception.csproj" />
-  </ItemGroup>
+    <!-- Project Configuration -->
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>NArchitecture.Core</RootNamespace>
+    </PropertyGroup>
+
+    <!-- Build Configuration -->
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest</AnalysisLevel>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <Deterministic>true</Deterministic>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
+
+    <!-- Package Configuration -->
+    <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>2.0.0</Version>
+        <Authors>Kodlama.io, Contributors</Authors>
+        <Company>Kodlama.io</Company>
+        <Product>NArchitecture</Product>
+        <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
+    </PropertyGroup>
+
+    <!-- Package Metadata -->
+    <PropertyGroup>
+        <PackageId>NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi</PackageId>
+        <Title>NArchitecture Exception Handling for Web API</Title>
+        <Description>Professional exception handling components with middleware integration for
+            ASP.NET Web API applications.</Description>
+        <PackageTags>exception-handling; aspnetcore; middleware; web-api; clean-architecture;
+            narchitecture</PackageTags>
+        <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+        <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <!-- Package Files -->
+    <ItemGroup>
+        <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+        <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+        <None Include="./README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <!-- Package Dependencies -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+        <PackageReference Include="System.Text.Encodings.Web" Version="9.0.2" />
+    </ItemGroup>
+
+    <!-- Project References -->
+    <ItemGroup>
+        <ProjectReference
+            Include="..\Core.CrossCuttingConcerns.Exception\Core.CrossCuttingConcerns.Exception.csproj" />
+        <ProjectReference
+            Include="..\Core.CrossCuttingConcerns.Logging.Abstractions\Core.CrossCuttingConcerns.Logging.Abstractions.csproj" />
+    </ItemGroup>
 
 </Project>

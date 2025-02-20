@@ -5,7 +5,7 @@ using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.ObjectPool;
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstraction;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 

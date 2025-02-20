@@ -1,15 +1,58 @@
-# NArchitecture.Core.Security.WebApi.Swagger
+# 📚 NArchitecture Security Swagger Integration
 
-This library provides utilities for integrating security features with ASP.NET Web API projects in kodlama.io projects, focusing specifically on Swagger integration. The `NArchitecture.Core.Security.WebApi.Swagger` package offers tools to configure and display security-related information in Swagger documentation. It includes core classes and extensions for integrating security features into Swagger documentation for ASP.NET Web API projects, supporting the documentation of JWT authentication, 2FA, OTP, email handling, hashing, encryption, and other security-related features in Swagger UI documentation for Web API endpoints.
+Swagger integration for security features in Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 🔐 JWT Authentication Documentation
+- 🛡️ Security Scheme Configuration
+- 📝 Bearer Token Integration
+- 🎯 Operation Filters
+- ⚡ Easy Setup
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Security.WebApi.Swagger
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Security.WebApi.Swagger GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Program.cs or Startup.cs
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddSwaggerGen(options =>
+    {
+        // Add security definition
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using the Bearer scheme",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
+
+        // Add security requirements
+        options.OperationFilter<BearerTokenSecurityOperationFilter>();
+    });
+}
+
+public void Configure(IApplicationBuilder app)
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+        c.DocumentTitle = "API Documentation";
+    });
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Security.WebApi.Swagger)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

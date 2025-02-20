@@ -1,15 +1,66 @@
-# NArchitecture.Core.Mailing.MailKit
+# 📧 NArchitecture MailKit Integration
 
-This library provides email sending capabilities using MailKit for kodlama.io projects. The `NArchitecture.Core.Mailing.MailKit` package offers utilities to send emails programmatically using the MailKit library. It includes core classes and extensions for sending emails using MailKit in both clean and union architectures, with support for configuring SMTP servers, defining email templates, sending HTML and plain text emails, and essential utilities for email sending management using the MailKit library.
+High-performance email sending capabilities using MailKit for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 📨 SMTP support
+- 🔐 DKIM signing
+- 📎 Attachments
+- 📝 HTML and text content
+- ⚡ Bulk sending support
+
+## 📥 Installation
 
 ```bash
 dotnet add package NArchitecture.Core.Mailing.MailKit
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.Mailing.MailKit GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Configure mail settings
+var mailSettings = new MailSettings
+{
+    Server = "smtp.example.com",
+    Port = 587,
+    UserName = "user@example.com",
+    Password = "your-password",
+    SenderEmail = "no-reply@example.com",
+    SenderFullName = "My Application"
+};
+
+// Register mail service
+services.AddSingleton(mailSettings);
+services.AddScoped<IMailService, MailKitMailService>();
+
+// Usage
+public class EmailService
+{
+    private readonly IMailService _mailService;
+
+    public EmailService(IMailService(IMailService mailService)
+    {
+        _mailService = mailService;
+    }
+
+    public async Task SendWelcomeEmail(string to)
+    {
+        var mail = new Mail
+        {
+            ToList = [new("User", to)],
+            Subject = "Welcome!",
+            HtmlBody = "<h1>Welcome to our platform!</h1>"
+        };
+
+        await _mailService.SendAsync(mail);
+    }
+}
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.Mailing.MailKit)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)

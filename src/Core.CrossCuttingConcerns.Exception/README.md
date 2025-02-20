@@ -1,15 +1,39 @@
-# NArchitecture.Core.CrossCuttingConcerns.Exception
+# 🛡️ NArchitecture Exception Handling
 
-This library offers cross-cutting concern components for effectively handling exceptions in kodlama.io projects. The `NArchitecture.Core.CrossCuttingConcerns.Exception` package provides core classes to manage exceptions across different layers of applications. It includes support for custom exception types, exception handling strategies, and essential utilities for exception management in both clean and union architectures.
+Professional exception handling components for Clean Architecture applications.
 
-## Installation
+## ✨ Features
 
-You can add the package to your project using NuGet package manager or .NET CLI:
+- 📋 Standardized exception types
+- 🔄 Middleware integration
+- 🎯 Consistent error handling
+- 🚦 Request validation
+- 🔐 Authorization checks
+
+## 📥 Installation 
 
 ```bash
 dotnet add package NArchitecture.Core.CrossCuttingConcerns.Exception
 ```
 
-## Contribution
+## 🚦 Quick Start
 
-If you would like to contribute, please visit the GitHub repository and submit a pull request: [NArchitecture.Core.CrossCuttingConcerns.Exception GitHub Repository](https://github.com/kodlamaio-projects/nArchitecture.Core)
+```csharp
+// Using custom exceptions
+throw new BusinessException("Invalid operation.");
+throw new ValidationException("Validation failed.");
+throw new AuthorizationException("Access denied.");
+
+// Registering middleware
+builder.Services.AddExceptionHandler();
+
+// Using middleware
+app.UseExceptionHandler();
+```
+
+## 🔗 Links
+
+- 📦 [NuGet Package](https://www.nuget.org/packages/NArchitecture.Core.CrossCuttingConcerns.Exception)
+- 💻 [Source Code](https://github.com/kodlamaio-projects/nArchitecture.Core)
+- 🚀 [nArchitecture Starter](https://github.com/kodlamaio-projects/nArchitecture)
+- ⚡ [nArchitecture Generator](https://github.com/kodlamaio-projects/nArchitecture.Gen)
