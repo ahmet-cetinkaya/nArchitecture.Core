@@ -26,7 +26,7 @@ public readonly ref struct RoleClaims(string[]? identityRoles, string[]? require
     private static bool ContainsAdmin(string[] roles)
     {
         const string adminRole = "Admin";
-        foreach (var role in roles)
+        foreach (string role in roles)
         {
             if (string.IsNullOrWhiteSpace(role))
                 continue;
@@ -51,15 +51,15 @@ public readonly ref struct RoleClaims(string[]? identityRoles, string[]? require
             return true;
 
         bool hasAnyValidRequiredRole = false;
-        foreach (var required in _requiredRoles)
+        foreach (string required in _requiredRoles)
         {
             if (string.IsNullOrWhiteSpace(required))
                 return true;
 
             hasAnyValidRequiredRole = true;
-            var requiredSpan = required.AsSpan().Trim();
+            ReadOnlySpan<char> requiredSpan = required.AsSpan().Trim();
 
-            foreach (var identity in _identityRoles!)
+            foreach (string identity in _identityRoles!)
             {
                 if (string.IsNullOrWhiteSpace(identity))
                     continue;

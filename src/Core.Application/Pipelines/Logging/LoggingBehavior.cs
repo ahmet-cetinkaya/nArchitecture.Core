@@ -34,13 +34,13 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         const int InitialDictionaryCapacity = 8;
         using var requestDict = new ValueDictionary<string, object>(InitialDictionaryCapacity);
 
-        foreach (var prop in typeof(TRequest).GetProperties())
+        foreach (System.Reflection.PropertyInfo prop in typeof(TRequest).GetProperties())
         {
-            var value = prop.GetValue(request);
+            object? value = prop.GetValue(request);
             if (value is null)
                 continue;
 
-            var excludeParam = Array.Find(request.LogOptions.ExcludeParameters, p => p.Name == prop.Name);
+            LogExcludeParameter excludeParam = Array.Find(request.LogOptions.ExcludeParameters, p => p.Name == prop.Name);
 
             if (excludeParam.Name != prop.Name)
             {
@@ -69,7 +69,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         _ = logger.InformationAsync(JsonSerializer.Serialize(logDetail, _jsonOptions));
 
         // Execute handler
-        var response = await next();
+        TResponse? response = await next();
 
         // Log response if configured
         if (request.LogOptions.LogResponse)
@@ -106,11 +106,11 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
             return value.ToString();
 
         const int maskLength = 6;
-        var startChars = param.Name == "SensitiveData" ? 4 : param.KeepStartChars;
-        var endChars = param.Name == "SensitiveData" ? 5 : param.KeepEndChars;
+        int startChars = param.Name == "SensitiveData" ? 4 : param.KeepStartChars;
+        int endChars = param.Name == "SensitiveData" ? 5 : param.KeepEndChars;
 
         // Removed threshold check to always mask
-        var emailMaskedResult = new char[startChars + maskLength + endChars];
+        char[] emailMaskedResult = new char[startChars + maskLength + endChars];
         value[..startChars].CopyTo(emailMaskedResult);
         emailMaskedResult.AsSpan(startChars, maskLength).Fill(param.MaskChar);
         value[^endChars..].CopyTo(emailMaskedResult.AsSpan(startChars + maskLength));
@@ -124,7 +124,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
 
         const int keepStart = 2,
             keepEnd = 2;
-        var numericResult = new char[value.Length];
+        char[] numericResult = new char[value.Length];
         value[..keepStart].CopyTo(numericResult);
         numericResult.AsSpan(keepStart, value.Length - keepStart - keepEnd).Fill(param.MaskChar);
         value[^keepEnd..].CopyTo(numericResult.AsSpan(value.Length - keepEnd));
@@ -137,7 +137,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
             return value.ToString();
 
         const int fixedMaskLength = 3;
-        var maskedFixedLengthResult = new char[param.KeepStartChars + fixedMaskLength];
+        char[] maskedFixedLengthResult = new char[param.KeepStartChars + fixedMaskLength];
         value[..param.KeepStartChars].CopyTo(maskedFixedLengthResult);
         maskedFixedLengthResult.AsSpan(param.KeepStartChars).Fill(param.MaskChar);
         return new string(maskedFixedLengthResult);
@@ -148,7 +148,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         // If the string is exactly keepStartChars + keepEndChars + 1, mask exactly one middle char.
         if (value.Length == param.KeepStartChars + param.KeepEndChars + 1)
         {
-            var simpleMaskedResult = new char[value.Length];
+            char[] simpleMaskedResult = new char[value.Length];
             value[..param.KeepStartChars].CopyTo(simpleMaskedResult);
             simpleMaskedResult[param.KeepStartChars] = param.MaskChar;
             value[^param.KeepEndChars..].CopyTo(simpleMaskedResult.AsSpan(param.KeepStartChars + 1));
@@ -161,7 +161,7 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         // For short strings, fill all positions between keepStart and (value.Length - keepEnd) with maskChar.
         if (value.Length < param.KeepStartChars + param.KeepEndChars + 5)
         {
-            var simpleMaskedResult = new char[value.Length];
+            char[] simpleMaskedResult = new char[value.Length];
             value[..param.KeepStartChars].CopyTo(simpleMaskedResult);
             for (int i = param.KeepStartChars; i < value.Length - param.KeepEndChars; i++)
                 simpleMaskedResult[i] = param.MaskChar;
@@ -169,8 +169,8 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
             return new string(simpleMaskedResult);
         }
 
-        var maskLength = 5; // Fixed mask length for longer strings
-        var longMaskedResult = new char[param.KeepStartChars + maskLength + param.KeepEndChars];
+        int maskLength = 5; // Fixed mask length for longer strings
+        char[] longMaskedResult = new char[param.KeepStartChars + maskLength + param.KeepEndChars];
         value[..param.KeepStartChars].CopyTo(longMaskedResult);
         longMaskedResult.AsSpan(param.KeepStartChars, maskLength).Fill(param.MaskChar);
         value[^param.KeepEndChars..].CopyTo(longMaskedResult.AsSpan(param.KeepStartChars + maskLength));
@@ -191,7 +191,7 @@ file static class SpanExtensions
 {
     public static bool IsNumeric(this ReadOnlySpan<char> span)
     {
-        foreach (var c in span)
+        foreach (char c in span)
             if (!char.IsDigit(c))
                 return false;
         return true;

@@ -20,7 +20,7 @@ class Program
 
     static async Task Main(string[] args)
     {
-        Directory.CreateDirectory(LogDirectory);
+        _ = Directory.CreateDirectory(LogDirectory);
 
         if (args is [LAST_RUN_FLAG, ..])
         {
@@ -28,7 +28,7 @@ class Program
             return;
         }
 
-        var benchmarkProjects = FindBenchmarkProjects();
+        List<BenchmarkProject> benchmarkProjects = FindBenchmarkProjects();
         if (benchmarkProjects is [])
         {
             AnsiConsole.MarkupLine("[red]:cross_mark: No benchmark projects found![/]");
@@ -36,7 +36,7 @@ class Program
         }
 
         AnsiConsole.MarkupLine("[blue]:magnifying_glass_tilted_left: Available benchmark projects:[/]");
-        var selectedProject = AnsiConsole.Prompt(
+        BenchmarkProject selectedProject = AnsiConsole.Prompt(
             new SelectionPrompt<BenchmarkProject>()
                 .Title("Select a [green]:racing_car: benchmark project[/] to run:")
                 .PageSize(10)
@@ -69,10 +69,10 @@ class Program
 
     private static string? FindSolutionDirectory()
     {
-        var currentDir = AppDomain.CurrentDomain.BaseDirectory;
+        string? currentDir = AppDomain.CurrentDomain.BaseDirectory;
         while (currentDir != null)
         {
-            if (Directory.GetFiles(currentDir, "*.sln").Any())
+            if (Directory.GetFiles(currentDir, "*.sln").Length != 0)
                 return currentDir;
 
             currentDir = Path.GetDirectoryName(currentDir);
@@ -88,7 +88,7 @@ class Program
             return;
         }
 
-        var lastProjectPath = await File.ReadAllTextAsync(LastRunFilePath);
+        string lastProjectPath = await File.ReadAllTextAsync(LastRunFilePath);
         var project = new BenchmarkProject(Path.GetFileNameWithoutExtension(lastProjectPath), lastProjectPath);
         await RunBenchmarkAsync(project);
     }
@@ -100,7 +100,7 @@ class Program
         AnsiConsole.MarkupLine($"[blue]:magnifying_glass_tilted_left: Selected project: [green]{project.Name}[/][/]");
         AnsiConsole.WriteLine();
 
-        var projectDir = Path.GetDirectoryName(project.Path)!;
+        string projectDir = Path.GetDirectoryName(project.Path)!;
         using var process = new Process
         {
             StartInfo = new()
@@ -113,7 +113,7 @@ class Program
             },
         };
 
-        process.Start();
+        _ = process.Start();
         await process.WaitForExitAsync();
 
         await File.WriteAllTextAsync(LastRunFilePath, project.Path);
@@ -128,7 +128,7 @@ class Program
                         $"[blue]:hammer_and_wrench: Building {project.Name}...[/]",
                         ctx =>
                         {
-                            ctx.Spinner(Spinner.Known.Star);
+                            _ = ctx.Spinner(Spinner.Known.Star);
                             using var process = new Process
                             {
                                 StartInfo = new()
@@ -139,7 +139,7 @@ class Program
                                     UseShellExecute = false,
                                 },
                             };
-                            process.Start();
+                            _ = process.Start();
                             process.WaitForExit();
                         }
                     )

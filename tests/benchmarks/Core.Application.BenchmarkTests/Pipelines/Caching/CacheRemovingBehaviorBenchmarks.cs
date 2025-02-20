@@ -2,9 +2,9 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
+using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
-using Moq;
 
 namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Caching;
 

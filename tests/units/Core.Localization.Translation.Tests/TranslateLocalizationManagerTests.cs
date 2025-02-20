@@ -20,7 +20,7 @@ public class TranslateLocalizationManagerTests
         // Arrange
         const string key = "hello";
         const string expectedTranslation = "Merhaba";
-        _mockTranslationService.Setup(s => s.TranslateAsync(key, "tr", It.IsAny<string>())).ReturnsAsync(expectedTranslation);
+        _ = _mockTranslationService.Setup(s => s.TranslateAsync(key, "tr", It.IsAny<string>())).ReturnsAsync(expectedTranslation);
 
         var manager = new TranslateLocalizationManager(_mockTranslationService.Object) { AcceptLocales = new[] { "tr" } };
 
@@ -38,8 +38,8 @@ public class TranslateLocalizationManagerTests
         // Arrange
         const string key = "hello";
         const string defaultTranslation = "Hello";
-        _mockTranslationService.Setup(s => s.TranslateAsync(key, "tr", It.IsAny<string>())).ReturnsAsync(string.Empty);
-        _mockTranslationService.Setup(s => s.TranslateAsync(key, "en", It.IsAny<string>())).ReturnsAsync(defaultTranslation);
+        _ = _mockTranslationService.Setup(s => s.TranslateAsync(key, "tr", It.IsAny<string>())).ReturnsAsync(string.Empty);
+        _ = _mockTranslationService.Setup(s => s.TranslateAsync(key, "en", It.IsAny<string>())).ReturnsAsync(defaultTranslation);
 
         var manager = new TranslateLocalizationManager(_mockTranslationService.Object) { AcceptLocales = new[] { "tr" } };
 
@@ -57,7 +57,7 @@ public class TranslateLocalizationManagerTests
     {
         // Arrange
         const string key = "nonexistent_key";
-        _mockTranslationService
+        _ = _mockTranslationService
             .Setup(s => s.TranslateAsync(key, It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(string.Empty);
 
@@ -77,7 +77,7 @@ public class TranslateLocalizationManagerTests
         var manager = new TranslateLocalizationManager(_mockTranslationService.Object) { AcceptLocales = null };
 
         // Act & Assert
-        Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("any_key").GetAwaiter().GetResult());
+        _ = Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("any_key").GetAwaiter().GetResult());
     }
 
     [Theory(DisplayName = "Should try multiple locales in order until finding translation")]
@@ -91,10 +91,12 @@ public class TranslateLocalizationManagerTests
 
         foreach (string locale in locales.Where(l => l != expectedLocale))
         {
-            _mockTranslationService.Setup(s => s.TranslateAsync(key, locale, It.IsAny<string>())).ReturnsAsync(string.Empty);
+            _ = _mockTranslationService.Setup(s => s.TranslateAsync(key, locale, It.IsAny<string>())).ReturnsAsync(string.Empty);
         }
 
-        _mockTranslationService.Setup(s => s.TranslateAsync(key, expectedLocale, It.IsAny<string>())).ReturnsAsync(translation);
+        _ = _mockTranslationService
+            .Setup(s => s.TranslateAsync(key, expectedLocale, It.IsAny<string>()))
+            .ReturnsAsync(translation);
 
         var manager = new TranslateLocalizationManager(_mockTranslationService.Object) { AcceptLocales = locales };
 
@@ -114,7 +116,7 @@ public class TranslateLocalizationManagerTests
     {
         // Arrange
         const string key = "test_key";
-        _mockTranslationService
+        _ = _mockTranslationService
             .Setup(s => s.TranslateAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(string.Empty);
 

@@ -36,12 +36,12 @@ public class AuthenticatorTests
         _mockOtpService = new Mock<IOtpService>();
         _cancellationToken = CancellationToken.None;
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.EnabledAuthenticatorTypes)
             .Returns([AuthenticatorType.Email, AuthenticatorType.Sms, AuthenticatorType.Otp]);
-        _mockConfiguration.Setup(c => c.CodeExpiration).Returns(TimeSpan.FromMinutes(5));
-        _mockConfiguration.Setup(c => c.CodeLength).Returns(6);
-        _mockConfiguration.Setup(c => c.CodeSeedLength).Returns(32);
+        _ = _mockConfiguration.Setup(c => c.CodeExpiration).Returns(TimeSpan.FromMinutes(5));
+        _ = _mockConfiguration.Setup(c => c.CodeLength).Returns(6);
+        _ = _mockConfiguration.Setup(c => c.CodeSeedLength).Returns(32);
 
         _authenticator = new(
             _mockRepository.Object,
@@ -60,7 +60,7 @@ public class AuthenticatorTests
     {
         var predicate = MatchUserId(userId);
 
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.Is<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(expr =>
@@ -79,7 +79,7 @@ public class AuthenticatorTests
     {
         if (authenticator != null)
         {
-            _mockRepository
+            _ = _mockRepository
                 .Setup(r =>
                     r.GetAsync(
                         It.Is<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(expr => true),
@@ -91,7 +91,7 @@ public class AuthenticatorTests
                 )
                 .ReturnsAsync(authenticator);
 
-            _mockCodeGenerator
+            _ = _mockCodeGenerator
                 .Setup(g => g.GenerateNumeric(It.IsAny<int>(), It.IsAny<byte[]>()))
                 .Returns(authenticator.Code ?? "123456");
         }
@@ -110,9 +110,9 @@ public class AuthenticatorTests
         var base64Seed = Convert.ToBase64String(TestCodeSeed);
         var code = "123456";
 
-        _mockCodeGenerator.Setup(g => g.GenerateBase64(32, It.IsAny<byte[]>())).Returns(base64Seed);
-        _mockCodeGenerator.Setup(g => g.GenerateNumeric(6, It.IsAny<byte[]>())).Returns(code);
-        _mockOtpService.Setup(o => o.GenerateSecretKey(It.IsAny<byte[]>())).Returns(TestCodeSeed);
+        _ = _mockCodeGenerator.Setup(g => g.GenerateBase64(32, It.IsAny<byte[]>())).Returns(base64Seed);
+        _ = _mockCodeGenerator.Setup(g => g.GenerateNumeric(6, It.IsAny<byte[]>())).Returns(code);
+        _ = _mockOtpService.Setup(o => o.GenerateSecretKey(It.IsAny<byte[]>())).Returns(TestCodeSeed);
 
         // Act
         var result = await _authenticator.CreateAsync(
@@ -123,7 +123,7 @@ public class AuthenticatorTests
         );
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.UserId.ShouldBe(userId);
         result.Type.ShouldBe(type);
         result.CodeSeed.ShouldBe(TestCodeSeed);
@@ -151,11 +151,11 @@ public class AuthenticatorTests
 
         SetupRepositoryMocks(authenticator);
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetEmailTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EmailTemplateConfiguration("Test Subject", "Test {0}", "Test {0}"));
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetSmsTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SmsTemplateConfiguration("Code: {0}"));
 
@@ -207,10 +207,12 @@ public class AuthenticatorTests
 
         SetupRepositoryMocks(authenticator);
 
-        _mockConfiguration.Setup(c => c.GetCodeExpiredMessageAsync(It.IsAny<CancellationToken>())).ReturnsAsync("Code expired");
+        _ = _mockConfiguration
+            .Setup(c => c.GetCodeExpiredMessageAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("Code expired");
 
         // Act & Assert
-        await Should.ThrowAsync<BusinessException>(
+        _ = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.VerifyAsync(userId, "123456", _cancellationToken)
         );
     }
@@ -236,7 +238,7 @@ public class AuthenticatorTests
         };
 
         // Setup repository mock
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.Is<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(expr => expr.Compile().Invoke(authenticator)),
@@ -251,11 +253,11 @@ public class AuthenticatorTests
         // Setup OTP service mock specifically for OTP type
         if (type == AuthenticatorType.Otp)
         {
-            _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
+            _ = _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
         }
 
         // Setup repository update mock
-        _mockRepository.Setup(r => r.UpdateAsync(authenticator, _cancellationToken)).ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.UpdateAsync(authenticator, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Act
         await _authenticator.VerifyAsync(userId, code, _cancellationToken);
@@ -286,13 +288,15 @@ public class AuthenticatorTests
         };
 
         SetupGetAsync(userId, authenticator);
-        _mockConfiguration.Setup(c => c.GetInvalidCodeMessageAsync(It.IsAny<CancellationToken>())).ReturnsAsync("Invalid code");
+        _ = _mockConfiguration
+            .Setup(c => c.GetInvalidCodeMessageAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("Invalid code");
 
         if (type == AuthenticatorType.Otp)
-            _mockOtpService.Setup(o => o.ComputeOtp(It.IsAny<byte[]>(), null)).Returns("654321");
+            _ = _mockOtpService.Setup(o => o.ComputeOtp(It.IsAny<byte[]>(), null)).Returns("654321");
 
         // Act & Assert
-        await Should.ThrowAsync<BusinessException>(
+        _ = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.VerifyAsync(userId, "wrong-code", _cancellationToken)
         );
     }
@@ -336,7 +340,7 @@ public class AuthenticatorTests
         var userId = Guid.NewGuid();
         var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Email);
 
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
@@ -348,7 +352,7 @@ public class AuthenticatorTests
             )
             .ReturnsAsync(authenticator);
 
-        _mockRepository
+        _ = _mockRepository
             .Setup(r => r.DeleteAsync(It.IsAny<UserAuthenticator<Guid, Guid>>(), It.IsAny<bool>(), _cancellationToken))
             .ReturnsAsync(authenticator);
 
@@ -440,19 +444,19 @@ public class AuthenticatorTests
         var userId = Guid.NewGuid();
 
         // Enable the unsupported type in configuration to bypass initial validation
-        _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([type]);
+        _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([type]);
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetUnsupportedTypeMessageAsync(type, It.IsAny<CancellationToken>()))
             .ReturnsAsync("Unsupported type");
 
         // Set up code generator to allow reaching the unsupported type check
-        _mockCodeGenerator
+        _ = _mockCodeGenerator
             .Setup(g => g.GenerateBase64(It.IsAny<int>(), It.IsAny<byte[]>()))
             .Returns(Convert.ToBase64String(TestCodeSeed));
 
         // Act & Assert
-        await Should.ThrowAsync<NotSupportedException>(
+        _ = await Should.ThrowAsync<NotSupportedException>(
             async () => await _authenticator.CreateAsync(userId, type, null, _cancellationToken)
         );
     }
@@ -472,12 +476,12 @@ public class AuthenticatorTests
         };
 
         SetupRepositoryMocks(authenticator);
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetDestinationRequiredMessageAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("Destination is required");
 
         // Act & Assert
-        await Should.ThrowAsync<BusinessException>(
+        _ = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.AttemptAsync(userId, null, _cancellationToken)
         );
     }
@@ -495,12 +499,12 @@ public class AuthenticatorTests
         };
 
         SetupRepositoryMocks(authenticator);
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetDestinationRequiredMessageAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("Destination is required");
 
         // Act & Assert
-        await Should.ThrowAsync<BusinessException>(
+        _ = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.AttemptAsync(userId, string.Empty, _cancellationToken)
         );
     }
@@ -544,12 +548,12 @@ public class AuthenticatorTests
 
         SetupRepositoryMocks(null);
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetAuthenticatorNotFoundMessageAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("Authenticator not found");
 
         // Act & Assert
-        await Should.ThrowAsync<BusinessException>(
+        _ = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.AttemptAsync(userId, destination, _cancellationToken)
         );
     }
@@ -570,12 +574,12 @@ public class AuthenticatorTests
 
         SetupRepositoryMocks(authenticator);
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetEmailTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Template not found"));
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
     }
@@ -599,25 +603,25 @@ public class AuthenticatorTests
 
         if (type == AuthenticatorType.Email)
         {
-            _mockConfiguration
+            _ = _mockConfiguration
                 .Setup(c => c.GetEmailTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new EmailTemplateConfiguration("Test", "Test {0}", "Test {0}"));
-            _mockMailService
+            _ = _mockMailService
                 .Setup(m => m.SendAsync(It.IsAny<Mail>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Mail service error"));
         }
         else
         {
-            _mockConfiguration
+            _ = _mockConfiguration
                 .Setup(c => c.GetSmsTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SmsTemplateConfiguration("Test {0}"));
-            _mockSmsService
+            _ = _mockSmsService
                 .Setup(s => s.SendAsync(It.IsAny<Sms>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("SMS service error"));
         }
 
         // Act & Assert
-        await Should.ThrowAsync<Exception>(
+        _ = await Should.ThrowAsync<Exception>(
             async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
     }
@@ -640,7 +644,9 @@ public class AuthenticatorTests
         };
 
         SetupRepositoryMocks(authenticator);
-        _mockConfiguration.Setup(c => c.GetCodeExpiredMessageAsync(It.IsAny<CancellationToken>())).ReturnsAsync("Code expired");
+        _ = _mockConfiguration
+            .Setup(c => c.GetCodeExpiredMessageAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("Code expired");
 
         // Act & Assert
         var exception = await Should.ThrowAsync<BusinessException>(
@@ -665,12 +671,12 @@ public class AuthenticatorTests
 
         SetupRepositoryMocks(authenticator);
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetSmsTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("SMS template not found"));
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(
+        _ = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _authenticator.AttemptAsync(userId, "+1234567890", _cancellationToken)
         );
     }
@@ -695,7 +701,7 @@ public class AuthenticatorTests
             Id = userId,
         };
 
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
@@ -709,10 +715,10 @@ public class AuthenticatorTests
 
         if (type == AuthenticatorType.Otp)
         {
-            _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
+            _ = _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
         }
 
-        _mockRepository.Setup(r => r.UpdateAsync(authenticator, _cancellationToken)).ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.UpdateAsync(authenticator, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Act
         await _authenticator.VerifyAsync(userId, code, _cancellationToken);
@@ -741,7 +747,7 @@ public class AuthenticatorTests
             Id = userId,
         };
 
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
@@ -755,7 +761,7 @@ public class AuthenticatorTests
 
         if (type == AuthenticatorType.Otp)
         {
-            _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
+            _ = _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
         }
 
         // Act
@@ -782,9 +788,9 @@ public class AuthenticatorTests
         };
 
         // Add unsupported type to enabled types to bypass initial validation
-        _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType> { type });
+        _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType> { type });
 
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
@@ -797,7 +803,7 @@ public class AuthenticatorTests
             .ReturnsAsync(authenticator);
 
         // Act & Assert
-        await Should.ThrowAsync<NotSupportedException>(
+        _ = await Should.ThrowAsync<NotSupportedException>(
             async () => await _authenticator.VerifyAsync(userId, "123456", _cancellationToken)
         );
     }
@@ -819,7 +825,7 @@ public class AuthenticatorTests
         };
 
         SetupRepositoryMocks(authenticator);
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetCodeExpiredMessageAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("Code has expired");
 
@@ -840,49 +846,53 @@ public class AuthenticatorTests
         var userId = Guid.NewGuid();
         var phoneNumber = "+1234567890";
         var code = "123456";
-        
+
         // If expirationDate is null or in the past, assign a future time.
         DateTime parsedDate = expirationDate != null ? DateTime.Parse(expirationDate) : DateTime.MinValue;
-        DateTime expiresAt = (expirationDate == null || parsedDate < DateTime.UtcNow)
-            ? DateTime.UtcNow.AddMinutes(10)
-            : parsedDate;
-            
+        DateTime expiresAt =
+            (expirationDate == null || parsedDate < DateTime.UtcNow) ? DateTime.UtcNow.AddMinutes(10) : parsedDate;
+
         var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Sms)
         {
             Code = code,
             CodeSeed = TestCodeSeed,
             CodeExpiresAt = expiresAt,
             Id = userId,
-            UserId = userId
+            UserId = userId,
         };
 
         // Setup repository returning our authenticator
-        _mockRepository.Setup(r =>
-            r.GetAsync(
-                It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                null,
-                false,
-                true,
-                _cancellationToken)
-        ).ReturnsAsync(authenticator);
+        _ = _mockRepository
+            .Setup(r =>
+                r.GetAsync(
+                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
+                    null,
+                    false,
+                    true,
+                    _cancellationToken
+                )
+            )
+            .ReturnsAsync(authenticator);
 
         // Enable SMS authentication type
-        _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes)
+        _ = _mockConfiguration
+            .Setup(c => c.EnabledAuthenticatorTypes)
             .Returns(new HashSet<AuthenticatorType> { AuthenticatorType.Sms });
 
         // Setup SMS template
-        _mockConfiguration.Setup(c => c.GetSmsTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _ = _mockConfiguration
+            .Setup(c => c.GetSmsTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SmsTemplateConfiguration("Code: {0}"));
 
         // Setup code generator expecting the known seed
-        _mockCodeGenerator.Setup(g => g.GenerateNumeric(
-            It.IsAny<int>(),
-            It.Is<byte[]>(s => s.SequenceEqual(TestCodeSeed))
-        )).Returns(code);
+        _ = _mockCodeGenerator
+            .Setup(g => g.GenerateNumeric(It.IsAny<int>(), It.Is<byte[]>(s => s.SequenceEqual(TestCodeSeed))))
+            .Returns(code);
 
         // Setup SMS service to capture the sent SMS and return CompletedTask
         Sms? capturedSms = null;
-        _mockSmsService.Setup(s => s.SendAsync(It.IsAny<Sms>(), It.IsAny<CancellationToken>()))
+        _ = _mockSmsService
+            .Setup(s => s.SendAsync(It.IsAny<Sms>(), It.IsAny<CancellationToken>()))
             .Callback<Sms, CancellationToken>((sms, _) => capturedSms = sms)
             .Returns(Task.CompletedTask);
 
@@ -890,23 +900,25 @@ public class AuthenticatorTests
         await _authenticator.AttemptAsync(userId, phoneNumber, _cancellationToken);
 
         // Assert
-        capturedSms.ShouldNotBeNull();
+        _ = capturedSms.ShouldNotBeNull();
         capturedSms.PhoneNumber.ShouldBe(phoneNumber);
         capturedSms.Priority.ShouldBe(1);
         capturedSms.CustomParameters!.ShouldContainKey("type");
         capturedSms.CustomParameters!["type"].ShouldBe("authentication");
         capturedSms.CustomParameters.ShouldContainKey("expiresAt");
         capturedSms.CustomParameters["expiresAt"].ShouldBe(expiresAt.ToString("O"));
-        
+
         // Verify repository update was called once
         _mockRepository.Verify(
-            r => r.UpdateAsync(
-                It.Is<UserAuthenticator<Guid, Guid>>(a =>
-                    a.Id.Equals(userId) &&
-                    a.Code == code &&
-                    a.Type == AuthenticatorType.Sms),
-                _cancellationToken),
-            Times.Once);
+            r =>
+                r.UpdateAsync(
+                    It.Is<UserAuthenticator<Guid, Guid>>(a =>
+                        a.Id.Equals(userId) && a.Code == code && a.Type == AuthenticatorType.Sms
+                    ),
+                    _cancellationToken
+                ),
+            Times.Once
+        );
     }
 
     [Fact(DisplayName = "Should throw for unsupported type during attempt")]
@@ -925,10 +937,11 @@ public class AuthenticatorTests
 
         SetupRepositoryMocks(authenticator);
         // Include unsupportedType in EnabledAuthenticatorTypes to bypass the "not enabled" check.
-        _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes)
+        _ = _mockConfiguration
+            .Setup(c => c.EnabledAuthenticatorTypes)
             .Returns(new HashSet<AuthenticatorType> { unsupportedType });
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetUnsupportedTypeMessageAsync(unsupportedType, It.IsAny<CancellationToken>()))
             .ReturnsAsync("Unsupported authenticator type");
 
@@ -953,11 +966,11 @@ public class AuthenticatorTests
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
             Id = userId,
-            UserId = userId
+            UserId = userId,
         };
 
         // Setup repository mock
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
@@ -970,12 +983,10 @@ public class AuthenticatorTests
             .ReturnsAsync(authenticator);
 
         // Clear enabled types
-        _mockConfiguration
-            .Setup(c => c.EnabledAuthenticatorTypes)
-            .Returns(new HashSet<AuthenticatorType>()); // Empty set means no types are enabled
+        _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType>()); // Empty set means no types are enabled
 
         // Setup error message
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetAuthenticatorTypeNotEnabledMessageAsync(type, It.IsAny<CancellationToken>()))
             .ReturnsAsync($"Authenticator type {type} is not enabled");
 
@@ -983,7 +994,7 @@ public class AuthenticatorTests
         var exception = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
-        
+
         exception.Message.ShouldBe($"Authenticator type {type} is not enabled");
 
         // Verify that GetAuthenticatorTypeNotEnabledMessageAsync was called
@@ -1008,11 +1019,11 @@ public class AuthenticatorTests
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
             Id = userId,
-            UserId = userId
+            UserId = userId,
         };
 
         // Setup repository mock
-        _mockRepository
+        _ = _mockRepository
             .Setup(r =>
                 r.GetAsync(
                     It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
@@ -1025,12 +1036,10 @@ public class AuthenticatorTests
             .ReturnsAsync(authenticator);
 
         // Clear enabled types
-        _mockConfiguration
-            .Setup(c => c.EnabledAuthenticatorTypes)
-            .Returns(new HashSet<AuthenticatorType>()); // Empty set means no types are enabled
+        _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType>()); // Empty set means no types are enabled
 
         // Setup error message
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetAuthenticatorTypeNotEnabledMessageAsync(type, It.IsAny<CancellationToken>()))
             .ReturnsAsync($"Authenticator type {type} is not enabled");
 
@@ -1038,7 +1047,7 @@ public class AuthenticatorTests
         var exception = await Should.ThrowAsync<BusinessException>(
             async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
-        
+
         exception.Message.ShouldBe($"Authenticator type {type} is not enabled");
 
         // Verify that GetAuthenticatorTypeNotEnabledMessageAsync was called
@@ -1069,10 +1078,10 @@ public class AuthenticatorTests
 
         if (type == AuthenticatorType.Otp)
         {
-            _mockOtpService.Setup(o => o.ComputeOtp(It.IsAny<byte[]>(), It.IsAny<DateTime?>())).Returns("654321"); // Different from input code
+            _ = _mockOtpService.Setup(o => o.ComputeOtp(It.IsAny<byte[]>(), It.IsAny<DateTime?>())).Returns("654321"); // Different from input code
         }
 
-        _mockConfiguration
+        _ = _mockConfiguration
             .Setup(c => c.GetInvalidCodeMessageAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("Invalid verification code");
 

@@ -24,7 +24,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         try
         {
-            var (databaseEntity, _) = GetDatabaseValues(entity);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(entity);
             ValidateEntityState(entity, databaseEntity);
             EditEntityPropertiesToUpdate(entity);
             Context.Entry(entity).State = EntityState.Modified;
@@ -32,7 +32,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException)
         {
-            var (databaseEntity, _) = GetDatabaseValues(entity);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(entity);
             ValidateEntityState(entity, databaseEntity);
             throw;
         }
@@ -46,7 +46,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         try
         {
-            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                await GetDatabaseValuesAsync(entity, cancellationToken);
             ValidateEntityState(entity, databaseEntity);
             EditEntityPropertiesToUpdate(entity);
             Context.Entry(entity).State = EntityState.Modified;
@@ -54,7 +55,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException)
         {
-            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                await GetDatabaseValuesAsync(entity, cancellationToken);
             ValidateEntityState(entity, databaseEntity);
             throw;
         }
@@ -74,7 +76,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         {
             foreach (TEntity entity in entities)
             {
-                var (databaseEntity, _) = GetDatabaseValues(entity);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(
+                    entity
+                );
                 ValidateEntityState(entity, databaseEntity);
                 EditEntityPropertiesToUpdate(entity);
                 Context.Entry(entity).State = EntityState.Modified;
@@ -83,10 +87,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            TEntity? failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
             if (failedEntity != null)
             {
-                var (databaseEntity, _) = GetDatabaseValues(failedEntity);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(
+                    failedEntity
+                );
                 ValidateEntityState(failedEntity, databaseEntity);
             }
             throw;
@@ -111,7 +117,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         {
             foreach (TEntity entity in entities)
             {
-                var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                    await GetDatabaseValuesAsync(entity, cancellationToken);
                 ValidateEntityState(entity, databaseEntity);
                 EditEntityPropertiesToUpdate(entity);
                 Context.Entry(entity).State = EntityState.Modified;
@@ -120,10 +127,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            TEntity? failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
             if (failedEntity != null)
             {
-                var (databaseEntity, _) = await GetDatabaseValuesAsync(failedEntity, cancellationToken);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                    await GetDatabaseValuesAsync(failedEntity, cancellationToken);
                 ValidateEntityState(failedEntity, databaseEntity);
             }
             throw;

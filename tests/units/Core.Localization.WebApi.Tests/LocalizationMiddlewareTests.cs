@@ -24,7 +24,7 @@ public class LocalizationMiddlewareTests
 
         // Setup the next delegate with explicit Task return
         var task = Task.CompletedTask;
-        _nextMock.Setup(x => x.Invoke(It.IsAny<HttpContext>())).Returns(task);
+        _ = _nextMock.Setup(x => x.Invoke(It.IsAny<HttpContext>())).Returns(task);
 
         _middleware = new LocalizationMiddleware(_nextMock.Object);
     }
@@ -108,7 +108,7 @@ public class LocalizationMiddlewareTests
     public void Constructor_WithNullNextDelegate_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => new LocalizationMiddleware(null!));
+        _ = Should.Throw<ArgumentNullException>(() => new LocalizationMiddleware(null!));
     }
 
     [Theory(DisplayName = "Should handle various Accept-Language header formats")]

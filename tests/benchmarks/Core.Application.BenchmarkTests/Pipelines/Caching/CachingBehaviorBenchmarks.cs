@@ -3,15 +3,15 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
+using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
-using Moq;
 
 namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Caching;
 
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
-public class CachingBehaviorBenchmarks
+internal class CachingBehaviorBenchmarks
 {
     private CachingBehavior<TestRequest, string> _behavior = null!;
     private TestRequest _request = null!;
@@ -108,7 +108,7 @@ public class CachingBehaviorBenchmarks
         }
     }
 
-    public class TestRequest : IRequest<string>, ICacheableRequest
+    internal class TestRequest : IRequest<string>, ICacheableRequest
     {
         public bool BypassCache { get; set; }
         public string CacheKey { get; set; } = string.Empty;

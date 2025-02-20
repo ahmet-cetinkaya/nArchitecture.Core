@@ -67,7 +67,7 @@ public class ValidationBehaviorTests
         var behavior = new ValidationBehavior<DummyRequest, DummyResponse>(validatorMock.Object);
         var dummyRequest = new DummyRequest { Data = "Test Fail" };
 
-        Task<DummyResponse> Next() => Task.FromResult(new DummyResponse());
+        static Task<DummyResponse> Next() => Task.FromResult(new DummyResponse());
 
         // Act & Assert
         var exception = await Should.ThrowAsync<ValidationException>(

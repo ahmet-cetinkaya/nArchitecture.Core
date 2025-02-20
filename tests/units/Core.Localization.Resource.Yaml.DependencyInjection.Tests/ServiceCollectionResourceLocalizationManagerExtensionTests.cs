@@ -15,12 +15,12 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
     public ServiceCollectionResourceLocalizationManagerExtensionTests()
     {
         _testBasePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        Directory.CreateDirectory(_testBasePath);
+        _ = Directory.CreateDirectory(_testBasePath);
         _services = new ServiceCollection();
 
         // Mock Assembly.GetExecutingAssembly() by creating test directory structure
         string featuresPath = Path.Combine(_testBasePath, "Features");
-        Directory.CreateDirectory(featuresPath);
+        _ = Directory.CreateDirectory(featuresPath);
     }
 
     [Fact(DisplayName = "Should register ResourceLocalizationManager when valid locale files exist")]
@@ -31,7 +31,7 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         SetupAssemblyLocation();
 
         // Act
-        _services.AddYamlResourceLocalization();
+        _ = _services.AddYamlResourceLocalization();
 
         // Assert
         var serviceProvider = _services.BuildServiceProvider();
@@ -48,7 +48,7 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         SetupAssemblyLocation();
 
         // Act
-        _services.AddYamlResourceLocalization();
+        _ = _services.AddYamlResourceLocalization();
 
         // Assert
         var serviceProvider = _services.BuildServiceProvider();
@@ -69,7 +69,7 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         SetupAssemblyLocation();
 
         // Act
-        _services.AddYamlResourceLocalization();
+        _ = _services.AddYamlResourceLocalization();
 
         // Assert
         var serviceProvider = _services.BuildServiceProvider();
@@ -84,11 +84,11 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
     {
         // Arrange
         string featurePath = Path.Combine(_testBasePath, "Features", "Feature1");
-        Directory.CreateDirectory(featurePath);
+        _ = Directory.CreateDirectory(featurePath);
         SetupAssemblyLocation();
 
         // Act
-        _services.AddYamlResourceLocalization();
+        _ = _services.AddYamlResourceLocalization();
 
         // Assert
         var serviceProvider = _services.BuildServiceProvider();
@@ -102,7 +102,7 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
     {
         string featurePath = Path.Combine(_testBasePath, "Features", featureName);
         string localesPath = Path.Combine(featurePath, "Resources", "Locales");
-        Directory.CreateDirectory(localesPath);
+        _ = Directory.CreateDirectory(localesPath);
 
         foreach (string locale in locales)
         {
@@ -115,7 +115,7 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
     {
         string featurePath = Path.Combine(_testBasePath, "Features", featureName);
         string localesPath = Path.Combine(featurePath, "Resources", "Locales");
-        Directory.CreateDirectory(localesPath);
+        _ = Directory.CreateDirectory(localesPath);
 
         string content = "test: Test Content";
         File.WriteAllText(Path.Combine(localesPath, fileName), content);

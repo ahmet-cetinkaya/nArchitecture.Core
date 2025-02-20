@@ -65,13 +65,12 @@ public interface IAuthenticatorConfiguration
     /// <summary>
     /// Gets the error message when an authenticator type is not enabled in the configuration.
     /// </summary>
-    ValueTask<string> GetAuthenticatorTypeNotEnabledMessageAsync(AuthenticatorType type, CancellationToken cancellationToken = default);
+    ValueTask<string> GetAuthenticatorTypeNotEnabledMessageAsync(
+        AuthenticatorType type,
+        CancellationToken cancellationToken = default
+    );
 }
 
-public readonly record struct EmailTemplateConfiguration(
-    string Subject,
-    string TextBodyTemplate,
-    string HtmlBodyTemplate);
+public readonly record struct EmailTemplateConfiguration(string Subject, string TextBodyTemplate, string HtmlBodyTemplate);
 
-public readonly record struct SmsTemplateConfiguration(
-    string MessageTemplate);
+public readonly record struct SmsTemplateConfiguration(string MessageTemplate);

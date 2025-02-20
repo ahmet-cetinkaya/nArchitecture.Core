@@ -14,7 +14,7 @@ public static class BenchmarkRunner
 
     public static async Task RunBenchmarksInteractivelyAsync(Assembly assembly, bool silent = false)
     {
-        Directory.CreateDirectory(LogDirectory);
+        _ = Directory.CreateDirectory(LogDirectory);
 
         try
         {
@@ -34,7 +34,7 @@ public static class BenchmarkRunner
             Type selectedType;
             if (silent && File.Exists(LastBenchmarkFilePath))
             {
-                var lastBenchmarkName = await File.ReadAllTextAsync(LastBenchmarkFilePath);
+                string lastBenchmarkName = await File.ReadAllTextAsync(LastBenchmarkFilePath);
                 if (string.IsNullOrEmpty(lastBenchmarkName))
                 {
                     AnsiConsole.MarkupLine("[red]:cross_mark: Invalid last benchmark data![/]");
@@ -91,39 +91,39 @@ public static class BenchmarkRunner
 
     private static async Task RunBenchmarkTypeAsync(Type benchmarkType)
     {
-        var config = BenchmarkDotNet
+        BenchmarkDotNet.Configs.ManualConfig config = BenchmarkDotNet
             .Configs.ManualConfig.Create(BenchmarkDotNet.Configs.DefaultConfig.Instance)
             .WithOptions(BenchmarkDotNet.Configs.ConfigOptions.DisableOptimizationsValidator);
 
-        await Task.Run(() => BenchmarkDotNet.Running.BenchmarkRunner.Run(benchmarkType, config));
+        _ = await Task.Run(() => BenchmarkDotNet.Running.BenchmarkRunner.Run(benchmarkType, config));
     }
 
     private static string GetRelativePath(Type type)
     {
-        var codeBase = type.Assembly.Location;
-        var assemblyPath = Path.GetDirectoryName(codeBase);
+        string codeBase = type.Assembly.Location;
+        string? assemblyPath = Path.GetDirectoryName(codeBase);
         if (assemblyPath == null)
             return type.Name + ".cs";
 
         // Find the nearest .csproj file by walking up the directory tree
         var currentDir = new DirectoryInfo(assemblyPath);
-        while (currentDir != null && !currentDir.GetFiles("*.csproj").Any())
+        while (currentDir != null && currentDir.GetFiles("*.csproj").Length == 0)
         {
             currentDir = currentDir.Parent;
         }
 
-        var projectDir = currentDir?.FullName;
+        string? projectDir = currentDir?.FullName;
         if (projectDir == null)
             return type.Name + ".cs";
 
         // Search for the file in and below the project directory
-        var fileName = type.Name + ".cs";
-        var files = Directory.GetFiles(projectDir, fileName, SearchOption.AllDirectories);
+        string fileName = type.Name + ".cs";
+        string[] files = Directory.GetFiles(projectDir, fileName, SearchOption.AllDirectories);
 
-        if (!files.Any())
+        if (files.Length == 0)
             return fileName;
 
-        var fullPath = files.First();
+        string fullPath = files.First();
         return Path.GetRelativePath(projectDir, fullPath);
     }
 }

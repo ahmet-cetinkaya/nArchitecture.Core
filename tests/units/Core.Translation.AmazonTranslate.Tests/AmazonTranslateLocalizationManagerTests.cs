@@ -29,27 +29,33 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
     )
     {
         // Arrange
-        _mockTranslateClient
-            .Setup(x => x.TranslateTextAsync(
-                It.Is<TranslateTextRequest>(r => 
-                    r.Text == sourceText && 
-                    r.TargetLanguageCode == targetLang && 
-                    r.SourceLanguageCode == sourceLang),
-                It.IsAny<CancellationToken>()))
+        _ = _mockTranslateClient
+            .Setup(x =>
+                x.TranslateTextAsync(
+                    It.Is<TranslateTextRequest>(r =>
+                        r.Text == sourceText && r.TargetLanguageCode == targetLang && r.SourceLanguageCode == sourceLang
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(new TranslateTextResponse { TranslatedText = expectedTranslation });
 
         // Act
         string result = await _manager.TranslateAsync(sourceText, targetLang, sourceLang);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldBe(expectedTranslation);
-        _mockTranslateClient.Verify(x => x.TranslateTextAsync(
-            It.Is<TranslateTextRequest>(r => 
-                r.Text == sourceText && 
-                r.TargetLanguageCode == targetLang && 
-                r.SourceLanguageCode == sourceLang),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _mockTranslateClient.Verify(
+            x =>
+                x.TranslateTextAsync(
+                    It.Is<TranslateTextRequest>(r =>
+                        r.Text == sourceText && r.TargetLanguageCode == targetLang && r.SourceLanguageCode == sourceLang
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 
     [Theory(DisplayName = "TranslateAsync should throw exception for invalid language codes")]
@@ -62,12 +68,12 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
     )
     {
         // Arrange
-        _mockTranslateClient
+        _ = _mockTranslateClient
             .Setup(x => x.TranslateTextAsync(It.IsAny<TranslateTextRequest>(), default))
             .ThrowsAsync(new InvalidRequestException("Invalid language code"));
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidRequestException>(
+        _ = await Should.ThrowAsync<InvalidRequestException>(
             async () => await _manager.TranslateAsync(sourceText, targetLang, sourceLang)
         );
     }
@@ -79,9 +85,7 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
         string emptyText = string.Empty;
 
         // Act & Assert
-        await Should.ThrowAsync<ArgumentException>(
-            async () => await _manager.TranslateAsync(emptyText, "tr", "en")
-        );
+        _ = await Should.ThrowAsync<ArgumentException>(async () => await _manager.TranslateAsync(emptyText, "tr", "en"));
     }
 
     [Theory(DisplayName = "TranslateAsync should handle service errors gracefully")]
@@ -90,14 +94,12 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
     public async Task TranslateAsync_ShouldHandleServiceErrors_Gracefully(string errorMessage)
     {
         // Arrange
-        _mockTranslateClient
+        _ = _mockTranslateClient
             .Setup(x => x.TranslateTextAsync(It.IsAny<TranslateTextRequest>(), default))
             .ThrowsAsync(new AmazonTranslateException(errorMessage));
 
         // Act & Assert
-        await Should.ThrowAsync<AmazonTranslateException>(
-            async () => await _manager.TranslateAsync("Hello", "tr", "en")
-        );
+        _ = await Should.ThrowAsync<AmazonTranslateException>(async () => await _manager.TranslateAsync("Hello", "tr", "en"));
     }
 
     [Theory(DisplayName = "TranslateAsync should throw ArgumentException for invalid inputs")]
@@ -116,9 +118,10 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
             async () => await _manager.TranslateAsync(text, targetLang, sourceLang)
         );
         exception.Message.ShouldContain(expectedErrorMessage);
-        _mockTranslateClient.Verify(x => x.TranslateTextAsync(
-            It.IsAny<TranslateTextRequest>(),
-            It.IsAny<CancellationToken>()), Times.Never);
+        _mockTranslateClient.Verify(
+            x => x.TranslateTextAsync(It.IsAny<TranslateTextRequest>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     public void Dispose()

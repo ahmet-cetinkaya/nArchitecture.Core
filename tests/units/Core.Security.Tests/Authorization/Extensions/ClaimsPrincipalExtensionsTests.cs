@@ -52,7 +52,7 @@ public class ClaimsPrincipalExtensionsTests
         var result = principal.GetClaims(ClaimTypes.Role);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldBe(expectedRoles);
     }
 
@@ -67,7 +67,7 @@ public class ClaimsPrincipalExtensionsTests
         var result = principal.GetClaims(ClaimTypes.Role);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldBeEmpty();
     }
 
@@ -85,7 +85,7 @@ public class ClaimsPrincipalExtensionsTests
         var result = principal.GetOperationClaims();
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldBe(expectedRoles);
     }
 

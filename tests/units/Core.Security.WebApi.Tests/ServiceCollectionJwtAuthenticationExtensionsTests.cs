@@ -18,26 +18,26 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
-        mockJwtConfig.Setup(c => c.Audience).Returns("test-audience");
-        mockJwtConfig.Setup(c => c.Issuer).Returns("test-issuer");
-        mockJwtConfig.Setup(c => c.ValidateAudience).Returns(true);
-        mockJwtConfig.Setup(c => c.ValidateIssuer).Returns(true);
-        mockJwtConfig.Setup(c => c.ValidateLifetime).Returns(true);
-        mockJwtConfig.Setup(c => c.ValidateIssuerSigningKey).Returns(true);
-        mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.Zero);
-        mockJwtConfig.Setup(c => c.RequireExpirationTime).Returns(true);
-        mockJwtConfig.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(30));
-        mockJwtConfig.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromDays(7));
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
+        _ = mockJwtConfig.Setup(c => c.Audience).Returns("test-audience");
+        _ = mockJwtConfig.Setup(c => c.Issuer).Returns("test-issuer");
+        _ = mockJwtConfig.Setup(c => c.ValidateAudience).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ValidateIssuer).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ValidateLifetime).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ValidateIssuerSigningKey).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.Zero);
+        _ = mockJwtConfig.Setup(c => c.RequireExpirationTime).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(30));
+        _ = mockJwtConfig.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromDays(7));
 
         // Act
-        services.ConfigureJwtAuthentication(mockJwtConfig.Object);
+        _ = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
         var provider = services.BuildServiceProvider();
         var authenticationScheme = provider.GetRequiredService<IAuthenticationSchemeProvider>();
 
         // Assert
         var scheme = await authenticationScheme.GetDefaultAuthenticateSchemeAsync();
-        scheme.ShouldNotBeNull();
+        _ = scheme.ShouldNotBeNull();
         scheme.Name.ShouldBe(JwtBearerDefaults.AuthenticationScheme);
     }
 
@@ -48,20 +48,20 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         IServiceCollection services = new ServiceCollection();
         const string securityKey = "very-long-secure-key-for-testing-purposes-min-16-chars";
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey);
-        mockJwtConfig.Setup(c => c.Audience).Returns("test-audience");
-        mockJwtConfig.Setup(c => c.Issuer).Returns("test-issuer");
-        mockJwtConfig.Setup(c => c.ValidateAudience).Returns(true);
-        mockJwtConfig.Setup(c => c.ValidateIssuer).Returns(true);
-        mockJwtConfig.Setup(c => c.ValidateLifetime).Returns(true);
-        mockJwtConfig.Setup(c => c.ValidateIssuerSigningKey).Returns(true);
-        mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.Zero);
-        mockJwtConfig.Setup(c => c.RequireExpirationTime).Returns(true);
-        mockJwtConfig.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(30));
-        mockJwtConfig.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromDays(7));
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey);
+        _ = mockJwtConfig.Setup(c => c.Audience).Returns("test-audience");
+        _ = mockJwtConfig.Setup(c => c.Issuer).Returns("test-issuer");
+        _ = mockJwtConfig.Setup(c => c.ValidateAudience).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ValidateIssuer).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ValidateLifetime).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ValidateIssuerSigningKey).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.Zero);
+        _ = mockJwtConfig.Setup(c => c.RequireExpirationTime).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(30));
+        _ = mockJwtConfig.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromDays(7));
 
         // Act
-        services.ConfigureJwtAuthentication(mockJwtConfig.Object);
+        _ = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
 
         // Assert
         var provider = services.BuildServiceProvider();
@@ -87,10 +87,10 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns(string.Empty);
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns(string.Empty);
 
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        _ = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
     }
 
     [Theory(DisplayName = "ConfigureJwtAuthentication should throw when security key is invalid")]
@@ -102,11 +102,11 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey!);
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey!);
 
         // Act & Assert
         var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
-        exception.ParamName.ShouldBe("SecurityKey");
+        exception.ParamName.ShouldBe("jwtConfiguration.SecurityKey");
     }
 
     [Theory(DisplayName = "ConfigureJwtAuthentication should throw when security key is too short")]
@@ -117,7 +117,7 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns(shortKey);
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns(shortKey);
 
         // Act & Assert
         var exception = Should.Throw<ArgumentException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
@@ -130,13 +130,13 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
-        mockJwtConfig.Setup(c => c.ValidateIssuer).Returns(true);
-        mockJwtConfig.Setup(c => c.Issuer).Returns(string.Empty);
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
+        _ = mockJwtConfig.Setup(c => c.ValidateIssuer).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.Issuer).Returns(string.Empty);
 
         // Act & Assert
         var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
-        exception.ParamName.ShouldBe("Issuer");
+        exception.ParamName.ShouldBe("jwtConfiguration.Issuer");
     }
 
     [Fact(DisplayName = "ConfigureJwtAuthentication should throw when ValidateAudience is true but Audience is empty")]
@@ -145,13 +145,13 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
-        mockJwtConfig.Setup(c => c.ValidateAudience).Returns(true);
-        mockJwtConfig.Setup(c => c.Audience).Returns(string.Empty);
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
+        _ = mockJwtConfig.Setup(c => c.ValidateAudience).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.Audience).Returns(string.Empty);
 
         // Act & Assert
         var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
-        exception.ParamName.ShouldBe("Audience");
+        exception.ParamName.ShouldBe("jwtConfiguration.Audience");
     }
 
     [Theory(DisplayName = "ConfigureJwtAuthentication should throw when token lifetimes are invalid")]
@@ -168,13 +168,13 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
-        mockJwtConfig.Setup(c => c.ValidateLifetime).Returns(true);
-        mockJwtConfig.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(accessTokenMinutes));
-        mockJwtConfig.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromMinutes(refreshTokenMinutes));
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
+        _ = mockJwtConfig.Setup(c => c.ValidateLifetime).Returns(true);
+        _ = mockJwtConfig.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(accessTokenMinutes));
+        _ = mockJwtConfig.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromMinutes(refreshTokenMinutes));
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        _ = Should.Throw<ArgumentException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
     }
 
     [Theory(DisplayName = "ConfigureJwtAuthentication should throw when clock skew is negative")]
@@ -184,11 +184,12 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
-        mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.FromMinutes(skewMinutes));
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
+        _ = mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.FromMinutes(skewMinutes));
 
         // Act & Assert
         var exception = Should.Throw<ArgumentException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        exception.ParamName.ShouldBe("jwtConfiguration.ClockSkew");
         exception.Message.ShouldContain("negative");
     }
 
@@ -198,7 +199,7 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         // Arrange
         IServiceCollection services = new ServiceCollection();
         var mockJwtConfig = new Mock<IJwtAuthenticationConfiguration>();
-        mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
+        _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
 
         // Act
         var result = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
@@ -214,6 +215,6 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         IServiceCollection services = new ServiceCollection();
 
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(null!));
+        _ = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(null!));
     }
 }

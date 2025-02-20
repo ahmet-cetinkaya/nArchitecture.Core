@@ -32,7 +32,7 @@ public class CachingBehaviorTests
         _loggerMock = new Mock<ILogger>();
 
         _behavior = new CachingBehavior<MockCacheableRequest, string>(
-            _cache, 
+            _cache,
             _loggerMock.Object,
             new CacheSettings(TimeSpan.FromDays(2))
         );
@@ -679,10 +679,7 @@ public class CachingBehaviorTests
     {
         // Arrange
         var request = new MockCacheableRequest();
-        await _cache.SetAsync(
-            request.CacheOptions.CacheKey,
-            Encoding.UTF8.GetBytes(JsonSerializer.Serialize("cached-value"))
-        );
+        await _cache.SetAsync(request.CacheOptions.CacheKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize("cached-value")));
 
         _ = _loggerMock
             .Setup(x => x.InformationAsync(It.Is<string>(msg => msg.Contains("Cache hit"))))
@@ -692,10 +689,7 @@ public class CachingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        _loggerMock.Verify(
-            x => x.InformationAsync(It.Is<string>(msg => msg.Contains("Cache hit"))),
-            Times.Once
-        );
+        _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(msg => msg.Contains("Cache hit"))), Times.Once);
     }
 
     /// <summary>
@@ -716,10 +710,7 @@ public class CachingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        _loggerMock.Verify(
-            x => x.WarningAsync(It.Is<string>(msg => msg.Contains("Cache deserialization failed"))),
-            Times.Once
-        );
+        _loggerMock.Verify(x => x.WarningAsync(It.Is<string>(msg => msg.Contains("Cache deserialization failed"))), Times.Once);
     }
 
     /// <summary>
@@ -732,11 +723,12 @@ public class CachingBehaviorTests
     {
         // Arrange & Act & Assert
         var exception = Should.Throw<ArgumentOutOfRangeException>(
-            () => new CachingBehavior<MockCacheableRequest, string>(
-                _cache,
-                _loggerMock.Object,
-                new CacheSettings(TimeSpan.FromSeconds(seconds))
-            )
+            () =>
+                new CachingBehavior<MockCacheableRequest, string>(
+                    _cache,
+                    _loggerMock.Object,
+                    new CacheSettings(TimeSpan.FromSeconds(seconds))
+                )
         );
 
         exception.Message.ShouldContain("Sliding expiration must be positive");

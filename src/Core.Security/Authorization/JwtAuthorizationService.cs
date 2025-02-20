@@ -20,7 +20,7 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
 
     public virtual Task<bool> HasPermissionAsync(ClaimsPrincipal principal, string permissionName)
     {
-        var userOperationClaims = principal.GetOperationClaims() ?? [];
+        ICollection<string> userOperationClaims = principal.GetOperationClaims() ?? [];
         bool hasPermission = userOperationClaims.Contains(permissionName);
         return Task.FromResult(hasPermission);
     }
@@ -33,7 +33,7 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
 
     public virtual Task<bool> HasAnyPermissionAsync(ClaimsPrincipal principal, IEnumerable<string> permissionNames)
     {
-        var userOperationClaims = principal.GetOperationClaims() ?? [];
+        ICollection<string> userOperationClaims = principal.GetOperationClaims() ?? [];
         bool hasAnyPermission = permissionNames.Any(userOperationClaims.Contains);
         return Task.FromResult(hasAnyPermission);
     }
@@ -46,7 +46,7 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
 
     public virtual Task<bool> HasAllPermissionsAsync(ClaimsPrincipal principal, IEnumerable<string> permissionNames)
     {
-        var userOperationClaims = principal.GetOperationClaims() ?? [];
+        ICollection<string> userOperationClaims = principal.GetOperationClaims() ?? [];
         bool hasAllPermissions = permissionNames.All(userOperationClaims.Contains);
         return Task.FromResult(hasAllPermissions);
     }

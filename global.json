@@ -1,6 +1,13 @@
 {
+    "sdk": {
+        "allowPrerelease": false,
+        "rollForward": "latestMinor",
+        "version": "9.0.0"
+    },
     "scripts": {
-        "analyze": "dotnet roslynator analyze",
+        "analyze": "dotnet roslynator analyze --exclude tests/**/**/*",
+        "analyze:fix": "dotnet roslynator fix --exclude tests/**/**/*",
+        "analyze:security": "dotnet security-scan CorePackages.sln",
         "benchmark": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj && dotnet restore",
         "benchmark:last": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run && dotnet restore",
         "build": "dotnet build --configuration Release",

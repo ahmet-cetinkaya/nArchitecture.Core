@@ -13,7 +13,7 @@ namespace NArchitecture.Core.Application.Pipelines.Caching;
 /// Pipeline behavior that handles cache removal operations for requests implementing ICacheRemoverRequest.
 /// Supports both individual cache key removal and group-based cache removal.
 /// </summary>
-public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public sealed class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, ICacheRemoverRequest
 {
     private readonly IDistributedCache _cache;
@@ -59,6 +59,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
             cancellationToken.ThrowIfCancellationRequested(); // Check before cache operation
             // Remove the single cache key
             await _cache.RemoveAsync(request.CacheOptions.CacheKey, cancellationToken);
+            await _logger.InformationAsync($"Removed cache key: {request.CacheOptions.CacheKey}");
             return response;
         }
 
@@ -91,6 +92,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
         {
             cancellationToken.ThrowIfCancellationRequested();
             await _cache.RemoveAsync(request.CacheOptions.CacheKey, cancellationToken);
+            await _logger.InformationAsync($"Removed cache key: {request.CacheOptions.CacheKey}");
         }
 
         return response;
@@ -99,7 +101,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
     private async Task RemoveGroupKeysAsync(string[] groupKeys, Memory<byte> buffer, CancellationToken cancellationToken)
     {
         // Initialize task list and key set from pool
-        var pendingTasks = new List<Task>(capacity: 32);
+        List<Task> pendingTasks = new(capacity: 32);
         HashSet<string> keySet = HashSetPool.Get();
 
         try
@@ -107,7 +109,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
             // Process each group key
             foreach (string groupKey in groupKeys)
             {
-                // Check for cancellation before each group processing
+                // Check cancellation first
                 cancellationToken.ThrowIfCancellationRequested();
 
                 // Acquire group lock
@@ -123,8 +125,8 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
 
                     // Prepare key set
                     keySet.Clear();
-                    var reader = new Utf8JsonReader(cachedGroup);
-                    if (JsonSerializer.Deserialize<string[]>(ref reader) is { } keys)
+                    string[]? keys = JsonSerializer.Deserialize<string[]>(cachedGroup);
+                    if (keys != null)
                         keySet.UnionWith(keys);
 
                     // Check cancellation before starting removal tasks
@@ -138,6 +140,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                     foreach (string key in keySet)
                     {
                         pendingTasks.Add(_cache.RemoveAsync(key, cancellationToken));
+                        await _logger.InformationAsync($"Removed cache key: {key}");
                     }
 
                     // Execute all removal tasks
@@ -145,9 +148,7 @@ public class CacheRemovingBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                     pendingTasks.Clear();
 
                     // Log the operation
-                    await _logger.InformationAsync(
-                        $"Removed cache group {groupKey} with {keySet.Count} keys"
-                    );
+                    await _logger.InformationAsync($"Removed cache group {groupKey} with {keySet.Count} keys");
                 }
                 finally
                 {

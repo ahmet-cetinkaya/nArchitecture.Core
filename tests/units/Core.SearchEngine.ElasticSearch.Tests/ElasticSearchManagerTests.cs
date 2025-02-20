@@ -116,7 +116,7 @@ public class ElasticSearchFixture : IAsyncLifetime
             {
                 try
                 {
-                    await _dockerClient.Containers.StopContainerAsync(container.ID, new ContainerStopParameters());
+                    _ = await _dockerClient.Containers.StopContainerAsync(container.ID, new ContainerStopParameters());
                     await _dockerClient.Containers.RemoveContainerAsync(container.ID, new ContainerRemoveParameters());
                 }
                 catch
@@ -162,7 +162,7 @@ public class ElasticSearchFixture : IAsyncLifetime
         );
 
         _containerId = createContainerResponse.ID;
-        await _dockerClient.Containers.StartContainerAsync(_containerId, null);
+        _ = await _dockerClient.Containers.StartContainerAsync(_containerId, null);
     }
 
     /// <summary>
@@ -228,10 +228,10 @@ public class ElasticSearchFixture : IAsyncLifetime
         }
 
         // Create test index and insert test data
-        await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
+        _ = await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
         await Task.Delay(1000);
 
-        await Manager.InsertAsync(
+        _ = await Manager.InsertAsync(
             new SearchDocumentWithData(
                 Id: "1",
                 IndexName: TestIndex,
@@ -248,7 +248,7 @@ public class ElasticSearchFixture : IAsyncLifetime
     {
         try
         {
-            await _client.Indices.DeleteAsync(TestIndex);
+            _ = await _client.Indices.DeleteAsync(TestIndex);
             await Task.Delay(1000); // Increased delay for better stability
         }
         catch
@@ -259,11 +259,11 @@ public class ElasticSearchFixture : IAsyncLifetime
         await Task.Delay(1000); // Additional delay before creating new index
 
         // Create fresh index
-        await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
+        _ = await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
         await Task.Delay(1000);
 
         // Insert initial test document
-        await Manager.InsertAsync(
+        _ = await Manager.InsertAsync(
             new SearchDocumentWithData(
                 Id: "1",
                 IndexName: TestIndex,
@@ -280,7 +280,7 @@ public class ElasticSearchFixture : IAsyncLifetime
     {
         if (!_skipContainerCreation && _containerId != null)
         {
-            await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters());
+            _ = await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters());
             await _dockerClient.Containers.RemoveContainerAsync(_containerId, new ContainerRemoveParameters());
         }
     }
@@ -345,7 +345,7 @@ public class ElasticSearchManagerTests
         var result = await _manager.GetAllSearch<TestDocument>(parameters);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
         result.Count.ShouldBe(1);
         result[0].Item.Name.ShouldBe("Test");
@@ -374,9 +374,9 @@ public class ElasticSearchManagerTests
         var result = await _manager.GetSearchByField<TestDocument>(parameters);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
-        result[0].Item.ShouldBeOfType<TestDocument>();
+        _ = result[0].Item.ShouldBeOfType<TestDocument>();
     }
 
     /// <summary>
@@ -502,7 +502,7 @@ public class ElasticSearchManagerTests
         var result = await _manager.GetIndexList();
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Count.ShouldBeGreaterThan(0);
         result.ShouldContainKey(TestIndex);
     }
@@ -527,7 +527,7 @@ public class ElasticSearchManagerTests
         var result = await _manager.GetSearchBySimpleQueryString<TestDocument>(parameters);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
         result[0].Item.Name.ShouldBe("Test");
     }
@@ -574,6 +574,6 @@ public class ElasticSearchManagerTests
         var document = new SearchDocumentWithData(Id: "1", IndexName: "", Data: new TestDocument());
 
         // Act & Assert
-        await Should.ThrowAsync<ArgumentNullException>(async () => await _manager.UpdateByElasticIdAsync(document));
+        _ = await Should.ThrowAsync<ArgumentNullException>(async () => await _manager.UpdateByElasticIdAsync(document));
     }
 }

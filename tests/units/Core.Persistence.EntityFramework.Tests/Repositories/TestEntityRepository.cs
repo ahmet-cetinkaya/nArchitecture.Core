@@ -69,26 +69,26 @@ public class TestDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TestEntity>(builder =>
+        _ = modelBuilder.Entity<TestEntity>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
-            builder.Property(e => e.Name).HasMaxLength(1000);
-            builder.Property(e => e.Description).HasMaxLength(2000);
-            builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).ValueGeneratedNever();
+            _ = builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+            _ = builder.Property(e => e.Name).HasMaxLength(1000);
+            _ = builder.Property(e => e.Description).HasMaxLength(2000);
+            _ = builder.HasKey(e => e.Id);
+            _ = builder.Property(e => e.Id).ValueGeneratedNever();
 
             // Add concurrency token
-            builder.Property(e => e.UpdatedAt).IsConcurrencyToken();
+            _ = builder.Property(e => e.UpdatedAt).IsConcurrencyToken();
 
             // One-to-One
-            builder
+            _ = builder
                 .HasOne(e => e.SingleDetail)
                 .WithOne(d => d.TestEntity)
                 .HasForeignKey<SingleDetail>(d => d.TestEntityId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // One-to-Many with self
-            builder
+            _ = builder
                 .HasOne(e => e.Parent)
                 .WithMany(e => e.Children)
                 .HasForeignKey(e => e.ParentId)
@@ -96,32 +96,32 @@ public class TestDbContext : DbContext
                 .IsRequired(false);
 
             // One-to-Many
-            builder
+            _ = builder
                 .HasMany(e => e.Details)
                 .WithOne(d => d.TestEntity)
                 .HasForeignKey(d => d.TestEntityId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Many-to-Many
-            builder.HasMany(e => e.Tags).WithMany(t => t.TestEntities).UsingEntity(j => j.ToTable("TestEntityTags"));
+            _ = builder.HasMany(e => e.Tags).WithMany(t => t.TestEntities).UsingEntity(j => j.ToTable("TestEntityTags"));
         });
 
-        modelBuilder.Entity<SingleDetail>(builder =>
+        _ = modelBuilder.Entity<SingleDetail>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
-            builder.HasKey(e => e.Id);
-            builder.Property(e => e.TestEntityId);
+            _ = builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+            _ = builder.HasKey(e => e.Id);
+            _ = builder.Property(e => e.TestEntityId);
         });
 
-        modelBuilder.Entity<DetailEntity>(builder =>
+        _ = modelBuilder.Entity<DetailEntity>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+            _ = builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
         });
 
-        modelBuilder.Entity<TagEntity>(builder =>
+        _ = modelBuilder.Entity<TagEntity>(builder =>
         {
-            builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
-            builder.Property(e => e.Name).HasMaxLength(50);
+            _ = builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+            _ = builder.Property(e => e.Name).HasMaxLength(50);
         });
     }
 }

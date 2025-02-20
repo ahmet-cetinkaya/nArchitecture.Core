@@ -14,14 +14,14 @@ public class ResourceLocalizationManager : ILocalizationService
     public ICollection<string>? AcceptLocales { get; set; }
 
     // Stores resource data per locale and section
-    private readonly Dictionary<string, Dictionary<string, (string path, YamlMappingNode? content)>> _resourceData = new();
+    private readonly Dictionary<string, Dictionary<string, (string path, YamlMappingNode? content)>> _resourceData = [];
 
     public ResourceLocalizationManager(Dictionary<string, Dictionary<string, string>> resources)
     {
         foreach ((string locale, Dictionary<string, string> sectionResources) in resources)
         {
             if (!_resourceData.ContainsKey(locale))
-                _resourceData.Add(locale, new Dictionary<string, (string path, YamlMappingNode? value)>());
+                _resourceData.Add(locale, []);
 
             foreach ((string sectionName, string sectionResourcePath) in sectionResources)
                 _resourceData[locale].Add(sectionName, (sectionResourcePath, null));
@@ -94,7 +94,7 @@ public class ResourceLocalizationManager : ILocalizationService
     {
         // Open and parse the YAML file
         using StreamReader reader = new(path);
-        YamlStream yamlStream = new();
+        YamlStream yamlStream = [];
         yamlStream.Load(reader);
         content = (YamlMappingNode)yamlStream.Documents[0].RootNode;
     }

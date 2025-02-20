@@ -20,7 +20,7 @@ public class OtpNetOtpServiceTests
         byte[] result = _sut.GenerateSecretKey(Array.Empty<byte>());
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Length.ShouldBeGreaterThan(0);
     }
 
@@ -42,7 +42,7 @@ public class OtpNetOtpServiceTests
     public void ConvertSecretKeyToString_ShouldThrowArgumentNullException_WhenSecretKeyIsNull()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => _sut.ConvertSecretKeyToString(null!));
+        _ = Should.Throw<ArgumentNullException>(() => _sut.ConvertSecretKeyToString(null!));
     }
 
     [Theory(DisplayName = "Should Handle Empty Secret Key")]
@@ -78,7 +78,7 @@ public class OtpNetOtpServiceTests
     public void ComputeOtp_ShouldThrowArgumentNullException_WhenSecretKeyIsNull()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => _sut.ComputeOtp(null!));
+        _ = Should.Throw<ArgumentNullException>(() => _sut.ComputeOtp(null!));
     }
 
     [Fact(DisplayName = "Should Generate Different OTPs For Different Time Windows")]
@@ -88,7 +88,7 @@ public class OtpNetOtpServiceTests
         // Arrange
         byte[] secretKey = _sut.GenerateSecretKey(Array.Empty<byte>());
         DateTime now = DateTime.UtcNow;
-        
+
         // Act
         string firstOtp = _sut.ComputeOtp(secretKey, now);
         string secondOtp = _sut.ComputeOtp(secretKey, now.AddSeconds(31));

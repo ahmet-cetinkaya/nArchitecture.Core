@@ -14,7 +14,7 @@ public class FluentValidatorAdapterTests
     {
         // Arrange
         var mockValidator = new Mock<FluentIValidator>();
-        mockValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>())).Returns(new ValidationResult());
+        _ = mockValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>())).Returns(new ValidationResult());
 
         var adapter = new FluentValidatorAdapter<TestClass>(mockValidator.Object);
         var instance = new TestClass();
@@ -37,7 +37,7 @@ public class FluentValidatorAdapterTests
             new("PropertyName1", "Error message 1"),
             new("PropertyName2", "Error message 2"),
         };
-        mockValidator
+        _ = mockValidator
             .Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>()))
             .Returns(new ValidationResult(validationFailures));
 
@@ -61,19 +61,19 @@ public class FluentValidatorAdapterTests
     {
         // Arrange
         var mockValidator = new Mock<FluentIValidator>();
-        mockValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>())).Throws<ArgumentNullException>();
+        _ = mockValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>())).Throws<ArgumentNullException>();
 
         var adapter = new FluentValidatorAdapter<TestClass>(mockValidator.Object);
 
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => adapter.Validate(null!));
+        _ = Should.Throw<ArgumentNullException>(() => adapter.Validate(null!));
     }
 
     [Fact(DisplayName = "Constructor should throw when validator is null")]
     public void Constructor_ShouldThrow_WhenValidatorIsNull()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => new FluentValidatorAdapter<TestClass>(null!));
+        _ = Should.Throw<ArgumentNullException>(() => new FluentValidatorAdapter<TestClass>(null!));
     }
 }
 

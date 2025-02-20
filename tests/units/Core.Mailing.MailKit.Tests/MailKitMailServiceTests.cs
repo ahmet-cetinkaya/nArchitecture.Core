@@ -21,7 +21,7 @@ public class MailKitMailServiceTests
     {
         _smtpClientMock = new Mock<ISmtpClient>();
         _smtpClientFactoryMock = new Mock<ISmtpClientFactory>();
-        _smtpClientFactoryMock.Setup(x => x.Create()).Returns(_smtpClientMock.Object);
+        _ = _smtpClientFactoryMock.Setup(x => x.Create()).Returns(_smtpClientMock.Object);
 
         _mailSettings = new MailSettings
         {
@@ -89,7 +89,7 @@ public class MailKitMailServiceTests
         var mail = new Mail("Test Subject", "Test Body", string.Empty, [new MailboxAddress("Test", "test@example.com")]);
         var expectedException = new ServiceNotConnectedException("Connection failed");
 
-        _smtpClientMock
+        _ = _smtpClientMock
             .Setup(x =>
                 x.ConnectAsync(
                     _mailSettings.Server,
@@ -100,12 +100,12 @@ public class MailKitMailServiceTests
             )
             .ThrowsAsync(expectedException);
 
-        _smtpClientMock
+        _ = _smtpClientMock
             .Setup(x => x.DisconnectAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act & Assert
-        await Should.ThrowAsync<ServiceNotConnectedException>(async () =>
+        _ = await Should.ThrowAsync<ServiceNotConnectedException>(async () =>
         {
             await _sut.SendAsync(mail);
         });
@@ -119,7 +119,7 @@ public class MailKitMailServiceTests
 
         var cts = new CancellationTokenSource();
 
-        _smtpClientMock
+        _ = _smtpClientMock
             .Setup(x =>
                 x.ConnectAsync(
                     It.IsAny<string>(),
@@ -133,14 +133,14 @@ public class MailKitMailServiceTests
                     Task.FromCanceled(token)
             );
 
-        _smtpClientMock
+        _ = _smtpClientMock
             .Setup(x => x.DisconnectAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         cts.Cancel(); // Cancel before execution
 
         // Act & Assert
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             await _sut.SendAsync(mail, cts.Token);
         });

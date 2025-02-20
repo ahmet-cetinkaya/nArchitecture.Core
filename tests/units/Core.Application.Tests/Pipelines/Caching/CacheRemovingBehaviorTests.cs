@@ -494,14 +494,8 @@ public class CacheRemovingBehaviorTests
 
         // Assert
         // Verify logger was called with correct group names and key counts
-        _loggerMock.Verify(
-            x => x.InformationAsync(It.Is<string>(m => m.Contains("group1") && m.Contains("2"))),
-            Times.Once
-        );
+        _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(m => m.Contains("group1") && m.Contains("2"))), Times.Once);
 
-        _loggerMock.Verify(
-            x => x.InformationAsync(It.Is<string>(m => m.Contains("group2") && m.Contains("1"))),
-            Times.Once
-        );
+        _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(m => m.Contains("group2") && m.Contains("1"))), Times.Once);
     }
 }

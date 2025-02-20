@@ -24,10 +24,10 @@ public static class SecurityServiceRegistration
         IAuthenticatorConfiguration? authenticatorConfiguration = null
     )
     {
-        var config = authenticatorConfiguration ?? new DefaultAuthenticatorConfiguration();
+        IAuthenticatorConfiguration config = authenticatorConfiguration ?? new DefaultAuthenticatorConfiguration();
         ValidateRequiredServices(services, config);
 
-        services
+        _ = services
             .AddAuthenticatorServices<TUserId, TUserAuthenticatorId>(config)
             .AddAuthenticationServices<TUserId, TUserAuthenticatorId, TOperationClaimId, TRefreshTokenId>(jwtConfiguration)
             .AddAuthorizationServices<TUserId, TUserAuthenticatorId, TOperationClaimId>();
@@ -110,7 +110,7 @@ public static class SecurityServiceRegistration
             }
         );
 
-        foreach (var (serviceType, errorMessage) in requiredServices)
+        foreach ((Type serviceType, string errorMessage) in requiredServices)
         {
             if (
                 !services.Any(s =>

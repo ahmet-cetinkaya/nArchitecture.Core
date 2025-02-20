@@ -1,4 +1,3 @@
-using NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 using NArchitecture.Core.Security.Abstractions.Authentication.Models;
 
 namespace NArchitecture.Core.Security.Abstractions.Authentication;

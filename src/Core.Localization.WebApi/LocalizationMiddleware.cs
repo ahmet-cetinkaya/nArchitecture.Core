@@ -23,7 +23,7 @@ public class LocalizationMiddleware
     /// <param name="localizationService">The localization service instance.</param>
     public async Task Invoke(HttpContext context, ILocalizationService localizationService)
     {
-        var headers = context.Request.GetTypedHeaders();
+        Microsoft.AspNetCore.Http.Headers.RequestHeaders headers = context.Request.GetTypedHeaders();
         // Ensure headers and AcceptLanguage are available before processing
         if (headers?.AcceptLanguage != null && headers.AcceptLanguage.Count > 0)
         {

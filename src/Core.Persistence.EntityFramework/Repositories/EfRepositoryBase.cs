@@ -62,8 +62,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         CancellationToken cancellationToken = default
     )
     {
-        var entry = Context.Entry(entity);
-        var databaseValues =
+        EntityEntry<TEntity> entry = Context.Entry(entity);
+        PropertyValues databaseValues =
             await entry.GetDatabaseValuesAsync(cancellationToken)
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
 
@@ -86,8 +86,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     /// </summary>
     protected virtual TEntity GetAndCheckEntityStatus(TEntity entity)
     {
-        var entry = Context.Entry(entity);
-        var databaseValues =
+        EntityEntry<TEntity> entry = Context.Entry(entity);
+        PropertyValues databaseValues =
             entry.GetDatabaseValues()
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
 
@@ -112,7 +112,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     {
         try
         {
-            var databaseEntity = GetAndCheckEntityStatus(entity);
+            TEntity databaseEntity = GetAndCheckEntityStatus(entity);
 
             if (databaseEntity.UpdatedAt != entity.UpdatedAt)
                 throw new DbUpdateConcurrencyException(
@@ -136,7 +136,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     {
         try
         {
-            var databaseEntity = await GetAndCheckEntityStatusAsync(entity, cancellationToken);
+            TEntity databaseEntity = await GetAndCheckEntityStatusAsync(entity, cancellationToken);
 
             if (databaseEntity.UpdatedAt != entity.UpdatedAt)
                 throw new DbUpdateConcurrencyException(
@@ -151,11 +151,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
 
     protected virtual void HandleAnyConcurrencyException(DbUpdateConcurrencyException ex)
     {
-        foreach (var entry in ex.Entries)
+        foreach (EntityEntry entry in ex.Entries)
         {
             if (entry.Entity is TEntity entity)
             {
-                var (databaseEntity, _) = GetDatabaseValues(entity);
+                (TEntity databaseEntity, PropertyValues _) = GetDatabaseValues(entity);
                 ValidateEntityState(entity, databaseEntity);
                 throw new DbUpdateConcurrencyException(
                     $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
@@ -169,11 +169,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         CancellationToken cancellationToken
     )
     {
-        foreach (var entry in ex.Entries)
+        foreach (EntityEntry entry in ex.Entries)
         {
             if (entry.Entity is TEntity entity)
             {
-                var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+                (TEntity databaseEntity, PropertyValues _) = await GetDatabaseValuesAsync(entity, cancellationToken);
                 ValidateEntityState(entity, databaseEntity);
                 throw new DbUpdateConcurrencyException(
                     $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again."
@@ -189,8 +189,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
     /// <returns>Tuple containing the database entity and its property values</returns>
     protected virtual (TEntity DatabaseEntity, PropertyValues Values) GetDatabaseValues(TEntity entity)
     {
-        var entry = Context.Entry(entity);
-        var values =
+        EntityEntry<TEntity> entry = Context.Entry(entity);
+        PropertyValues values =
             entry.GetDatabaseValues()
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
         return ((TEntity)values.ToObject(), values);
@@ -206,8 +206,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>(TContext con
         CancellationToken cancellationToken
     )
     {
-        var entry = Context.Entry(entity);
-        var values =
+        EntityEntry<TEntity> entry = Context.Entry(entity);
+        PropertyValues values =
             await entry.GetDatabaseValuesAsync(cancellationToken)
             ?? throw new InvalidOperationException($"The entity with id {entity.Id} no longer exists in the database.");
         return ((TEntity)values.ToObject(), values);

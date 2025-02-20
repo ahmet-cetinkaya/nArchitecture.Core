@@ -12,7 +12,6 @@ public class UserGroupOperationClaim<TId, TUserGroupId, TUserId, TUserAuthentica
     public virtual OperationClaim<TOperationClaimId>? OperationClaim { get; set; }
 
     [Obsolete("This constructor is for ORM etc.. Do not use it in the code.", true)]
-
     public UserGroupOperationClaim()
     {
         UserGroupId = default!;

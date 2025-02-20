@@ -25,7 +25,7 @@ public class ExceptionMiddlewareTests
         _loggerMock = new Mock<ILogger>();
         _contextAccessorMock = new Mock<IHttpContextAccessor>();
         _httpContext = new DefaultHttpContext();
-        _contextAccessorMock.Setup(x => x.HttpContext).Returns(_httpContext);
+        _ = _contextAccessorMock.Setup(x => x.HttpContext).Returns(_httpContext);
     }
 
     /// <summary>

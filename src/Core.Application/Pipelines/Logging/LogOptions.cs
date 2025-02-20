@@ -22,7 +22,7 @@ public readonly struct LogOptions
 
     public LogOptions()
     {
-        ExcludeParameters = Array.Empty<LogExcludeParameter>();
+        ExcludeParameters = [];
         LogResponse = false;
         User = "?";
     }

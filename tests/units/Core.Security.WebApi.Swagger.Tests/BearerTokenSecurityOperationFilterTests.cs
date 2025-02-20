@@ -1,11 +1,11 @@
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Moq;
 using NArchitecture.Core.Security.WebApi.Swagger;
 using Shouldly;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Reflection;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace Core.Security.WebApi.Swagger.Tests;
 
@@ -30,10 +30,7 @@ public class BearerTokenSecurityOperationFilterTests
     {
         // Arrange
         var filter = new BearerTokenSecurityOperationFilter();
-        var operation = new OpenApiOperation
-        {
-            Security = new List<OpenApiSecurityRequirement>()
-        };
+        var operation = new OpenApiOperation { Security = new List<OpenApiSecurityRequirement>() };
         var context = CreateOperationContext();
 
         // Act
@@ -62,12 +59,9 @@ public class BearerTokenSecurityOperationFilterTests
             {
                 new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = "Existing" } },
                 new string[] { }
-            }
+            },
         };
-        var operation = new OpenApiOperation
-        {
-            Security = new List<OpenApiSecurityRequirement> { existingRequirement }
-        };
+        var operation = new OpenApiOperation { Security = new List<OpenApiSecurityRequirement> { existingRequirement } };
         var context = CreateOperationContext();
 
         // Act
@@ -84,17 +78,14 @@ public class BearerTokenSecurityOperationFilterTests
     {
         // Arrange
         var filter = new BearerTokenSecurityOperationFilter();
-        var operation = new OpenApiOperation
-        {
-            Security = null!
-        };
+        var operation = new OpenApiOperation { Security = null! };
         var context = CreateOperationContext();
 
         // Act
         filter.Apply(operation, context);
 
         // Assert
-        operation.Security.ShouldNotBeNull();
+        _ = operation.Security.ShouldNotBeNull();
         operation.Security.Count.ShouldBe(1);
         operation.Security.First().Keys.First().Reference.Id.ShouldBe("Bearer");
     }
@@ -111,7 +102,7 @@ public class BearerTokenSecurityOperationFilterTests
         var operation = new OpenApiOperation
         {
             Security = new List<OpenApiSecurityRequirement>(),
-            OperationId = $"{operationType}Test"
+            OperationId = $"{operationType}Test",
         };
         var context = CreateOperationContext();
 

@@ -37,7 +37,7 @@ public partial class EfRepositoryBaseTests
         // Assert
         var dbEntity = await Repository.GetByIdAsync(entity.Id, withDeleted: true);
         _ = dbEntity.ShouldNotBeNull();
-        dbEntity.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.DeletedAt.ShouldNotBeNull();
         dbEntity.DeletedAt.Value.ShouldBeGreaterThanOrEqualTo(beforeDelete);
         dbEntity.DeletedAt.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
     }
@@ -82,20 +82,20 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(entityCount);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
         var beforeDelete = DateTime.UtcNow;
 
         // Act
         if (isAsync)
         {
-            await Repository.BulkDeleteAsync(entities);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkDeleteAsync(entities);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.BulkDelete(entities);
-            Repository.SaveChanges();
+            _ = Repository.BulkDelete(entities);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -103,7 +103,7 @@ public partial class EfRepositoryBaseTests
         dbEntities.Count.ShouldBe(entityCount);
         foreach (var entity in dbEntities)
         {
-            entity.DeletedAt.ShouldNotBeNull();
+            _ = entity.DeletedAt.ShouldNotBeNull();
             entity.DeletedAt.Value.ShouldBeGreaterThanOrEqualTo(beforeDelete);
             entity.DeletedAt.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
         }
@@ -120,19 +120,19 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(entityCount);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         if (isAsync)
         {
-            await Repository.BulkDeleteAsync(entities, permanent: true);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkDeleteAsync(entities, permanent: true);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.BulkDelete(entities, permanent: true);
-            Repository.SaveChanges();
+            _ = Repository.BulkDelete(entities, permanent: true);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -149,9 +149,9 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange & Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.DeleteAsync(null!));
+            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.DeleteAsync(null!));
         else
-            Should.Throw<ArgumentNullException>(() => Repository.Delete(null!));
+            _ = Should.Throw<ArgumentNullException>(() => Repository.Delete(null!));
     }
 
     [Theory(DisplayName = "BulkDelete/BulkDeleteAsync - Should handle empty collection")]
@@ -168,7 +168,7 @@ public partial class EfRepositoryBaseTests
         if (isAsync)
             await Should.NotThrowAsync(async () => await Repository.BulkDeleteAsync(entities));
         else
-            Should.NotThrow(() => Repository.BulkDelete(entities));
+            _ = Should.NotThrow(() => Repository.BulkDelete(entities));
     }
 
     [Theory(DisplayName = "BulkDelete/BulkDeleteAsync - Should throw when collection is null")]
@@ -180,9 +180,9 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange & Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkDeleteAsync(null!));
+            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkDeleteAsync(null!));
         else
-            Should.Throw<ArgumentNullException>(() => Repository.BulkDelete(null!));
+            _ = Should.Throw<ArgumentNullException>(() => Repository.BulkDelete(null!));
     }
 
     [Theory(DisplayName = "Delete - Should cascade soft delete related entities")]
@@ -198,25 +198,25 @@ public partial class EfRepositoryBaseTests
         var child2 = CreateTestEntity("Child 2");
         child1.ParentId = parent.Id;
         child2.ParentId = parent.Id;
-        await Repository.BulkAddAsync(new[] { child1, child2 });
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(new[] { child1, child2 });
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         if (isAsync)
         {
-            await Repository.DeleteAsync(parent);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.DeleteAsync(parent);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.Delete(parent);
-            Repository.SaveChanges();
+            _ = Repository.Delete(parent);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
         var dbParent = await Repository.GetByIdAsync(parent.Id, withDeleted: true);
-        dbParent.ShouldNotBeNull();
-        dbParent.DeletedAt.ShouldNotBeNull();
+        _ = dbParent.ShouldNotBeNull();
+        _ = dbParent.DeletedAt.ShouldNotBeNull();
 
         var children = await Repository.GetAllAsync(predicate: e => e.ParentId == parent.Id, withDeleted: true);
         children.Count.ShouldBe(2);
@@ -233,9 +233,9 @@ public partial class EfRepositoryBaseTests
     [Theory(DisplayName = "Delete - Should handle soft deleted entity properly")]
     [Trait("Category", "Delete")]
     [Trait("Method", "Delete")]
-    [InlineData(true, true)]   // isAsync, permanent
-    [InlineData(false, true)]  // sync, permanent
-    [InlineData(true, false)]  // isAsync, not permanent
+    [InlineData(true, true)] // isAsync, permanent
+    [InlineData(false, true)] // sync, permanent
+    [InlineData(true, false)] // isAsync, not permanent
     [InlineData(false, false)] // sync, not permanent
     public async Task Delete_ShouldHandleSoftDeletedEntity(bool isAsync, bool permanent)
     {
@@ -243,7 +243,7 @@ public partial class EfRepositoryBaseTests
         var entity = await CreateAndAddTestEntity();
         var initialDeleteTime = DateTime.UtcNow.AddMinutes(-5);
         entity.DeletedAt = initialDeleteTime;
-        await Repository.SaveChangesAsync();
+        _ = await Repository.SaveChangesAsync();
 
         // Clear change tracker and reload entity to ensure fresh state
         Context.ChangeTracker.Clear();
@@ -256,7 +256,7 @@ public partial class EfRepositoryBaseTests
             var expectedMessage = $"The entity with id {entity.Id} has already been deleted.";
 
             if (isAsync)
-                await Should.ThrowAsync<InvalidOperationException>(
+                _ = await Should.ThrowAsync<InvalidOperationException>(
                     async () =>
                     {
                         _ = await Repository.DeleteAsync(entity);
@@ -265,7 +265,7 @@ public partial class EfRepositoryBaseTests
                     expectedMessage
                 );
             else
-                Should.Throw<InvalidOperationException>(
+                _ = Should.Throw<InvalidOperationException>(
                     () =>
                     {
                         _ = Repository.Delete(entity);
@@ -311,20 +311,20 @@ public partial class EfRepositoryBaseTests
         var entity = await CreateAndAddTestEntity();
         entity.Parent = null;
         entity.Children.Clear();
-        await Repository.SaveChangesAsync();
+        _ = await Repository.SaveChangesAsync();
 
         // Act & Assert
         if (isAsync)
             await Should.NotThrowAsync(async () =>
             {
-                await Repository.DeleteAsync(entity);
-                await Repository.SaveChangesAsync();
+                _ = await Repository.DeleteAsync(entity);
+                _ = await Repository.SaveChangesAsync();
             });
         else
             Should.NotThrow(() =>
             {
-                Repository.Delete(entity);
-                Repository.SaveChanges();
+                _ = Repository.Delete(entity);
+                _ = Repository.SaveChanges();
             });
     }
 
@@ -338,21 +338,21 @@ public partial class EfRepositoryBaseTests
         // Arrange
         var entitiesToSoftDelete = CreateTestEntities(2);
         var entitiesToPermanentDelete = CreateTestEntities(2);
-        await Repository.BulkAddAsync([.. entitiesToSoftDelete, .. entitiesToPermanentDelete]);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync([.. entitiesToSoftDelete, .. entitiesToPermanentDelete]);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         if (isAsync)
         {
-            await Repository.BulkDeleteAsync(entitiesToSoftDelete, permanent: false);
-            await Repository.BulkDeleteAsync(entitiesToPermanentDelete, permanent: true);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkDeleteAsync(entitiesToSoftDelete, permanent: false);
+            _ = await Repository.BulkDeleteAsync(entitiesToPermanentDelete, permanent: true);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.BulkDelete(entitiesToSoftDelete, permanent: false);
-            Repository.BulkDelete(entitiesToPermanentDelete, permanent: true);
-            Repository.SaveChanges();
+            _ = Repository.BulkDelete(entitiesToSoftDelete, permanent: false);
+            _ = Repository.BulkDelete(entitiesToPermanentDelete, permanent: true);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -372,18 +372,18 @@ public partial class EfRepositoryBaseTests
         var entity = await CreateAndAddTestEntity();
         var singleDetail = new SingleDetail { TestEntityId = entity.Id, Detail = "Test Detail" };
         entity.SingleDetail = singleDetail;
-        await Context.SaveChangesAsync();
+        _ = await Context.SaveChangesAsync();
 
         // Act
         if (isAsync)
         {
-            await Repository.DeleteAsync(entity);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.DeleteAsync(entity);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.Delete(entity);
-            Repository.SaveChanges();
+            _ = Repository.Delete(entity);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -392,9 +392,9 @@ public partial class EfRepositoryBaseTests
             .Include(e => e.SingleDetail)
             .SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedAt.ShouldNotBeNull();
-        dbEntity.SingleDetail.ShouldNotBeNull();
-        dbEntity.SingleDetail.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.SingleDetail.ShouldNotBeNull();
+        _ = dbEntity.SingleDetail.DeletedAt.ShouldNotBeNull();
         dbEntity.SingleDetail.DeletedAt.ShouldBe(dbEntity.DeletedAt); // Aynı zamanda silinmiş olmalılar
     }
 
@@ -413,18 +413,18 @@ public partial class EfRepositoryBaseTests
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" },
         };
         entity.Details = details.ToList();
-        await Context.SaveChangesAsync();
+        _ = await Context.SaveChangesAsync();
 
         // Act
         if (isAsync)
         {
-            await Repository.DeleteAsync(entity);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.DeleteAsync(entity);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.Delete(entity);
-            Repository.SaveChanges();
+            _ = Repository.Delete(entity);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -433,7 +433,7 @@ public partial class EfRepositoryBaseTests
             .Include(e => e.Details)
             .SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.DeletedAt.ShouldNotBeNull();
         dbEntity.Details.Count.ShouldBe(2);
         dbEntity.Details.ShouldAllBe(d => d.DeletedAt != null);
     }
@@ -453,31 +453,31 @@ public partial class EfRepositoryBaseTests
             new TagEntity { Name = "Tag 2" },
         };
         await Context.Tags.AddRangeAsync(tags);
-        await Context.SaveChangesAsync();
+        _ = await Context.SaveChangesAsync();
 
         entity.Tags = tags.ToList();
-        await Context.SaveChangesAsync();
+        _ = await Context.SaveChangesAsync();
 
         // Act
         if (isAsync)
         {
-            await Repository.DeleteAsync(entity);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.DeleteAsync(entity);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.Delete(entity);
-            Repository.SaveChanges();
+            _ = Repository.Delete(entity);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
         var dbEntity = await Context.TestEntities.IgnoreQueryFilters().Include(e => e.Tags).SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.DeletedAt.ShouldNotBeNull();
         dbEntity.Tags.Count.ShouldBe(2);
         foreach (var tag in dbEntity.Tags)
         {
-            tag.DeletedAt.ShouldNotBeNull();
+            _ = tag.DeletedAt.ShouldNotBeNull();
             tag.DeletedAt.ShouldBe(dbEntity.DeletedAt); // Aynı zamanda silinmiş olmalılar
         }
     }
@@ -494,7 +494,7 @@ public partial class EfRepositoryBaseTests
 
         // Add one-to-one
         var singleDetail = new SingleDetail { TestEntityId = entity.Id, Detail = "Test Detail" };
-        await Context.SingleDetails.AddAsync(singleDetail);
+        _ = await Context.SingleDetails.AddAsync(singleDetail);
 
         // Add one-to-many
         var details = new[]
@@ -512,12 +512,12 @@ public partial class EfRepositoryBaseTests
         };
         await Context.Tags.AddRangeAsync(tags);
 
-        await Context.SaveChangesAsync();
+        _ = await Context.SaveChangesAsync();
 
         entity.SingleDetail = singleDetail;
         entity.Details = details.ToList();
         entity.Tags = tags.ToList();
-        await Context.SaveChangesAsync();
+        _ = await Context.SaveChangesAsync();
 
         Context.ChangeTracker.Clear();
         entity = await Context
@@ -529,13 +529,13 @@ public partial class EfRepositoryBaseTests
         // Act
         if (isAsync)
         {
-            await Repository.DeleteAsync(entity);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.DeleteAsync(entity);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.Delete(entity);
-            Repository.SaveChanges();
+            _ = Repository.Delete(entity);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -546,10 +546,10 @@ public partial class EfRepositoryBaseTests
             .Include(e => e.Tags)
             .SingleAsync(e => e.Id == entity.Id);
 
-        dbEntity.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.DeletedAt.ShouldNotBeNull();
 
-        dbEntity.SingleDetail.ShouldNotBeNull();
-        dbEntity.SingleDetail.DeletedAt.ShouldNotBeNull();
+        _ = dbEntity.SingleDetail.ShouldNotBeNull();
+        _ = dbEntity.SingleDetail.DeletedAt.ShouldNotBeNull();
 
         dbEntity.Details.Count.ShouldBe(2);
         dbEntity.Details.ShouldAllBe(d => d.DeletedAt != null);
@@ -561,9 +561,9 @@ public partial class EfRepositoryBaseTests
     [Theory(DisplayName = "Delete - Should handle permanent delete and re-delete of soft-deleted entity")]
     [Trait("Category", "Delete")]
     [Trait("Method", "Delete")]
-    [InlineData(true, true)]   // isAsync, permanent
-    [InlineData(false, true)]  // sync, permanent
-    [InlineData(true, false)]  // isAsync, not permanent
+    [InlineData(true, true)] // isAsync, permanent
+    [InlineData(false, true)] // sync, permanent
+    [InlineData(true, false)] // isAsync, not permanent
     [InlineData(false, false)] // sync, not permanent
     public async Task Delete_ShouldHandlePermanentAndReDeleteOfSoftDeletedEntity(bool isAsync, bool permanent)
     {
@@ -571,7 +571,7 @@ public partial class EfRepositoryBaseTests
         var entity = await CreateAndAddTestEntity();
         var initialDeleteTime = DateTime.UtcNow.AddMinutes(-5);
         entity.DeletedAt = initialDeleteTime;
-        await Repository.SaveChangesAsync();
+        _ = await Repository.SaveChangesAsync();
 
         // Clear change tracker and reload entity to ensure fresh state
         Context.ChangeTracker.Clear();
@@ -584,7 +584,7 @@ public partial class EfRepositoryBaseTests
             var expectedMessage = $"The entity with id {entity.Id} has already been deleted.";
 
             if (isAsync)
-                await Should.ThrowAsync<InvalidOperationException>(
+                _ = await Should.ThrowAsync<InvalidOperationException>(
                     async () =>
                     {
                         _ = await Repository.DeleteAsync(entity);
@@ -593,7 +593,7 @@ public partial class EfRepositoryBaseTests
                     expectedMessage
                 );
             else
-                Should.Throw<InvalidOperationException>(
+                _ = Should.Throw<InvalidOperationException>(
                     () =>
                     {
                         _ = Repository.Delete(entity);
@@ -656,15 +656,15 @@ public partial class EfRepositoryBaseTests
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<OneToOneEntity>(builder =>
+            _ = modelBuilder.Entity<OneToOneEntity>(builder =>
             {
-                builder.ToTable("OneToOneEntities");
-                builder.HasKey(e => e.Id);
-                builder.Property(e => e.Id).ValueGeneratedNever();
+                _ = builder.ToTable("OneToOneEntities");
+                _ = builder.HasKey(e => e.Id);
+                _ = builder.Property(e => e.Id).ValueGeneratedNever();
 
-                builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+                _ = builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
 
-                builder
+                _ = builder
                     .HasOne(e => e.Dependency)
                     .WithOne(d => d.Entity)
                     .HasForeignKey<OneToOneDependency>(d => d.Id)
@@ -673,13 +673,13 @@ public partial class EfRepositoryBaseTests
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<OneToOneDependency>(builder =>
+            _ = modelBuilder.Entity<OneToOneDependency>(builder =>
             {
-                builder.ToTable("OneToOneDependencies");
-                builder.HasKey(e => e.Id);
-                builder.Property(e => e.Id).ValueGeneratedNever();
+                _ = builder.ToTable("OneToOneDependencies");
+                _ = builder.HasKey(e => e.Id);
+                _ = builder.Property(e => e.Id).ValueGeneratedNever();
 
-                builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
+                _ = builder.HasQueryFilter(e => !e.DeletedAt.HasValue);
             });
         }
     }

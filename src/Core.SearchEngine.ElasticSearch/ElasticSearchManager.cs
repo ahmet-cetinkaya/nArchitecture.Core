@@ -25,7 +25,7 @@ public class ElasticSearchManager : ISearchEngine
     public ElasticSearchManager(ElasticSearchConfig configuration)
     {
         _config = configuration;
-        var settings = new ElasticsearchClientSettings(new Uri(configuration.ConnectionString))
+        ElasticsearchClientSettings settings = new ElasticsearchClientSettings(new Uri(configuration.ConnectionString))
             .DefaultIndex(DefaultIndex)
             .EnableDebugMode()
             .PrettyJson()
@@ -38,11 +38,13 @@ public class ElasticSearchManager : ISearchEngine
     /// <inheritdoc/>
     public async Task<SearchResult> CreateIndexAsync(IndexModel indexModel)
     {
-        var existResponse = await _client.Indices.ExistsAsync(indexModel.IndexName);
+        Elastic.Clients.Elasticsearch.IndexManagement.ExistsResponse existResponse = await _client.Indices.ExistsAsync(
+            indexModel.IndexName
+        );
         if (existResponse.Exists)
             return new SearchResult(false, Messages.IndexAlreadyExists);
 
-        var response = await _client.Indices.CreateAsync(
+        Elastic.Clients.Elasticsearch.IndexManagement.CreateIndexResponse response = await _client.Indices.CreateAsync(
             indexModel.IndexName,
             i =>
                 i.Settings(s => s.NumberOfReplicas(_config.NumberOfReplicas).NumberOfShards(_config.NumberOfShards))
@@ -62,13 +64,13 @@ public class ElasticSearchManager : ISearchEngine
     /// </summary>
     /// <param name="isValid">Indicates if the operation was successful.</param>
     /// <param name="errorReason">Optional error reason if operation failed.</param>
-    private SearchResult CreateResponse(bool isValid, string? errorReason = null) =>
+    private static SearchResult CreateResponse(bool isValid, string? errorReason = null) =>
         new(isValid, isValid ? Messages.Success : errorReason ?? Messages.UnknownError);
 
     /// <inheritdoc/>
     public async Task<SearchResult> InsertAsync(SearchDocumentWithData document)
     {
-        var response = await _client.IndexAsync(
+        IndexResponse response = await _client.IndexAsync(
             document.Data,
             i => i.Index(document.IndexName).Id(document.Id).Refresh(Refresh.True)
         );
@@ -79,7 +81,7 @@ public class ElasticSearchManager : ISearchEngine
     /// <inheritdoc/>
     public async Task<SearchResult> InsertManyAsync(string indexName, object[] items)
     {
-        var bulkResponse = await _client.BulkAsync(b => b.Index(indexName).IndexMany(items).Refresh(Refresh.True));
+        BulkResponse bulkResponse = await _client.BulkAsync(b => b.Index(indexName).IndexMany(items).Refresh(Refresh.True));
 
         return CreateResponse(bulkResponse.IsValidResponse, bulkResponse.ElasticsearchServerError?.Error?.Reason);
     }
@@ -87,7 +89,7 @@ public class ElasticSearchManager : ISearchEngine
     /// <inheritdoc/>
     public async Task<IDictionary<string, object>> GetIndexList()
     {
-        var response = await _client.Indices.GetAsync(AllIndices);
+        Elastic.Clients.Elasticsearch.IndexManagement.GetIndexResponse response = await _client.Indices.GetAsync(AllIndices);
         return response.Indices.ToDictionary(x => x.Key.ToString(), x => (object)x.Value);
     }
 
@@ -95,7 +97,7 @@ public class ElasticSearchManager : ISearchEngine
     public async Task<List<SearchGetModel<T>>> GetAllSearch<T>(SearchParameters parameters)
         where T : class
     {
-        var response = await _client.SearchAsync<T>(s =>
+        SearchResponse<T> response = await _client.SearchAsync<T>(s =>
             s.Index(parameters.IndexName).From(parameters.From).Size(parameters.Size)
         );
 
@@ -106,7 +108,7 @@ public class ElasticSearchManager : ISearchEngine
     public async Task<List<SearchGetModel<T>>> GetSearchByField<T>(SearchByFieldParameters parameters)
         where T : class
     {
-        var response = await _client.SearchAsync<T>(s =>
+        SearchResponse<T> response = await _client.SearchAsync<T>(s =>
             s.Index(parameters.IndexName)
                 .From(parameters.From)
                 .Size(parameters.Size)
@@ -133,7 +135,7 @@ public class ElasticSearchManager : ISearchEngine
     public async Task<List<SearchGetModel<T>>> GetSearchBySimpleQueryString<T>(SearchByQueryParameters parameters)
         where T : class
     {
-        var response = await _client.SearchAsync<T>(s =>
+        SearchResponse<T> response = await _client.SearchAsync<T>(s =>
             s.Index(parameters.IndexName)
                 .From(parameters.From)
                 .Size(parameters.Size)
@@ -158,7 +160,7 @@ public class ElasticSearchManager : ISearchEngine
     /// <inheritdoc/>
     public async Task<SearchResult> UpdateAsync(SearchDocumentWithData document)
     {
-        var response = await _client.UpdateAsync<object, object>(
+        UpdateResponse<object> response = await _client.UpdateAsync<object, object>(
             document.IndexName,
             document.Id,
             u => u.Doc(document.Data).Refresh(Refresh.True)
@@ -175,9 +177,9 @@ public class ElasticSearchManager : ISearchEngine
     public async Task<SearchResult> UpdateByElasticIdAsync(SearchDocumentWithData model)
     {
         if (string.IsNullOrEmpty(model.IndexName))
-            throw new ArgumentNullException(nameof(model.IndexName), Messages.IndexNameCannotBeNullOrEmpty);
+            throw new ArgumentNullException(nameof(model), Messages.IndexNameCannotBeNullOrEmpty);
 
-        var response = await _client.UpdateAsync<object, object>(
+        UpdateResponse<object> response = await _client.UpdateAsync<object, object>(
             model.IndexName,
             model.Id,
             u => u.Doc(model.Data).Refresh(Refresh.True).RetryOnConflict(3)
@@ -189,7 +191,11 @@ public class ElasticSearchManager : ISearchEngine
     /// <inheritdoc/>
     public async Task<SearchResult> DeleteAsync(SearchDocument document)
     {
-        var response = await _client.DeleteAsync<object>(document.IndexName, document.Id, d => d.Refresh(Refresh.True));
+        DeleteResponse response = await _client.DeleteAsync<object>(
+            document.IndexName,
+            document.Id,
+            d => d.Refresh(Refresh.True)
+        );
 
         return CreateResponse(response.IsValidResponse, response.ElasticsearchServerError?.Error?.Reason);
     }

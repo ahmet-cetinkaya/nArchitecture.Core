@@ -34,7 +34,7 @@ public partial class EfRepositoryBaseTests
         updatedEntity.Name.ShouldBe("Updated Name");
         updatedEntity.Description.ShouldBe("Updated Description");
         updatedEntity.CreatedAt.ShouldBe(originalCreatedDate);
-        updatedEntity.UpdatedAt.ShouldNotBeNull();
+        _ = updatedEntity.UpdatedAt.ShouldNotBeNull();
         updatedEntity.UpdatedAt!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
         updatedEntity.UpdatedAt!.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
     }
@@ -48,9 +48,9 @@ public partial class EfRepositoryBaseTests
     {
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.UpdateAsync(null!));
+            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.UpdateAsync(null!));
         else
-            Should.Throw<ArgumentNullException>(() => Repository.Update(null!));
+            _ = Should.Throw<ArgumentNullException>(() => Repository.Update(null!));
     }
 
     [Theory(DisplayName = "Update/UpdateAsync - Should handle entity with relationships")]
@@ -83,8 +83,8 @@ public partial class EfRepositoryBaseTests
         _ = updatedChild.ShouldNotBeNull();
         updatedChild.Name.ShouldBe("Updated Child");
         updatedChild.ParentId.ShouldBe(parent.Id);
-        updatedChild.Parent.ShouldNotBeNull();
-        updatedChild.UpdatedAt.ShouldNotBeNull();
+        _ = updatedChild.Parent.ShouldNotBeNull();
+        _ = updatedChild.UpdatedAt.ShouldNotBeNull();
         updatedChild.UpdatedAt!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
     }
 
@@ -99,8 +99,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(entityCount);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
         var beforeUpdate = DateTime.UtcNow;
 
         foreach (var entity in entities)
@@ -112,13 +112,13 @@ public partial class EfRepositoryBaseTests
         // Act
         if (isAsync)
         {
-            await Repository.BulkUpdateAsync(entities);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkUpdateAsync(entities);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.BulkUpdate(entities);
-            Repository.SaveChanges();
+            _ = Repository.BulkUpdate(entities);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -128,7 +128,7 @@ public partial class EfRepositoryBaseTests
         {
             entity.Name.ShouldStartWith("Updated");
             entity.Description.ShouldStartWith("Updated");
-            entity.UpdatedAt.ShouldNotBeNull();
+            _ = entity.UpdatedAt.ShouldNotBeNull();
             entity.UpdatedAt!.Value.ShouldBeGreaterThanOrEqualTo(beforeUpdate);
         }
     }
@@ -142,9 +142,9 @@ public partial class EfRepositoryBaseTests
     {
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkUpdateAsync(null!));
+            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkUpdateAsync(null!));
         else
-            Should.Throw<ArgumentNullException>(() => Repository.BulkUpdate(null!));
+            _ = Should.Throw<ArgumentNullException>(() => Repository.BulkUpdate(null!));
     }
 
     [Theory]
@@ -161,7 +161,7 @@ public partial class EfRepositoryBaseTests
         if (isAsync)
             await Should.NotThrowAsync(async () => await Repository.BulkUpdateAsync(entities));
         else
-            Should.NotThrow(() => Repository.BulkUpdate(entities));
+            _ = Should.NotThrow(() => Repository.BulkUpdate(entities));
     }
 
     private async Task<TestEntity> CreateAndAddTestEntity()

@@ -47,7 +47,7 @@ public class CodeGeneratorTests
     public void GenerateNumeric_ShouldThrowArgumentException_WhenLengthIsInvalid(int length)
     {
         // Act & Assert
-        Should.Throw<ArgumentException>(() => _codeGenerator.GenerateNumeric(length));
+        _ = Should.Throw<ArgumentException>(() => _codeGenerator.GenerateNumeric(length));
     }
 
     [Theory(DisplayName = "GenerateAlphanumeric should create valid string with exact length")]
@@ -89,7 +89,7 @@ public class CodeGeneratorTests
         string result = _codeGenerator.GenerateBase64(byteLength);
 
         // Assert
-        Should.NotThrow(() => Convert.FromBase64String(result));
+        _ = Should.NotThrow(() => Convert.FromBase64String(result));
         Convert.FromBase64String(result).Length.ShouldBe(byteLength);
     }
 
@@ -128,6 +128,6 @@ public class CodeGeneratorTests
     public void GenerateBase64_ShouldThrowArgumentException_WhenByteLengthIsInvalid(int byteLength)
     {
         // Act & Assert
-        Should.Throw<ArgumentException>(() => _codeGenerator.GenerateBase64(byteLength));
+        _ = Should.Throw<ArgumentException>(() => _codeGenerator.GenerateBase64(byteLength));
     }
 }

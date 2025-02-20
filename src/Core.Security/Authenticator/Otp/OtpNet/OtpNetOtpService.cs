@@ -15,8 +15,7 @@ public class OtpNetOtpService : IOtpService
 
     public string ConvertSecretKeyToString(byte[] secretKey)
     {
-        if (secretKey is null)
-            throw new ArgumentNullException(nameof(secretKey));
+        ArgumentNullException.ThrowIfNull(secretKey);
         if (secretKey.Length == 0)
             return string.Empty;
 
@@ -26,8 +25,7 @@ public class OtpNetOtpService : IOtpService
 
     public string ComputeOtp(byte[] secretKey, DateTime? time = null)
     {
-        if (secretKey is null)
-            throw new ArgumentNullException(nameof(secretKey));
+        ArgumentNullException.ThrowIfNull(secretKey);
 
         Totp totp = new(secretKey);
         string totpCode = totp.ComputeTotp(time ?? DateTime.UtcNow);

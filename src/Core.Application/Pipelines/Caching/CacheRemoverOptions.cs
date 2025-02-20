@@ -25,7 +25,7 @@ public readonly struct CacheRemoverOptions
         {
             BypassCache = false,
             CacheKey = string.Empty,
-            CacheGroupKey = System.Array.Empty<string>(),
+            CacheGroupKey = [],
         };
 
     public CacheRemoverOptions(bool bypassCache, string? cacheKey, string[]? cacheGroupKey)

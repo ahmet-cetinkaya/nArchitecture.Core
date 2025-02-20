@@ -27,7 +27,11 @@ public interface IAsyncRepository<TEntity, TEntityId> : IQuery<TEntity>
     /// <param name="entities">The entities to add.</param>
     /// <param name="batchSize">The batch size for bulk operations.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    Task<ICollection<TEntity>> BulkAddAsync(ICollection<TEntity> entities, int batchSize = 1_000, CancellationToken cancellationToken = default);
+    Task<ICollection<TEntity>> BulkAddAsync(
+        ICollection<TEntity> entities,
+        int batchSize = 1_000,
+        CancellationToken cancellationToken = default
+    );
     #endregion
 
     #region Update Methods
@@ -45,7 +49,11 @@ public interface IAsyncRepository<TEntity, TEntityId> : IQuery<TEntity>
     /// <param name="entities">The entities to update.</param>
     /// <param name="batchSize">The batch size for bulk operations.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    Task<ICollection<TEntity>> BulkUpdateAsync(ICollection<TEntity> entities, int batchSize = 1_000, CancellationToken cancellationToken = default);
+    Task<ICollection<TEntity>> BulkUpdateAsync(
+        ICollection<TEntity> entities,
+        int batchSize = 1_000,
+        CancellationToken cancellationToken = default
+    );
     #endregion
 
     #region Delete Methods

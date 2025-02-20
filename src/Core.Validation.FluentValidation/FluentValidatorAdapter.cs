@@ -1,4 +1,3 @@
-using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.Validation.Abstractions;
 
 namespace NArchitecture.Core.Validation.FluentValidation;
@@ -18,7 +17,7 @@ public class FluentValidatorAdapter<T>(global::FluentValidation.IValidator<T> fl
     {
         // Create validation context and execute FluentValidation
         var context = new global::FluentValidation.ValidationContext<T>(instance);
-        var result = _fluentValidator.Validate(context);
+        global::FluentValidation.Results.ValidationResult result = _fluentValidator.Validate(context);
 
         // Map FluentValidation result to application's ValidationResult
         return new ValidationResult

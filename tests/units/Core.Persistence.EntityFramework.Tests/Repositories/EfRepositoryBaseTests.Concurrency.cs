@@ -16,7 +16,8 @@ public partial class EfRepositoryBaseTests
         // Arrange
         var entity = await CreateAndAddTestEntity();
         var entityFromAnotherContext = await SimulateAnotherUserModifyingEntity(entity.Id);
-        var expectedMessage = $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again.";
+        var expectedMessage =
+            $"The entity with id {entity.Id} has been modified by another user. Please reload the entity and try again.";
 
         // Act & Assert
         var exception = isAsync
@@ -110,11 +111,11 @@ public partial class EfRepositoryBaseTests
         _ = await Repository.AddAsync(child);
         _ = await Repository.SaveChangesAsync();
 
-        await SimulateAnotherUserModifyingEntity(child.Id);
+        _ = await SimulateAnotherUserModifyingEntity(child.Id);
 
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<DbUpdateConcurrencyException>(async () =>
+            _ = await Should.ThrowAsync<DbUpdateConcurrencyException>(async () =>
             {
                 child.Name = "Updated by first user";
                 parent.Name = "Updated parent";
@@ -123,7 +124,7 @@ public partial class EfRepositoryBaseTests
                 _ = await Repository.SaveChangesAsync();
             });
         else
-            Should.Throw<DbUpdateConcurrencyException>(() =>
+            _ = Should.Throw<DbUpdateConcurrencyException>(() =>
             {
                 child.Name = "Updated by first user";
                 parent.Name = "Updated parent";
@@ -142,17 +143,17 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entity = await CreateAndAddTestEntity();
-        await SimulateAnotherUserModifyingEntity(entity.Id);
+        _ = await SimulateAnotherUserModifyingEntity(entity.Id);
 
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<DbUpdateConcurrencyException>(async () =>
+            _ = await Should.ThrowAsync<DbUpdateConcurrencyException>(async () =>
             {
                 _ = await Repository.DeleteAsync(entity);
                 _ = await Repository.SaveChangesAsync();
             });
         else
-            Should.Throw<DbUpdateConcurrencyException>(() =>
+            _ = Should.Throw<DbUpdateConcurrencyException>(() =>
             {
                 _ = Repository.Delete(entity);
                 _ = Repository.SaveChanges();
@@ -172,13 +173,13 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<InvalidOperationException>(async () =>
+            _ = await Should.ThrowAsync<InvalidOperationException>(async () =>
             {
                 _ = await Repository.DeleteAsync(entity);
                 _ = await Repository.SaveChangesAsync();
             });
         else
-            Should.Throw<InvalidOperationException>(() =>
+            _ = Should.Throw<InvalidOperationException>(() =>
             {
                 _ = Repository.Delete(entity);
                 _ = Repository.SaveChanges();
@@ -194,27 +195,27 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(3);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
-        await SimulateAnotherUserModifyingEntity(entities.First().Id);
+        _ = await SimulateAnotherUserModifyingEntity(entities.First().Id);
 
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<DbUpdateConcurrencyException>(async () =>
+            _ = await Should.ThrowAsync<DbUpdateConcurrencyException>(async () =>
             {
                 foreach (var entity in entities)
                     entity.Name = $"Updated {entity.Name}";
-                await Repository.BulkUpdateAsync(entities);
-                await Repository.SaveChangesAsync();
+                _ = await Repository.BulkUpdateAsync(entities);
+                _ = await Repository.SaveChangesAsync();
             });
         else
-            Should.Throw<DbUpdateConcurrencyException>(() =>
+            _ = Should.Throw<DbUpdateConcurrencyException>(() =>
             {
                 foreach (var entity in entities)
                     entity.Name = $"Updated {entity.Name}";
-                Repository.BulkUpdate(entities);
-                Repository.SaveChanges();
+                _ = Repository.BulkUpdate(entities);
+                _ = Repository.SaveChanges();
             });
     }
 

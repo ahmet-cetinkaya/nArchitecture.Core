@@ -70,13 +70,13 @@ public partial class EfRepositoryBaseTests
         // Act
         if (isAsync)
         {
-            await Repository.BulkAddAsync(entities);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkAddAsync(entities);
+            _ = await Repository.SaveChangesAsync();
         }
         else
         {
-            Repository.BulkAdd(entities);
-            Repository.SaveChanges();
+            _ = Repository.BulkAdd(entities);
+            _ = Repository.SaveChanges();
         }
 
         // Assert
@@ -103,7 +103,7 @@ public partial class EfRepositoryBaseTests
         if (isAsync)
             await Should.NotThrowAsync(async () => await Repository.BulkAddAsync(entities));
         else
-            Should.NotThrow(() => Repository.BulkAdd(entities));
+            _ = Should.NotThrow(() => Repository.BulkAdd(entities));
     }
 
     [Theory(DisplayName = "BulkAdd/BulkAddAsync - Should throw when collection is null")]

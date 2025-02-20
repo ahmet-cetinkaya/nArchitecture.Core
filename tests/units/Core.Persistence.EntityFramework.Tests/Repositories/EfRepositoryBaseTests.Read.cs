@@ -66,8 +66,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(entityCount);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         ICollection<TestEntity> result;
@@ -93,8 +93,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = new[] { CreateTestEntity("Match"), CreateTestEntity("Match"), CreateTestEntity("NoMatch") };
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         ICollection<TestEntity> result;
@@ -119,8 +119,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(totalCount);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         var result = isAsync
@@ -177,8 +177,8 @@ public partial class EfRepositoryBaseTests
         if (entityCount > 0)
         {
             var entities = CreateTestEntities(entityCount);
-            await Repository.BulkAddAsync(entities);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkAddAsync(entities);
+            _ = await Repository.SaveChangesAsync();
         }
 
         // Act
@@ -206,8 +206,8 @@ public partial class EfRepositoryBaseTests
             CreateTestEntity("Medium Priority"),
             CreateTestEntity("Low Priority"),
         };
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         var dynamicQuery = new DynamicQuery
         {
@@ -255,14 +255,14 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(5);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         var result = isAsync ? await Repository.GetRandomAsync() : Repository.GetRandom();
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         entities.ShouldContain(e => e.Id == result.Id);
     }
 
@@ -275,8 +275,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = new[] { CreateTestEntity("Target"), CreateTestEntity("Target"), CreateTestEntity("NonTarget") };
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         var result = isAsync
@@ -284,7 +284,7 @@ public partial class EfRepositoryBaseTests
             : Repository.GetRandom(e => e.Name == "Target");
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Name.ShouldBe("Target");
     }
 
@@ -297,8 +297,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(10);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         var result = isAsync ? await Repository.GetRandomListAsync(size: 5) : Repository.GetRandomList(size: 5);
@@ -321,8 +321,8 @@ public partial class EfRepositoryBaseTests
         if (entityCount > 0)
         {
             var entities = CreateTestEntities(entityCount);
-            await Repository.BulkAddAsync(entities);
-            await Repository.SaveChangesAsync();
+            _ = await Repository.BulkAddAsync(entities);
+            _ = await Repository.SaveChangesAsync();
         }
 
         // Act
@@ -341,8 +341,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = new[] { CreateTestEntity("Match"), CreateTestEntity("Match"), CreateTestEntity("NoMatch") };
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         int count = isAsync ? await Repository.CountAsync(e => e.Name == "Match") : Repository.Count(e => e.Name == "Match");
@@ -361,7 +361,7 @@ public partial class EfRepositoryBaseTests
     [InlineData(0, int.MaxValue)] // Max size
     public void GetList_ShouldThrowOnInvalidPaginationParameters(int index, int size)
     {
-        Should.Throw<ArgumentException>(() => Repository.GetList(index: index, size: size));
+        _ = Should.Throw<ArgumentException>(() => Repository.GetList(index: index, size: size));
     }
 
     [Theory(DisplayName = "GetListByDynamic - Should validate operator")]
@@ -394,14 +394,14 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(3);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act & Assert
         if (isAsync)
             await Should.NotThrowAsync(async () => await Repository.GetListByDynamicAsync(new DynamicQuery()));
         else
-            Should.NotThrow(() => Repository.GetListByDynamic(new DynamicQuery()));
+            _ = Should.NotThrow(() => Repository.GetListByDynamic(new DynamicQuery()));
     }
 
     [Theory(DisplayName = "GetListByDynamic - Should handle null filter")]
@@ -413,8 +413,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(3);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         var dynamicQuery = new DynamicQuery { Filter = null };
 
@@ -422,7 +422,7 @@ public partial class EfRepositoryBaseTests
         if (isAsync)
             await Should.NotThrowAsync(async () => await Repository.GetListByDynamicAsync(dynamicQuery));
         else
-            Should.NotThrow(() => Repository.GetListByDynamic(dynamicQuery));
+            _ = Should.NotThrow(() => Repository.GetListByDynamic(dynamicQuery));
     }
 
     [Theory(DisplayName = "GetListByDynamic - Should throw ParseException for nonexistent field")]
@@ -434,8 +434,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(3);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         var dynamicQuery = new DynamicQuery
         {
@@ -461,14 +461,14 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(5);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<InvalidOperationException>(async () => await Repository.GetAllAsync(fetchLimit: 1));
+            _ = await Should.ThrowAsync<InvalidOperationException>(async () => await Repository.GetAllAsync(fetchLimit: 1));
         else
-            Should.Throw<InvalidOperationException>(() => Repository.GetAll(fetchLimit: 1));
+            _ = Should.Throw<InvalidOperationException>(() => Repository.GetAll(fetchLimit: 1));
     }
 
     [Theory(DisplayName = "GetAll - Should throw on invalid chunk size")]
@@ -478,7 +478,7 @@ public partial class EfRepositoryBaseTests
     [InlineData(-1)]
     public async Task GetAll_ShouldThrowOnInvalidChunkSize(int chunkSize)
     {
-        await Should.ThrowAsync<ArgumentException>(async () => await Repository.GetAllAsync(chunkSize: chunkSize));
+        _ = await Should.ThrowAsync<ArgumentException>(async () => await Repository.GetAllAsync(chunkSize: chunkSize));
     }
 
     [Theory(DisplayName = "GetRandomList - Should handle invalid size")]
@@ -489,7 +489,7 @@ public partial class EfRepositoryBaseTests
     [InlineData(int.MaxValue)]
     public async Task GetRandomList_ShouldHandleInvalidSize(int size)
     {
-        await Should.ThrowAsync<ArgumentException>(async () => await Repository.GetRandomListAsync(size: size));
+        _ = await Should.ThrowAsync<ArgumentException>(async () => await Repository.GetRandomListAsync(size: size));
     }
 
     [Fact(DisplayName = "GetById - Should handle invalid id")]
@@ -516,9 +516,9 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         if (isAsync)
-            await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.GetAsync(nullPredicate!));
+            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.GetAsync(nullPredicate!));
         else
-            Should.Throw<ArgumentNullException>(() => Repository.Get(nullPredicate!));
+            _ = Should.Throw<ArgumentNullException>(() => Repository.Get(nullPredicate!));
     }
 
     [Theory(DisplayName = "Count - Should handle null predicate")]
@@ -530,8 +530,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(3);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         var count = isAsync ? await Repository.CountAsync(predicate: null) : Repository.Count(predicate: null);
@@ -560,7 +560,7 @@ public partial class EfRepositoryBaseTests
             result = Repository.Get(e => e.Id == entity.Id, enableTracking: enableTracking);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         var entry = Context.Entry(result);
         if (enableTracking)
             entry.State.ShouldBe(EntityState.Unchanged);
@@ -579,8 +579,8 @@ public partial class EfRepositoryBaseTests
         var parent = await CreateAndAddTestEntity();
         var child = CreateTestEntity();
         child.ParentId = parent.Id;
-        await Repository.AddAsync(child);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.AddAsync(child);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         ICollection<TestEntity> result;
@@ -591,7 +591,7 @@ public partial class EfRepositoryBaseTests
 
         // Assert
         var childEntity = result.First(e => e.ParentId != null);
-        childEntity.Parent.ShouldNotBeNull();
+        _ = childEntity.Parent.ShouldNotBeNull();
         childEntity.Parent.Id.ShouldBe(parent.Id);
     }
 
@@ -604,8 +604,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = new[] { CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B") };
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         var result = isAsync
@@ -625,8 +625,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entity = await CreateAndAddTestEntity();
-        await Repository.DeleteAsync(entity);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.DeleteAsync(entity);
+        _ = await Repository.SaveChangesAsync();
 
         // Act
         ICollection<TestEntity> withoutDeleted;
@@ -657,8 +657,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = new[] { CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B") };
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         var dynamicQuery = new DynamicQuery { Sort = new[] { new Sort("name", "asc") } };
 
@@ -678,8 +678,8 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         var entities = CreateTestEntities(10);
-        await Repository.BulkAddAsync(entities);
-        await Repository.SaveChangesAsync();
+        _ = await Repository.BulkAddAsync(entities);
+        _ = await Repository.SaveChangesAsync();
 
         // Act - Request last page
         var result = isAsync ? await Repository.GetListAsync(index: 3, size: 3) : Repository.GetList(index: 3, size: 3);

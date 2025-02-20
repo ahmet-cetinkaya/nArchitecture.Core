@@ -96,7 +96,7 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
         email.Subject = mail.Subject;
 
         if (mail.CustomHeaders is not null)
-            foreach (var header in mail.CustomHeaders)
+            foreach (KeyValuePair<string, string> header in mail.CustomHeaders)
                 email.Headers.Add(header.Key, header.Value);
 
         if (mail.Priority.HasValue)

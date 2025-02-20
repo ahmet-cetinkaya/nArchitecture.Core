@@ -17,7 +17,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         try
         {
-            var (databaseEntity, _) = GetDatabaseValues(entity);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(entity);
             ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
 
             if (permanent)
@@ -31,7 +31,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException)
         {
-            var (databaseEntity, _) = GetDatabaseValues(entity);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(entity);
             ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
             throw;
         }
@@ -45,7 +45,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         try
         {
-            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                await GetDatabaseValuesAsync(entity, cancellationToken);
             ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
 
             if (permanent)
@@ -59,7 +60,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException)
         {
-            var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+            (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                await GetDatabaseValuesAsync(entity, cancellationToken);
             ValidateEntityState(entity, databaseEntity, ignoreSoftDelete: permanent);
             throw;
         }
@@ -79,7 +81,9 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         {
             foreach (TEntity entity in entities)
             {
-                var (databaseEntity, _) = GetDatabaseValues(entity);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(
+                    entity
+                );
                 ValidateEntityState(entity, databaseEntity);
 
                 if (permanent)
@@ -94,10 +98,12 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            TEntity? failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
             if (failedEntity != null)
             {
-                var (databaseEntity, _) = GetDatabaseValues(failedEntity);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) = GetDatabaseValues(
+                    failedEntity
+                );
                 ValidateEntityState(failedEntity, databaseEntity);
             }
             throw;
@@ -123,7 +129,8 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         {
             foreach (TEntity entity in entities)
             {
-                var (databaseEntity, _) = await GetDatabaseValuesAsync(entity, cancellationToken);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                    await GetDatabaseValuesAsync(entity, cancellationToken);
                 ValidateEntityState(entity, databaseEntity);
 
                 if (permanent)
@@ -138,10 +145,11 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            var failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
+            TEntity? failedEntity = entities.LastOrDefault(e => ex.Entries.Any(entry => entry.Entity == e));
             if (failedEntity != null)
             {
-                var (databaseEntity, _) = await GetDatabaseValuesAsync(failedEntity, cancellationToken);
+                (TEntity databaseEntity, Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues _) =
+                    await GetDatabaseValuesAsync(failedEntity, cancellationToken);
                 ValidateEntityState(failedEntity, databaseEntity);
             }
             throw;
@@ -215,7 +223,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         EditEntityPropertiesToDelete(entity, deletionTime);
 
         // Retrieve navigation properties.
-        var entry = Context.Entry(entity);
+        Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<IEntityTimestamps> entry = Context.Entry(entity);
         var navigations = entry
             .Metadata.GetNavigations()
             .Cast<INavigationBase>()
@@ -224,7 +232,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
             .ToList();
 
         // Cascade soft delete to navigated entities.
-        foreach (var navigation in navigations)
+        foreach (INavigationBase? navigation in navigations)
         {
             if (navigation.PropertyInfo == null)
                 continue;
@@ -233,14 +241,18 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
             if (navigation.IsCollection)
             {
-                var collectionEntry = entry.Collection(navigation.PropertyInfo.Name);
+                Microsoft.EntityFrameworkCore.ChangeTracking.CollectionEntry collectionEntry = entry.Collection(
+                    navigation.PropertyInfo.Name
+                );
                 if (!collectionEntry.IsLoaded)
                     await collectionEntry.LoadAsync(cancellationToken);
                 navValue = collectionEntry.CurrentValue;
             }
             else
             {
-                var referenceEntry = entry.Reference(navigation.PropertyInfo.Name);
+                Microsoft.EntityFrameworkCore.ChangeTracking.ReferenceEntry referenceEntry = entry.Reference(
+                    navigation.PropertyInfo.Name
+                );
                 if (!referenceEntry.IsLoaded)
                     await referenceEntry.LoadAsync(cancellationToken);
                 navValue = referenceEntry.CurrentValue;

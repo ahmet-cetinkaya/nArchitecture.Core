@@ -1,6 +1,6 @@
-﻿using NArchitecture.Core.Persistence.Abstractions.Dynamic;
-using System.Linq.Dynamic.Core;
+﻿using System.Linq.Dynamic.Core;
 using System.Text;
+using NArchitecture.Core.Persistence.Abstractions.Dynamic;
 
 namespace NArchitecture.Core.Persistence.EntityFramework.Dynamic;
 
@@ -127,11 +127,10 @@ public static class IQueryableDynamicFilterExtensions
     {
         if (string.IsNullOrEmpty(filter.Field))
             throw new ArgumentException("Invalid Field");
-        if (string.IsNullOrEmpty(filter.Operator) || !Operators.ContainsKey(filter.Operator))
+        if (string.IsNullOrEmpty(filter.Operator) || !Operators.TryGetValue(filter.Operator, out string? comparison))
             throw new ArgumentException("Invalid Operator");
 
         int index = filters.IndexOf(filter);
-        string comparison = Operators[filter.Operator];
         StringBuilder where = new();
 
         if (!string.IsNullOrEmpty(filter.Value))

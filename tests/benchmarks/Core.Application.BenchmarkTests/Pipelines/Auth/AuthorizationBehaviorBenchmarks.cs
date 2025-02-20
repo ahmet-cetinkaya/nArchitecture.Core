@@ -10,7 +10,7 @@ namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Authorization;
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
-public class AuthorizationBehaviorBenchmarks
+internal class AuthorizationBehaviorBenchmarks
 {
     private AuthorizationBehavior<TestRequest, TestResponse>? _behavior;
     private TestRequest? _adminRequest;
@@ -72,7 +72,7 @@ public class AuthorizationBehaviorBenchmarks
         public RoleClaims RoleClaims => new(IdentityRoles, RequiredRoles);
     }
 
-    public sealed record TestResponse;
+    internal sealed record TestResponse;
 
     private sealed class TestRequestHandler : IRequestHandler<TestRequest, TestResponse>
     {

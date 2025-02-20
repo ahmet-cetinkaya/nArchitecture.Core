@@ -26,7 +26,7 @@ public static class ServiceCollectionResourceLocalizationManagerExtension
     /// </summary>
     public static IServiceCollection AddYamlResourceLocalization(this IServiceCollection services)
     {
-        services.AddScoped<ILocalizationService, ResourceLocalizationManager>(_ =>
+        _ = services.AddScoped<ILocalizationService, ResourceLocalizationManager>(_ =>
         {
             Dictionary<string, Dictionary<string, string>> resources = GetLocalizationResources();
             return new ResourceLocalizationManager(resources);

@@ -91,7 +91,10 @@ public sealed class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
         // Validate and get sliding expiration
         TimeSpan slidingExpiration = request.CacheOptions.SlidingExpiration ?? _cacheSettings.SlidingExpiration;
         if (slidingExpiration <= TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(slidingExpiration), "Sliding expiration must be positive");
+            throw new ArgumentOutOfRangeException(
+                nameof(request),
+                $"Cache sliding expiration duration must be greater than zero. Current value: {slidingExpiration}"
+            );
 
         // Cache the response
         var cacheOptions = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };

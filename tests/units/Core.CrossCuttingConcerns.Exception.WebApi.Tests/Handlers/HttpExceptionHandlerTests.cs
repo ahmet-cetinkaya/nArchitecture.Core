@@ -31,7 +31,7 @@ public class HttpExceptionHandlerTests
     /// </summary>
     private async Task<T> GetResponseBody<T>()
     {
-        _bodyStream.Seek(0, SeekOrigin.Begin);
+        _ = _bodyStream.Seek(0, SeekOrigin.Begin);
         string responseBody = await new StreamReader(_bodyStream).ReadToEndAsync();
         return JsonSerializer.Deserialize<T>(responseBody)
             ?? throw new InvalidOperationException("Response body could not be deserialized");
@@ -151,6 +151,6 @@ public class HttpExceptionHandlerTests
         var handler = new HttpExceptionHandler();
 
         // Act & Assert
-        Should.Throw<NullReferenceException>(() => handler.Response);
+        _ = Should.Throw<NullReferenceException>(() => handler.Response);
     }
 }

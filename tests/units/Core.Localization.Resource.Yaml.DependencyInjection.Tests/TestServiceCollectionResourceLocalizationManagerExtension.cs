@@ -9,7 +9,7 @@ public static class TestServiceCollectionResourceLocalizationManagerExtension
     public static IServiceCollection AddYamlResourceLocalization(this IServiceCollection services)
     {
         var basePath = GetTestBasePath();
-        services.AddScoped<ILocalizationService, ResourceLocalizationManager>(_ =>
+        _ = services.AddScoped<ILocalizationService, ResourceLocalizationManager>(_ =>
         {
             var resources = GetLocalizationResources(basePath);
             return new ResourceLocalizationManager(resources);
@@ -35,7 +35,7 @@ public static class TestServiceCollectionResourceLocalizationManagerExtension
             var localeFiles = GetLocaleFiles(featureDir);
             foreach (var (culture, filePath) in localeFiles)
             {
-                resources.TryAdd(culture, new Dictionary<string, string>());
+                _ = resources.TryAdd(culture, new Dictionary<string, string>());
                 resources[culture][Path.GetFileName(featureDir)] = filePath;
             }
         }

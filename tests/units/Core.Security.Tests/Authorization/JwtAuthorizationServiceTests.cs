@@ -26,7 +26,7 @@ public class JwtAuthorizationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        _userRepositoryMock.Setup(r => r.HasPermissionAsync(userId, permissionName, default)).ReturnsAsync(expected);
+        _ = _userRepositoryMock.Setup(r => r.HasPermissionAsync(userId, permissionName, default)).ReturnsAsync(expected);
 
         var claims = new List<Claim> { new(ClaimTypes.Role, expected ? permissionName : "other") };
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
@@ -48,7 +48,7 @@ public class JwtAuthorizationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        _userRepositoryMock.Setup(r => r.HasAnyPermissionAsync(userId, permissionNames, default)).ReturnsAsync(expected);
+        _ = _userRepositoryMock.Setup(r => r.HasAnyPermissionAsync(userId, permissionNames, default)).ReturnsAsync(expected);
 
         var claims = new List<Claim> { new(ClaimTypes.Role, expected ? permissionNames[0] : "other") };
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
@@ -70,7 +70,7 @@ public class JwtAuthorizationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        _userRepositoryMock.Setup(r => r.HasAllPermissionsAsync(userId, permissionNames, default)).ReturnsAsync(expected);
+        _ = _userRepositoryMock.Setup(r => r.HasAllPermissionsAsync(userId, permissionNames, default)).ReturnsAsync(expected);
 
         var claims = new List<Claim>();
         if (expected)
@@ -100,13 +100,13 @@ public class JwtAuthorizationServiceTests
             new OperationClaim<Guid>("user") { Id = Guid.NewGuid() },
         };
 
-        _userRepositoryMock.Setup(r => r.GetOperationClaimsAsync(userId, default)).ReturnsAsync(expectedClaims);
+        _ = _userRepositoryMock.Setup(r => r.GetOperationClaimsAsync(userId, default)).ReturnsAsync(expectedClaims);
 
         // Act
         var result = await _authorizationService.GetUserOperationClaimsAsync(userId);
 
         // Assert
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Count.ShouldBe(expectedClaims.Count);
         result.ShouldBeEquivalentTo(expectedClaims);
     }

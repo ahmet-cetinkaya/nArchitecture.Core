@@ -11,7 +11,7 @@ public class ResourceLocalizationManagerTests
     public ResourceLocalizationManagerTests()
     {
         _testDataPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        Directory.CreateDirectory(_testDataPath);
+        _ = Directory.CreateDirectory(_testDataPath);
         _testResources = new Dictionary<string, Dictionary<string, string>>();
         SetupTestData();
     }
@@ -128,7 +128,7 @@ greeting: Merhaba, Dünya!
         manager.AcceptLocales = null;
 
         // Act & Assert
-        Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
+        _ = Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
     }
 
     [Fact]

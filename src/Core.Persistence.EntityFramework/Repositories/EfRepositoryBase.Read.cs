@@ -178,7 +178,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
     private const int MaxPageSize = 100_000;
 
-    private void validatePaginationParameters(int index, int size)
+    private static void validatePaginationParameters(int index, int size)
     {
         if (index < 0)
             throw new ArgumentException(ReadMessages.PageIndexNegativeMsg, nameof(index));
@@ -205,7 +205,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         bool enableTracking = true
     )
     {
-        validatePaginationParameters(index, size);
+        EfRepositoryBase<TEntity, TEntityId, TContext>.validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -232,7 +232,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         CancellationToken cancellationToken = default
     )
     {
-        validatePaginationParameters(index, size);
+        EfRepositoryBase<TEntity, TEntityId, TContext>.validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -258,7 +258,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         bool enableTracking = true
     )
     {
-        validatePaginationParameters(index, size);
+        EfRepositoryBase<TEntity, TEntityId, TContext>.validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
@@ -283,7 +283,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
         CancellationToken cancellationToken = default
     )
     {
-        validatePaginationParameters(index, size);
+        EfRepositoryBase<TEntity, TEntityId, TContext>.validatePaginationParameters(index, size);
         IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
         if (!enableTracking)
             queryable = queryable.AsNoTracking();

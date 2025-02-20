@@ -16,7 +16,7 @@ public class SerilogFileLoggerTests : IDisposable
     {
         _baseTestPath = Path.Combine(Path.GetTempPath(), $"narch_tests_{Guid.NewGuid()}");
         _testPaths = new List<string>();
-        Directory.CreateDirectory(_baseTestPath);
+        _ = Directory.CreateDirectory(_baseTestPath);
     }
 
     private (string path, SerilogFileLogger logger) createTestLogger(string testName)
@@ -29,7 +29,7 @@ public class SerilogFileLoggerTests : IDisposable
 
         try
         {
-            Directory.CreateDirectory(testPath);
+            _ = Directory.CreateDirectory(testPath);
             var config = new SerilogFileLogConfiguration(
                 folderPath: testPath,
                 rollingInterval: RollingInterval.Infinite,
@@ -54,7 +54,7 @@ public class SerilogFileLoggerTests : IDisposable
                 if (Directory.Exists(path))
                 {
                     Directory.Delete(path, true);
-                    _testPaths.Remove(path);
+                    _ = _testPaths.Remove(path);
                 }
             }
             catch (IOException ex)
@@ -69,7 +69,7 @@ public class SerilogFileLoggerTests : IDisposable
         if (Directory.Exists(path))
             Directory.Delete(path, true);
 
-        Directory.CreateDirectory(path);
+        _ = Directory.CreateDirectory(path);
 
         if (!Directory.Exists(path))
             throw new InvalidOperationException($"Failed to create directory: {path}");

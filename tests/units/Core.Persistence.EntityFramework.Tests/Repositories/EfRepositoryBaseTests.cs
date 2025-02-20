@@ -17,16 +17,13 @@ public partial class EfRepositoryBaseTests : IDisposable
         var options = new DbContextOptionsBuilder<TestDbContext>().UseSqlite(_connection).Options;
 
         Context = new TestDbContext(options);
-        Context.Database.EnsureCreated();
+        _ = Context.Database.EnsureCreated();
         Repository = new TestEntityRepository(Context);
     }
 
     protected TestDbContext CreateTestDbContext()
     {
-        var options = new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlite(_connection)
-            .EnableSensitiveDataLogging()
-            .Options;
+        var options = new DbContextOptionsBuilder<TestDbContext>().UseSqlite(_connection).EnableSensitiveDataLogging().Options;
 
         return new TestDbContext(options);
     }
@@ -39,7 +36,7 @@ public partial class EfRepositoryBaseTests : IDisposable
 
     public void Dispose()
     {
-        Context.Database.EnsureDeleted();
+        _ = Context.Database.EnsureDeleted();
         Context.Dispose();
         _connection.Dispose();
         GC.SuppressFinalize(this);

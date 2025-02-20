@@ -30,7 +30,7 @@ public class ClaimCollectionExtensionsTests
         string? nullUserId = null;
 
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => claims.AddUserId(nullUserId));
+        _ = Should.Throw<ArgumentNullException>(() => claims.AddUserId(nullUserId));
     }
 
     [Theory(DisplayName = "AddOperationClaim should add role claim with operation claim")]

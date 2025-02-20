@@ -17,16 +17,16 @@ public class SecurityServiceRegistrationTests
         IServiceCollection services = new ServiceCollection();
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
         var authConfig = new Mock<IAuthenticatorConfiguration>();
-        authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType>());
+        _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType>());
         SetupRequiredRepositories(services);
 
         // Act
-        services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
+        _ = services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
 
         // Assert
         var provider = services.BuildServiceProvider();
-        provider.GetService<IAuthenticator<Guid, int>>().ShouldNotBeNull();
-        provider.GetService<IAuthenticationService<Guid, int>>().ShouldNotBeNull();
+        _ = provider.GetService<IAuthenticator<Guid, int>>().ShouldNotBeNull();
+        _ = provider.GetService<IAuthenticationService<Guid, int>>().ShouldNotBeNull();
     }
 
     [Fact(DisplayName = "Should throw when required repositories are missing")]
@@ -38,7 +38,7 @@ public class SecurityServiceRegistrationTests
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object));
+        _ = Should.Throw<InvalidOperationException>(() => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object));
     }
 
     [Theory(DisplayName = "Should validate email service when email authenticator is enabled")]
@@ -50,11 +50,11 @@ public class SecurityServiceRegistrationTests
         IServiceCollection services = new ServiceCollection();
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
         var authConfig = new Mock<IAuthenticatorConfiguration>();
-        authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([authenticatorType]);
+        _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([authenticatorType]);
         SetupRequiredRepositories(services);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(
+        _ = Should.Throw<InvalidOperationException>(
             () => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object)
         );
     }
@@ -68,11 +68,11 @@ public class SecurityServiceRegistrationTests
         IServiceCollection services = new ServiceCollection();
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
         var authConfig = new Mock<IAuthenticatorConfiguration>();
-        authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([authenticatorType]);
+        _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([authenticatorType]);
         SetupRequiredRepositories(services);
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(
+        _ = Should.Throw<InvalidOperationException>(
             () => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object)
         );
     }
@@ -85,27 +85,27 @@ public class SecurityServiceRegistrationTests
         IServiceCollection services = new ServiceCollection();
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
         var authConfig = new Mock<IAuthenticatorConfiguration>();
-        authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([AuthenticatorType.Email]);
+        _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([AuthenticatorType.Email]);
         SetupRequiredRepositories(services);
-        services.AddScoped<IMailService>(_ => new Mock<IMailService>().Object);
+        _ = services.AddScoped<IMailService>(_ => new Mock<IMailService>().Object);
 
         // Act
-        services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
+        _ = services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
 
         // Assert
         var provider = services.BuildServiceProvider();
-        provider.GetService<IMailService>().ShouldNotBeNull();
+        _ = provider.GetService<IMailService>().ShouldNotBeNull();
     }
 
     private static void SetupRequiredRepositories(IServiceCollection services)
     {
-        services.AddScoped<IUserRepository<Guid, int, int>>(_ => new Mock<IUserRepository<Guid, int, int>>().Object);
+        _ = services.AddScoped<IUserRepository<Guid, int, int>>(_ => new Mock<IUserRepository<Guid, int, int>>().Object);
 
-        services.AddScoped<IRefreshTokenRepository<int, Guid, int>>(_ =>
+        _ = services.AddScoped<IRefreshTokenRepository<int, Guid, int>>(_ =>
             new Mock<IRefreshTokenRepository<int, Guid, int>>().Object
         );
 
-        services.AddScoped<IUserAuthenticatorRepository<Guid, int>>(_ =>
+        _ = services.AddScoped<IUserAuthenticatorRepository<Guid, int>>(_ =>
             new Mock<IUserAuthenticatorRepository<Guid, int>>().Object
         );
     }
