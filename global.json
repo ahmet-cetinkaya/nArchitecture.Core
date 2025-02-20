@@ -7,7 +7,7 @@
     "scripts": {
         "analyze": "dotnet roslynator analyze --exclude tests/**/**/*",
         "analyze:fix": "dotnet roslynator fix --exclude tests/**/**/*",
-        "analyze:security": "dotnet security-scan CorePackages.sln",
+        "analyze:security": "dotnet security-scan NArchitecture.Core.sln",
         "benchmark": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj && dotnet restore",
         "benchmark:last": "sudo dotnet run --project tests/benchmarks/Core.Benchmarks/Core.Benchmarks.csproj -- --last-run && dotnet restore",
         "build": "dotnet build --configuration Release",
