@@ -41,13 +41,12 @@ public class MailKitMailServiceTests
     public async Task SendEmailAsync_WithValidParameters_ShouldSendEmail()
     {
         // Arrange
-        var mail = new Mail
-        {
-            Subject = "Test Subject",
-            TextBody = "Test Body",
-            HtmlBody = "<p>Test Body</p>",
-            ToList = [new("Test Recipient", "recipient@example.com")],
-        };
+        var mail = new Mail(
+            "Test Subject",
+            "Test Body",
+            "<p>Test Body</p>",
+            [new MailboxAddress("Test Recipient", "recipient@example.com")]
+        );
 
         _ = _smtpClientMock
             .Setup(x => x.ConnectAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
@@ -75,13 +74,7 @@ public class MailKitMailServiceTests
     public async Task SendEmailAsync_WithEmptyRecipientList_ShouldNotSendEmail()
     {
         // Arrange
-        var mail = new Mail
-        {
-            Subject = "Test Subject",
-            TextBody = "Test Body",
-            ToList = [],
-        };
-
+        var mail = new Mail("Test Subject", "Test Body", string.Empty, []);
         // Act
         await _sut.SendAsync(mail);
 
@@ -93,13 +86,7 @@ public class MailKitMailServiceTests
     public async Task SendEmailAsync_WhenSmtpConnectionFails_ShouldThrowException()
     {
         // Arrange
-        var mail = new Mail
-        {
-            Subject = "Test Subject",
-            TextBody = "Test Body",
-            ToList = [new("Test", "test@example.com")],
-        };
-
+        var mail = new Mail("Test Subject", "Test Body", string.Empty, [new MailboxAddress("Test", "test@example.com")]);
         var expectedException = new ServiceNotConnectedException("Connection failed");
 
         _smtpClientMock
@@ -128,12 +115,7 @@ public class MailKitMailServiceTests
     public async Task SendEmailAsync_WhenCancellationRequested_ShouldCancelOperation()
     {
         // Arrange
-        var mail = new Mail
-        {
-            Subject = "Test Subject",
-            TextBody = "Test Body",
-            ToList = [new("Test", "test@example.com")],
-        };
+        var mail = new Mail("Test Subject", "Test Body", string.Empty, [new MailboxAddress("Test", "test@example.com")]);
 
         var cts = new CancellationTokenSource();
 
@@ -177,16 +159,17 @@ public class MailKitMailServiceTests
     )
     {
         // Arrange
-        var mail = new Mail
+        var mail = new Mail(
+            Subject: "Test Subject",
+            TextBody: "Test Body",
+            HtmlBody: string.Empty,
+            ToList: [new MailboxAddress("Primary", "primary@example.com")]
+        )
         {
-            Subject = "Test Subject",
-            TextBody = "Test Body",
-            ToList = [new("Primary", "primary@example.com")],
-            CcList = includeCc ? [new("CC", "cc@example.com")] : [],
-            BccList = includeBcc ? [new("BCC", "bcc@example.com")] : [],
-            ReplyTo = includeReplyTo ? [new("Reply", "reply@example.com")] : []
+            CcList = includeCc ? [new MailboxAddress("CC", "cc@example.com")] : [],
+            BccList = includeBcc ? [new MailboxAddress("BCC", "bcc@example.com")] : [],
+            ReplyTo = includeReplyTo ? [new MailboxAddress("Reply", "reply@example.com")] : [],
         };
-
         _ = _smtpClientMock
             .Setup(x => x.ConnectAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);

@@ -17,8 +17,7 @@ public class PerformanceBehaviorTests
     {
         _loggerMock = new();
         _stopwatch = new();
-        var options = new PerformanceOptions(TimeSpan.FromSeconds(1));
-        _behavior = new(_loggerMock.Object, _stopwatch, options);
+        _behavior = new(_loggerMock.Object, _stopwatch);
     }
 
     /// <summary>
