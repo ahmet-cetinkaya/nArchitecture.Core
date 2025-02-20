@@ -40,8 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core.CrossCuttingConcerns.Logging.SeriLog\Core.CrossCuttingConcerns.Logging.Serilog.csproj" />
-    <ProjectReference Include="..\Core.CrossCuttingConcerns.Logging\Core.CrossCuttingConcerns.Logging.csproj" />
+    <ProjectReference
+      Include="..\Core.CrossCuttingConcerns.Logging.SeriLog\Core.CrossCuttingConcerns.Logging.Serilog.csproj" />
   </ItemGroup>
 
 </Project>

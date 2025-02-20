@@ -40,8 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core.CrossCuttingConcerns.Logging.Abstraction\Core.CrossCuttingConcerns.Logging.Abstraction.csproj" />
-    <ProjectReference Include="..\Core.CrossCuttingConcerns.Logging\Core.CrossCuttingConcerns.Logging.csproj" />
+    <ProjectReference
+      Include="..\Core.CrossCuttingConcerns.Logging.Abstraction\Core.CrossCuttingConcerns.Logging.Abstraction.csproj" />
   </ItemGroup>
 
 </Project>
