@@ -2,7 +2,7 @@ using System.Security.Claims;
 using NArchitecture.Core.Security.Authorization.Extensions;
 using Shouldly;
 
-namespace Core.Security.Tests.Authorization.Extensions;
+namespace NArchitecture.Core.Security.Tests.Authorization.Extensions;
 
 public class ClaimCollectionExtensionsTests
 {
@@ -55,7 +55,7 @@ public class ClaimCollectionExtensionsTests
     {
         // Arrange
         var claims = new List<Claim>();
-        var operationClaims = new[] { "admin", "user", "manager" };
+        string[] operationClaims = new[] { "admin", "user", "manager" };
 
         // Act
         claims.AddOperationClaim(operationClaims);
@@ -72,7 +72,7 @@ public class ClaimCollectionExtensionsTests
     {
         // Arrange
         var claims = new List<Claim>();
-        var emptyOperationClaims = Array.Empty<string>();
+        string[] emptyOperationClaims = Array.Empty<string>();
 
         // Act
         claims.AddOperationClaim(emptyOperationClaims);

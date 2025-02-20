@@ -18,7 +18,7 @@ public static class IQueryablePaginateExtensions
             throw new ArgumentException(PaginationMessages.PageIndexTooLarge, nameof(index));
         if (size <= 0)
             throw new ArgumentException(PaginationMessages.PageSizeMustBeGreaterThanZero, nameof(size));
-        if (size == int.MaxValue || size > MaxPageSize)
+        if (size is int.MaxValue or > MaxPageSize)
             throw new ArgumentException(PaginationMessages.PageSizeTooLarge, nameof(size));
         if (index >= int.MaxValue / size)
             throw new ArgumentException(PaginationMessages.PageIndexSizeCombinationOverflow, nameof(index));

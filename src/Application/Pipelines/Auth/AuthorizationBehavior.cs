@@ -3,7 +3,7 @@ using System.Security.Authentication;
 using MediatR;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 
-namespace NArchitecture.Core.Application.Pipelines.Authorization;
+namespace NArchitecture.Core.Application.Pipelines.Auth;
 
 /// <summary>
 /// Pipeline behavior that handles authorization for secured requests.

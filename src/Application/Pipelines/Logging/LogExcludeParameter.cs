@@ -42,5 +42,8 @@ public readonly struct LogExcludeParameter
         KeepEndChars = keepEndChars;
     }
 
-    public static implicit operator LogExcludeParameter(string name) => new(name);
+    public static implicit operator LogExcludeParameter(string name)
+    {
+        return new(name);
+    }
 }

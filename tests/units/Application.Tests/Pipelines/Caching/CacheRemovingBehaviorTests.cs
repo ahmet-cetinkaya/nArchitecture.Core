@@ -51,7 +51,7 @@ public class CacheRemovingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var result = await _cache.GetAsync("test-key");
+        byte[]? result = await _cache.GetAsync("test-key");
         result.ShouldBeNull("Cache key should be removed from cache");
     }
 
@@ -64,15 +64,16 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WhenGroupKeyProvided_ShouldRemoveEntireGroup()
     {
         // Arrange
-        var groupKey = "group1";
+        string groupKey = "group1";
         var cachedKeys = new HashSet<string> { "key1", "key2" };
-        var serializedKeys = JsonSerializer.Serialize(cachedKeys);
+        string serializedKeys = JsonSerializer.Serialize(cachedKeys);
 
         await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(serializedKeys));
-        foreach (var key in cachedKeys)
+        foreach (string key in cachedKeys)
         {
             await _cache.SetAsync(key, Encoding.UTF8.GetBytes($"value-{key}"));
         }
+
         await _cache.SetAsync($"{groupKey}SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
         var request = new MockCacheRemoverRequest
@@ -84,16 +85,16 @@ public class CacheRemovingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        foreach (var key in cachedKeys)
+        foreach (string key in cachedKeys)
         {
-            var value = await _cache.GetAsync(key);
+            byte[]? value = await _cache.GetAsync(key);
             value.ShouldBeNull($"Cache key '{key}' should be removed");
         }
 
-        var groupValue = await _cache.GetAsync(groupKey);
+        byte[]? groupValue = await _cache.GetAsync(groupKey);
         groupValue.ShouldBeNull("Group key should be removed");
 
-        var slidingValue = await _cache.GetAsync($"{groupKey}SlidingExpiration");
+        byte[]? slidingValue = await _cache.GetAsync($"{groupKey}SlidingExpiration");
         slidingValue.ShouldBeNull("Sliding expiration key should be removed");
     }
 
@@ -106,24 +107,26 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WhenMultipleGroupKeysProvided_ShouldRemoveAllGroups()
     {
         // Arrange
-        var groupKeys = new[] { "group1", "group2" };
+        string[] groupKeys = new[] { "group1", "group2" };
         var cachedKeys1 = new HashSet<string> { "key1", "key2" };
         var cachedKeys2 = new HashSet<string> { "key3", "key4" };
 
         // Setup first group
         await _cache.SetAsync("group1", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cachedKeys1)));
-        foreach (var key in cachedKeys1)
+        foreach (string key in cachedKeys1)
         {
             await _cache.SetAsync(key, Encoding.UTF8.GetBytes($"value-{key}"));
         }
+
         await _cache.SetAsync("group1SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
         // Setup second group
         await _cache.SetAsync("group2", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cachedKeys2)));
-        foreach (var key in cachedKeys2)
+        foreach (string key in cachedKeys2)
         {
             await _cache.SetAsync(key, Encoding.UTF8.GetBytes($"value-{key}"));
         }
+
         await _cache.SetAsync("group2SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
         var request = new MockCacheRemoverRequest
@@ -135,18 +138,18 @@ public class CacheRemovingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        foreach (var key in cachedKeys1.Concat(cachedKeys2))
+        foreach (string? key in cachedKeys1.Concat(cachedKeys2))
         {
-            var value = await _cache.GetAsync(key);
+            byte[]? value = await _cache.GetAsync(key);
             value.ShouldBeNull($"Cache key '{key}' should be removed");
         }
 
-        foreach (var groupKey in groupKeys)
+        foreach (string? groupKey in groupKeys)
         {
-            var groupValue = await _cache.GetAsync(groupKey);
+            byte[]? groupValue = await _cache.GetAsync(groupKey);
             groupValue.ShouldBeNull($"Group key '{groupKey}' should be removed");
 
-            var slidingValue = await _cache.GetAsync($"{groupKey}SlidingExpiration");
+            byte[]? slidingValue = await _cache.GetAsync($"{groupKey}SlidingExpiration");
             slidingValue.ShouldBeNull($"Sliding expiration key for '{groupKey}' should be removed");
         }
     }
@@ -160,7 +163,7 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WhenGroupKeyDoesNotExist_ShouldHandleGracefully()
     {
         // Arrange
-        var existingKey = "existing-key";
+        string existingKey = "existing-key";
         await _cache.SetAsync(existingKey, Encoding.UTF8.GetBytes("test-value"));
 
         var request = new MockCacheRemoverRequest
@@ -176,7 +179,7 @@ public class CacheRemovingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var existingValue = await _cache.GetAsync(existingKey);
+        byte[]? existingValue = await _cache.GetAsync(existingKey);
         _ = existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
     }
 
@@ -189,8 +192,8 @@ public class CacheRemovingBehaviorTests
     public async Task Handle_WhenBypassCacheIsTrue_ShouldSkipCacheOperations()
     {
         // Arrange
-        var testKey = "test-key";
-        var groupKey = "group1";
+        string testKey = "test-key";
+        string groupKey = "group1";
         await _cache.SetAsync(testKey, Encoding.UTF8.GetBytes("test-value"));
         await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new[] { testKey })));
 
@@ -203,10 +206,10 @@ public class CacheRemovingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var value = await _cache.GetAsync(testKey);
+        byte[]? value = await _cache.GetAsync(testKey);
         _ = value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
 
-        var groupValue = await _cache.GetAsync(groupKey);
+        byte[]? groupValue = await _cache.GetAsync(groupKey);
         _ = groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
     }
 
@@ -220,11 +223,11 @@ public class CacheRemovingBehaviorTests
         // Arrange
         bool nextDelegateCalled = false;
         var request = new MockCacheRemoverRequest();
-        RequestHandlerDelegate<int> next = () =>
+        Task<int> next()
         {
             nextDelegateCalled = true;
             return Task.FromResult(42);
-        };
+        }
 
         // Act
         _ = await _behavior.Handle(request, next, CancellationToken.None);
@@ -264,7 +267,7 @@ public class CacheRemovingBehaviorTests
             await _cache.SetAsync(cacheKey, Encoding.UTF8.GetBytes("test-value"));
 
         if (groupKeys != null)
-            foreach (var groupKey in groupKeys)
+            foreach (string groupKey in groupKeys)
             {
                 var groupData = new HashSet<string> { "key1" };
                 await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
@@ -272,7 +275,7 @@ public class CacheRemovingBehaviorTests
             }
 
         // Act
-        var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        int result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe(42);
@@ -281,15 +284,15 @@ public class CacheRemovingBehaviorTests
         {
             if (cacheKey != null)
             {
-                var cachedValue = await _cache.GetAsync(cacheKey);
+                byte[]? cachedValue = await _cache.GetAsync(cacheKey);
                 cachedValue.ShouldBeNull();
             }
 
             if (groupKeys != null)
             {
-                foreach (var groupKey in groupKeys)
+                foreach (string groupKey in groupKeys)
                 {
-                    var groupValue = await _cache.GetAsync(groupKey);
+                    byte[]? groupValue = await _cache.GetAsync(groupKey);
                     groupValue.ShouldBeNull();
                 }
             }
@@ -310,7 +313,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull();
@@ -334,7 +337,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
 
         // Assert
         _ = exception.ShouldNotBeNull();
@@ -392,17 +395,17 @@ public class CacheRemovingBehaviorTests
 
         // Set up cache data
         var groupData = new HashSet<string> { "key1" };
-        foreach (var groupKey in request.CacheOptions.CacheGroupKey!)
+        foreach (string groupKey in request.CacheOptions.CacheGroupKey!)
         {
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
         }
 
         // Set up next delegate to cancel during execution
-        RequestHandlerDelegate<int> next = () =>
+        Task<int> next()
         {
             cts.Cancel(); // Cancel during execution
             return Task.FromResult(42);
-        };
+        }
 
         // Act & Assert
         _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
@@ -411,7 +414,7 @@ public class CacheRemovingBehaviorTests
         });
 
         // Verify that not all groups were processed
-        var lastGroupValue = await _cache.GetAsync("group3");
+        byte[]? lastGroupValue = await _cache.GetAsync("group3");
         _ = lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
     }
 
@@ -433,7 +436,7 @@ public class CacheRemovingBehaviorTests
         };
 
         // Setup cache data
-        foreach (var groupKey in request.CacheOptions.CacheGroupKey!)
+        foreach (string groupKey in request.CacheOptions.CacheGroupKey!)
         {
             var groupData = new HashSet<string> { "testKey" };
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));

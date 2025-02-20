@@ -3,14 +3,14 @@ using Spectre.Console;
 
 namespace NArchitecture.Core.Benchmarks;
 
-class BenchmarkProject(string Name, string Path)
+internal class BenchmarkProject(string Name, string Path)
 {
     public string Name { get; } = Name;
     public string Path { get; } = Path;
     public string LastRunLog { get; set; } = string.Empty;
 }
 
-class Program
+internal static class Program
 {
     private const string LAST_RUN_FLAG = "--last-run";
     private const string LAST_BENCHMARK_FLAG = "--last-benchmark";
@@ -18,7 +18,7 @@ class Program
     private static readonly string LastRunFilePath = Path.Combine(LogDirectory, "last-run.txt");
     private static readonly string LastBenchmarkFilePath = Path.Combine(LogDirectory, "last-benchmark.txt");
 
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         _ = Directory.CreateDirectory(LogDirectory);
 
@@ -77,10 +77,11 @@ class Program
 
             currentDir = Path.GetDirectoryName(currentDir);
         }
+
         return null;
     }
 
-    static async Task RunLastBenchmarkAsync()
+    private static async Task RunLastBenchmarkAsync()
     {
         if (!File.Exists(LastRunFilePath))
         {
@@ -93,7 +94,7 @@ class Program
         await RunBenchmarkAsync(project);
     }
 
-    static async Task RunBenchmarkAsync(BenchmarkProject project)
+    private static async Task RunBenchmarkAsync(BenchmarkProject project)
     {
         await BuildProjectAsync(project);
 
@@ -119,8 +120,9 @@ class Program
         await File.WriteAllTextAsync(LastRunFilePath, project.Path);
     }
 
-    static Task BuildProjectAsync(BenchmarkProject project) =>
-        Task.Run(
+    private static Task BuildProjectAsync(BenchmarkProject project)
+    {
+        return Task.Run(
             () =>
                 AnsiConsole
                     .Status()
@@ -144,4 +146,5 @@ class Program
                         }
                     )
         );
+    }
 }

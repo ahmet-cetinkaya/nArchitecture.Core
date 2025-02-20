@@ -1,9 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
 using MediatR;
-using NArchitecture.Core.Application.Pipelines.Authorization;
+using NArchitecture.Core.Application.Pipelines.Auth;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 
-namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Authorization;
+namespace NArchitecture.Core.Application.BenchmarkTests.Pipelines.Auth;
 
 /// <summary>
 /// Benchmark tests for AuthorizationBehavior performance.
@@ -22,7 +22,7 @@ internal class AuthorizationBehaviorBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var handler = new TestRequestHandler();
+        _ = new TestRequestHandler();
         _behavior = new();
 
         _adminRequest = new TestRequest(["admin"], ["test"]);
@@ -35,14 +35,19 @@ internal class AuthorizationBehaviorBenchmarks
     /// Benchmark for admin role authorization.
     /// </summary>
     [Benchmark(Baseline = true)]
-    public async Task<TestResponse> AdminRole() => await _behavior!.Handle(_adminRequest!, () => _cachedResponse, default);
+    public async Task<TestResponse> AdminRole()
+    {
+        return await _behavior!.Handle(_adminRequest!, () => _cachedResponse, default);
+    }
 
     /// <summary>
     /// Benchmark for matching role authorization.
     /// </summary>
     [Benchmark]
-    public async Task<TestResponse> MatchingRole() =>
-        await _behavior!.Handle(_matchingRoleRequest!, () => _cachedResponse, default);
+    public async Task<TestResponse> MatchingRole()
+    {
+        return await _behavior!.Handle(_matchingRoleRequest!, () => _cachedResponse, default);
+    }
 
     /// <summary>
     /// Benchmark for non-matching role authorization.
@@ -64,8 +69,10 @@ internal class AuthorizationBehaviorBenchmarks
     /// Benchmark for multiple roles authorization.
     /// </summary>
     [Benchmark]
-    public async Task<TestResponse> MultipleRoles() =>
-        await _behavior!.Handle(_multiRoleRequest!, () => _cachedResponse, default);
+    public async Task<TestResponse> MultipleRoles()
+    {
+        return await _behavior!.Handle(_multiRoleRequest!, () => _cachedResponse, default);
+    }
 
     private sealed record TestRequest(string[] IdentityRoles, string[] RequiredRoles) : IRequest<TestResponse>, ISecuredRequest
     {
@@ -76,6 +83,9 @@ internal class AuthorizationBehaviorBenchmarks
 
     private sealed class TestRequestHandler : IRequestHandler<TestRequest, TestResponse>
     {
-        public Task<TestResponse> Handle(TestRequest request, CancellationToken ct) => Task.FromResult(new TestResponse());
+        public Task<TestResponse> Handle(TestRequest request, CancellationToken ct)
+        {
+            return Task.FromResult(new TestResponse());
+        }
     }
 }

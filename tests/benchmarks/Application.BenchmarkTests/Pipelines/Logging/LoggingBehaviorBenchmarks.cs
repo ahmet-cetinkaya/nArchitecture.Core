@@ -89,7 +89,7 @@ public class LoggingBehaviorBenchmarks
     [Benchmark]
     public async Task Handle_MultipleSequential()
     {
-        foreach (var request in _multipleRequests)
+        foreach (TestRequest request in _multipleRequests)
         {
             _ = await _loggingBehavior.Handle(
                 request,
@@ -102,7 +102,7 @@ public class LoggingBehaviorBenchmarks
     [Benchmark]
     public async Task Handle_MultipleParallel()
     {
-        var tasks = _multipleRequests.Select(request =>
+        IEnumerable<Task<TestResponse>> tasks = _multipleRequests.Select(request =>
             _loggingBehavior.Handle(request, () => Task.FromResult(new TestResponse { Success = true }), CancellationToken.None)
         );
 
@@ -113,14 +113,14 @@ public class LoggingBehaviorBenchmarks
     public async Task Handle_MultipleBatched()
     {
         const int batchSize = 10;
-        var batches = _multipleRequests
+        IEnumerable<IEnumerable<TestRequest>> batches = _multipleRequests
             .Select((request, index) => new { request, index })
             .GroupBy(x => x.index / batchSize)
             .Select(g => g.Select(x => x.request));
 
-        foreach (var batch in batches)
+        foreach (IEnumerable<TestRequest>? batch in batches)
         {
-            var tasks = batch.Select(request =>
+            IEnumerable<Task<TestResponse>> tasks = batch.Select(request =>
                 _loggingBehavior.Handle(
                     request,
                     () => Task.FromResult(new TestResponse { Success = true }),
@@ -138,7 +138,7 @@ public class LoggingBehaviorBenchmarks
         using var semaphore = new SemaphoreSlim(5); // Max 5 concurrent requests
         var tasks = new List<Task>();
 
-        foreach (var request in _multipleRequests)
+        foreach (TestRequest request in _multipleRequests)
         {
             await semaphore.WaitAsync();
             tasks.Add(
@@ -172,19 +172,20 @@ public class LoggingBehaviorBenchmarks
 
         var producer = Task.Run(async () =>
         {
-            foreach (var request in _multipleRequests)
+            foreach (TestRequest request in _multipleRequests)
             {
                 await channel.Writer.WriteAsync(request);
             }
+
             channel.Writer.Complete();
         });
 
-        var consumers = Enumerable
+        IEnumerable<Task> consumers = Enumerable
             .Range(0, 3)
             .Select(_ =>
                 Task.Run(async () =>
                 {
-                    await foreach (var request in channel.Reader.ReadAllAsync())
+                    await foreach (TestRequest request in channel.Reader.ReadAllAsync())
                     {
                         _ = await _loggingBehavior.Handle(
                             request,

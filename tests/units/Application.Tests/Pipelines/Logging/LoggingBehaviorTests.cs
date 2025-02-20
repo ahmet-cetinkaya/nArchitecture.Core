@@ -2,8 +2,8 @@ using System.Text.Json;
 using MediatR;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Logging;
-using NArchitecture.Core.CrossCuttingConcerns.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Logging;
@@ -12,7 +12,10 @@ public class LoggingBehaviorTests
 {
     private readonly Mock<ILogger> _loggerMock;
 
-    public LoggingBehaviorTests() => _loggerMock = new Mock<ILogger>();
+    public LoggingBehaviorTests()
+    {
+        _loggerMock = new Mock<ILogger>();
+    }
 
     /// <summary>
     /// Tests that request details are logged when the request is valid.
@@ -26,7 +29,11 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         // Act
-        var response = await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
+        TestResponse response = await loggingBehavior.Handle(
+            request,
+            () => Task.FromResult(expectedResponse),
+            CancellationToken.None
+        );
 
         // Assert
         response.ShouldBe(expectedResponse);
@@ -48,7 +55,11 @@ public class LoggingBehaviorTests
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
         // Act
-        var response = await loggingBehavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
+        TestResponse response = await loggingBehavior.Handle(
+            request,
+            () => Task.FromResult(expectedResponse),
+            CancellationToken.None
+        );
 
         // Assert
         response.ShouldBe(expectedResponse);
@@ -74,7 +85,7 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         logDetail!.Parameters.Count.ShouldBe(1);
         logDetail.Parameters[0].Type.ShouldBe(nameof(TestRequest));
         logDetail.User.ShouldBe("testuser");
@@ -101,7 +112,7 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         logDetail!.User.ShouldBe(expectedUsername);
     }
 
@@ -115,7 +126,7 @@ public class LoggingBehaviorTests
         var request = new TestRequest("testuser") { Id = 1, Name = "Test" };
         var loggingBehavior = new LoggingBehavior<TestRequest, TestResponse>(_loggerMock.Object);
 
-        RequestHandlerDelegate<TestResponse> next = () => throw new InvalidOperationException("Test exception");
+        static Task<TestResponse> next() => throw new InvalidOperationException("Test exception");
 
         // Act & Assert
         _ = await Should.ThrowAsync<InvalidOperationException>(
@@ -147,7 +158,7 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
         _ = logDetail!.MethodName.ShouldNotBeNull();
         logDetail.MethodName.ShouldContain("RequestHandlerDelegate");
     }
@@ -199,8 +210,10 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
-        var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        Dictionary<string, object>? parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(
+            logDetail!.Parameters[0].Value.ToString()!
+        );
         parameters!["SensitiveData"].ToString().ShouldBe(expected);
     }
 
@@ -208,21 +221,18 @@ public class LoggingBehaviorTests
     {
         public string SensitiveData { get; set; } = string.Empty;
 
-        public LogOptions LogOptions
-        {
-            get =>
-                new(
-                    excludeParameters:
-                    [
-                        new LogExcludeParameter(
-                            name: nameof(SensitiveData),
-                            mask: true,
-                            keepStartChars: 2, // Changed from 4 to 2
-                            keepEndChars: 3 // Changed from 4 to 3
-                        ),
-                    ]
-                );
-        }
+        public LogOptions LogOptions =>
+            new(
+                excludeParameters:
+                [
+                    new LogExcludeParameter(
+                        name: nameof(SensitiveData),
+                        mask: true,
+                        keepStartChars: 2, // Changed from 4 to 2
+                        keepEndChars: 3 // Changed from 4 to 3
+                    ),
+                ]
+            );
     }
 
     private class TestRequestWithExclusion : IRequest<TestResponse>, ILoggableRequest
@@ -231,10 +241,7 @@ public class LoggingBehaviorTests
         public string Name { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
 
-        public LogOptions LogOptions
-        {
-            get => new(excludeParameters: [nameof(Password)]);
-        }
+        public LogOptions LogOptions => new(excludeParameters: [nameof(Password)]);
     }
 
     /// <summary>
@@ -262,24 +269,21 @@ public class LoggingBehaviorTests
     private class TestRequestWithResponseLogging : IRequest<TestResponse>, ILoggableRequest
     {
         public int Id { get; set; }
-        public LogOptions LogOptions
-        {
-            get => new(logResponse: true);
-        }
+        public LogOptions LogOptions => new(logResponse: true);
     }
 
     private class TestRequest : IRequest<TestResponse>, ILoggableRequest
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        private string _user;
+        private readonly string _user;
 
-        public TestRequest(string user = "testuser") => _user = user;
-
-        public LogOptions LogOptions
+        public TestRequest(string user = "testuser")
         {
-            get => new(_user);
+            _user = user;
         }
+
+        public LogOptions LogOptions => new(_user);
     }
 
     private class TestResponse
@@ -322,8 +326,10 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
-        var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        Dictionary<string, object>? parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(
+            logDetail!.Parameters[0].Value.ToString()!
+        );
         parameters!["SensitiveData"].ToString().ShouldBe(expected);
     }
 
@@ -352,8 +358,10 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
-        var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        Dictionary<string, object>? parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(
+            logDetail!.Parameters[0].Value.ToString()!
+        );
 
         parameters!["PublicData"].ToString().ShouldBe("visible");
         parameters!.ContainsKey("Password").ShouldBeFalse();
@@ -373,14 +381,14 @@ public class LoggingBehaviorTests
         {
             Id = 1,
             Name = "Test",
-            Details = new() { "detail1", "detail2" },
+            Details = ["detail1", "detail2"],
             Timestamp = DateTime.UtcNow,
         };
 
         var loggingBehavior = new LoggingBehavior<ComplexResponseRequest, ComplexResponse>(_loggerMock.Object);
 
         var logMessages = new List<string>();
-        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(msg => logMessages.Add(msg));
+        _ = _loggerMock.Setup(x => x.InformationAsync(It.IsAny<string>())).Callback<string>(logMessages.Add);
 
         // Act
         _ = await loggingBehavior.Handle(request, () => Task.FromResult(complexResponse), CancellationToken.None);
@@ -399,22 +407,19 @@ public class LoggingBehaviorTests
         public int KeepEndChars { get; set; }
         public char MaskChar { get; set; }
 
-        public LogOptions LogOptions
-        {
-            get =>
-                new(
-                    excludeParameters:
-                    [
-                        new LogExcludeParameter(
-                            nameof(SensitiveData),
-                            mask: true,
-                            maskChar: MaskChar,
-                            keepStartChars: KeepStartChars,
-                            keepEndChars: KeepEndChars
-                        ),
-                    ]
-                );
-        }
+        public LogOptions LogOptions =>
+            new(
+                excludeParameters:
+                [
+                    new LogExcludeParameter(
+                        nameof(SensitiveData),
+                        mask: true,
+                        maskChar: MaskChar,
+                        keepStartChars: KeepStartChars,
+                        keepEndChars: KeepEndChars
+                    ),
+                ]
+            );
     }
 
     private class MultipleExclusionRequest : IRequest<TestResponse>, ILoggableRequest
@@ -424,26 +429,20 @@ public class LoggingBehaviorTests
         public string Email { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
 
-        public LogOptions LogOptions
-        {
-            get =>
-                new(
-                    excludeParameters:
-                    [
-                        new LogExcludeParameter(nameof(Password)),
-                        new LogExcludeParameter(name: nameof(Email), mask: true, keepStartChars: 4, keepEndChars: 3),
-                        new LogExcludeParameter(name: nameof(ApiKey), mask: true, keepStartChars: 3, keepEndChars: 0),
-                    ]
-                );
-        }
+        public LogOptions LogOptions =>
+            new(
+                excludeParameters:
+                [
+                    new LogExcludeParameter(nameof(Password)),
+                    new LogExcludeParameter(name: nameof(Email), mask: true, keepStartChars: 4, keepEndChars: 3),
+                    new LogExcludeParameter(name: nameof(ApiKey), mask: true, keepStartChars: 3, keepEndChars: 0),
+                ]
+            );
     }
 
     private class ComplexResponseRequest : IRequest<ComplexResponse>, ILoggableRequest
     {
-        public LogOptions LogOptions
-        {
-            get => new(logResponse: true);
-        }
+        public LogOptions LogOptions => new(logResponse: true);
     }
 
     private class ComplexResponse
@@ -472,29 +471,28 @@ public class LoggingBehaviorTests
 
         // Assert
         _ = capturedLogMessage.ShouldNotBeNull();
-        var logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
-        var parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(logDetail!.Parameters[0].Value.ToString()!);
+        LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(capturedLogMessage);
+        Dictionary<string, object>? parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(
+            logDetail!.Parameters[0].Value.ToString()!
+        );
         parameters!["MaskedData"].ToString().ShouldBe("ab-----hi");
     }
 
     private class TestDefaultMaskingRequest : IRequest<TestResponse>, ILoggableRequest
     {
         public string MaskedData { get; set; } = string.Empty;
-        public LogOptions LogOptions
-        {
-            get =>
-                new(
-                    excludeParameters:
-                    [
-                        new LogExcludeParameter(
-                            name: nameof(MaskedData),
-                            mask: true,
-                            maskChar: '-',
-                            keepStartChars: 2,
-                            keepEndChars: 2
-                        ),
-                    ]
-                );
-        }
+        public LogOptions LogOptions =>
+            new(
+                excludeParameters:
+                [
+                    new LogExcludeParameter(
+                        name: nameof(MaskedData),
+                        mask: true,
+                        maskChar: '-',
+                        keepStartChars: 2,
+                        keepEndChars: 2
+                    ),
+                ]
+            );
     }
 }

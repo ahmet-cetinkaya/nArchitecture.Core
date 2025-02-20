@@ -6,7 +6,7 @@ using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 
-namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Caching;
+namespace NArchitecture.Core.Application.BenchmarkTests.Pipelines.Caching;
 
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
@@ -37,9 +37,7 @@ public class CacheRemovingBehaviorBenchmarks
     public async ValueTask BaselineOperation()
     {
         for (int i = 0; i < 1000; i++)
-        {
             _ = await Task.FromResult($"test-response-{i}");
-        }
     }
 
     [Benchmark(Description = "Remove Single Key", OperationsPerInvoke = 1000)]
@@ -66,9 +64,7 @@ public class CacheRemovingBehaviorBenchmarks
     public async ValueTask RemoveBoth()
     {
         for (int i = 0; i < 1000; i++)
-        {
             _ = await _behavior.Handle(_request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None);
-        }
     }
 
     public class TestRequest : IRequest<string>, ICacheRemoverRequest

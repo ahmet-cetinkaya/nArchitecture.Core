@@ -57,11 +57,11 @@ public class CachingBehaviorTests
         };
 
         // Act
-        var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe("test-response");
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         cachedValue.ShouldBeNull();
     }
 
@@ -73,11 +73,11 @@ public class CachingBehaviorTests
     {
         // Arrange
         var request = new MockCacheableRequest();
-        var cachedResponse = "cached-response";
+        string cachedResponse = "cached-response";
         await _cache.SetAsync(request.CacheOptions.CacheKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cachedResponse)));
 
         // Act
-        var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe(cachedResponse);
@@ -93,13 +93,13 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest();
 
         // Act
-        var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe("test-response");
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         _ = cachedValue.ShouldNotBeNull();
-        var cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
+        string? cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
         cachedResponse.ShouldBe("test-response");
     }
 
@@ -133,7 +133,7 @@ public class CachingBehaviorTests
             Encoding.UTF8.GetBytes(JsonSerializer.Serialize("test")),
             cacheOptions
         );
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         _ = cachedValue.ShouldNotBeNull();
     }
 
@@ -158,13 +158,13 @@ public class CachingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
+        byte[]? groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
         _ = groupCache.ShouldNotBeNull();
-        var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.Default.GetString(groupCache!));
+        HashSet<string>? keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.Default.GetString(groupCache!));
         _ = keys.ShouldNotBeNull();
         keys.ShouldContain(request.CacheOptions.CacheKey);
 
-        var slidingExpirationCache = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
+        byte[]? slidingExpirationCache = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
         _ = slidingExpirationCache.ShouldNotBeNull();
     }
 
@@ -193,7 +193,7 @@ public class CachingBehaviorTests
         cts.Cancel();
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<OperationCanceledException>(
+        OperationCanceledException exception = await Should.ThrowAsync<OperationCanceledException>(
             async () => await _behavior.Handle(request, _nextDelegate, cts.Token)
         );
     }
@@ -239,7 +239,7 @@ public class CachingBehaviorTests
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe("test-response", "Should fallback to next delegate when deserialization fails");
@@ -260,17 +260,17 @@ public class CachingBehaviorTests
     {
         // Arrange
         var request = new MockCacheableRequest();
-        var largeResponse = new string('x', 8192); // Create a string larger than default buffer size
-        RequestHandlerDelegate<string> largeResponseDelegate = () => Task.FromResult(largeResponse);
+        string largeResponse = new('x', 8192); // Create a string larger than default buffer size
+        Task<string> largeResponseDelegate() => Task.FromResult(largeResponse);
 
         // Act
-        var result = await _behavior.Handle(request, largeResponseDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, largeResponseDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe(largeResponse);
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         _ = cachedValue.ShouldNotBeNull();
-        var cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
+        string? cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
         cachedResponse.ShouldBe(largeResponse);
     }
 
@@ -286,17 +286,17 @@ public class CachingBehaviorTests
     {
         // Arrange
         var request = new MockCacheableRequest();
-        var response = new string('x', responseSize);
-        RequestHandlerDelegate<string> responseDelegate = () => Task.FromResult(response);
+        string response = new('x', responseSize);
+        Task<string> responseDelegate() => Task.FromResult(response);
 
         // Act
-        var result = await _behavior.Handle(request, responseDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, responseDelegate, CancellationToken.None);
 
         // Assert
         result.Length.ShouldBe(responseSize);
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         _ = cachedValue.ShouldNotBeNull();
-        var cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
+        string? cachedResponse = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(cachedValue!));
         cachedResponse!.Length.ShouldBe(responseSize);
     }
 
@@ -309,16 +309,18 @@ public class CachingBehaviorTests
         // Arrange
         var request = new MockCacheableRequest();
         var failingData = new FailingData();
-        RequestHandlerDelegate<string> failingDelegate = () => Task.FromResult(JsonSerializer.Serialize(failingData));
+        Task<string> failingDelegate() => Task.FromResult(JsonSerializer.Serialize(failingData));
 
         // Act & Assert
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, failingDelegate, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(
+            () => _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        );
 
         _ = exception.ShouldNotBeNull();
         _ = exception.ShouldBeOfType<JsonException>();
 
         // Verify the cache wasn't modified
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         cachedValue.ShouldBeNull("Cache should not be modified when serialization fails");
     }
 
@@ -331,10 +333,12 @@ public class CachingBehaviorTests
         // Arrange
         var request = new MockCacheableRequest();
         var failingData = new FailingData();
-        RequestHandlerDelegate<string> failingDelegate = () => Task.FromResult(JsonSerializer.Serialize(failingData));
+        Task<string> failingDelegate() => Task.FromResult(JsonSerializer.Serialize(failingData));
 
         // Act & Assert
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, failingDelegate, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(
+            () => _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        );
 
         _ = exception.ShouldNotBeNull();
         _ = exception.ShouldBeOfType<JsonException>();
@@ -349,7 +353,7 @@ public class CachingBehaviorTests
                 slidingExpiration: null
             ),
         };
-        var result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
         result.ShouldBe("test-response", "Subsequent requests should work after serialization failure");
     }
 
@@ -363,8 +367,8 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest();
 
         // Create a delegate that will trigger array allocation and then fail serialization
-        var count = 0;
-        RequestHandlerDelegate<string> failingDelegate = () =>
+        int count = 0;
+        Task<string> failingDelegate()
         {
             count++;
             if (count == 1)
@@ -373,8 +377,9 @@ public class CachingBehaviorTests
                 circularObject.Reference = circularObject; // Create circular reference
                 return Task.FromResult(JsonSerializer.Serialize(circularObject)); // This will throw
             }
+
             return Task.FromResult("test-response");
-        };
+        }
 
         // Act & Assert
         _ = await Should.ThrowAsync<JsonException>(
@@ -391,7 +396,7 @@ public class CachingBehaviorTests
                 slidingExpiration: null
             ),
         };
-        var result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
         result.ShouldBe("test-response");
     }
 
@@ -415,15 +420,15 @@ public class CachingBehaviorTests
         // Don't set any cache data to ensure null group cache
 
         // Act
-        var result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe("test-response");
 
         // Verify group was created
-        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
+        byte[]? groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
         _ = groupCache.ShouldNotBeNull();
-        var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
+        HashSet<string>? keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
         _ = keys.ShouldNotBeNull();
         keys.ShouldContain(request.CacheOptions.CacheKey);
     }
@@ -447,11 +452,15 @@ public class CachingBehaviorTests
     /// </summary>
     private class FailingConverter : JsonConverter<FailingData>
     {
-        public override FailingData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        public override FailingData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
             throw new JsonException("Forced serialization failure");
+        }
 
-        public override void Write(Utf8JsonWriter writer, FailingData value, JsonSerializerOptions options) =>
+        public override void Write(Utf8JsonWriter writer, FailingData value, JsonSerializerOptions options)
+        {
             throw new JsonException("Forced serialization failure");
+        }
     }
 
     /// <summary>
@@ -461,7 +470,10 @@ public class CachingBehaviorTests
     {
         public UnserializableType Self => this; // Creates a circular reference
 
-        public override string ToString() => "Unserializable object";
+        public override string ToString()
+        {
+            return "Unserializable object";
+        }
     }
 
     /// <summary>
@@ -473,7 +485,7 @@ public class CachingBehaviorTests
         // Arrange
         var request = new MockCacheableRequest();
         var throwingData = new ThrowingSerializationData();
-        RequestHandlerDelegate<string> throwingDelegate = () => Task.FromResult(throwingData.ToString()!);
+        Task<string> throwingDelegate() => Task.FromResult(throwingData.ToString()!);
 
         // Act & Assert - First call will throw
         _ = await Should.ThrowAsync<InvalidOperationException>(
@@ -482,7 +494,7 @@ public class CachingBehaviorTests
 
         // Verify pool is still usable
         var validRequest = new MockCacheableRequest();
-        var result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
         result.ShouldBe("test-response");
     }
 
@@ -512,8 +524,8 @@ public class CachingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
-        var keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
+        byte[]? groupCache = await _cache.GetAsync(request.CacheOptions.CacheGroupKey!);
+        HashSet<string>? keys = JsonSerializer.Deserialize<HashSet<string>>(Encoding.UTF8.GetString(groupCache!));
         keys!.ShouldContain("existing-key");
         keys!.ShouldContain(request.CacheOptions.CacheKey);
     }
@@ -536,16 +548,16 @@ public class CachingBehaviorTests
         };
 
         // Set existing longer expiration (60 seconds)
-        var existingSeconds = 60;
+        int existingSeconds = 60;
         await _cache.SetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration", BitConverter.GetBytes(existingSeconds));
 
         // Act
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var storedBytes = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
+        byte[]? storedBytes = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
         _ = storedBytes.ShouldNotBeNull();
-        var storedSeconds = BitConverter.ToInt32(storedBytes);
+        int storedSeconds = BitConverter.ToInt32(storedBytes);
         storedSeconds.ShouldBe(existingSeconds, "Should keep the longer expiration time");
     }
 
@@ -573,9 +585,9 @@ public class CachingBehaviorTests
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
         // Assert
-        var storedBytes = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
+        byte[]? storedBytes = await _cache.GetAsync($"{request.CacheOptions.CacheGroupKey}SlidingExpiration");
         _ = storedBytes.ShouldNotBeNull();
-        var storedSeconds = BitConverter.ToInt32(storedBytes);
+        int storedSeconds = BitConverter.ToInt32(storedBytes);
         storedSeconds.ShouldBe(expirationSeconds, "Expiration time should be stored correctly");
     }
 
@@ -598,7 +610,7 @@ public class CachingBehaviorTests
 
         // Create a response that will trigger the pooled array serialization and then fail
         var explodingResponse = new ExplodingResponse();
-        RequestHandlerDelegate<string> failingDelegate = () => Task.FromResult(explodingResponse.ToString());
+        Task<string> failingDelegate() => Task.FromResult(explodingResponse.ToString());
 
         // Act - First call should throw
         _ = await Should.ThrowAsync<InvalidOperationException>(
@@ -606,15 +618,15 @@ public class CachingBehaviorTests
         );
 
         // Arrange - Second attempt with valid data to verify pool is still usable
-        var largeResponse = new string('x', 8192); // Force pool usage
-        RequestHandlerDelegate<string> validDelegate = () => Task.FromResult(largeResponse);
+        string largeResponse = new('x', 8192); // Force pool usage
+        Task<string> validDelegate() => Task.FromResult(largeResponse);
 
         // Act - Second call should succeed
-        var result = await _behavior.Handle(request, validDelegate, CancellationToken.None);
+        string result = await _behavior.Handle(request, validDelegate, CancellationToken.None);
 
         // Assert
         result.ShouldBe(largeResponse, "Pool should be usable after error");
-        var cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(request.CacheOptions.CacheKey);
         _ = cachedValue.ShouldNotBeNull("Cache operation should succeed after pool error");
     }
 
@@ -636,7 +648,7 @@ public class CachingBehaviorTests
         // Arrange
         var request = new MockCacheableRequest();
         var response = new SerializationExplodingObject(8192); // Force array allocation with size
-        RequestHandlerDelegate<string> failingDelegate = () => Task.FromResult(response.ToString());
+        Task<string> failingDelegate() => Task.FromResult(response.ToString());
 
         // Act & Assert
         _ = await Should.ThrowAsync<InvalidOperationException>(
@@ -645,11 +657,11 @@ public class CachingBehaviorTests
 
         // Verify we can still use arrays from the pool
         var validRequest = new MockCacheableRequest();
-        var largeData = new string('x', 8192);
-        var result = await _behavior.Handle(validRequest, () => Task.FromResult(largeData), CancellationToken.None);
+        string largeData = new('x', 8192);
+        string result = await _behavior.Handle(validRequest, () => Task.FromResult(largeData), CancellationToken.None);
         result.ShouldBe(largeData, "Pool should be usable after error");
 
-        var cachedValue = await _cache.GetAsync(validRequest.CacheOptions.CacheKey);
+        byte[]? cachedValue = await _cache.GetAsync(validRequest.CacheOptions.CacheKey);
         _ = cachedValue.ShouldNotBeNull("Cache should work after pool error");
     }
 
@@ -666,7 +678,9 @@ public class CachingBehaviorTests
         public override string ToString()
         {
             // Force allocation then fail
-            var temp = new string((char)_data[0], _data.Length);
+            _ =
+                new // Force allocation then fail
+                string((char)_data[0], _data.Length);
             throw new InvalidOperationException("Forced failure after allocation");
         }
     }
@@ -722,7 +736,7 @@ public class CachingBehaviorTests
     public void Constructor_WithInvalidCacheSettings_ShouldThrowException(int seconds)
     {
         // Arrange & Act & Assert
-        var exception = Should.Throw<ArgumentOutOfRangeException>(
+        ArgumentOutOfRangeException exception = Should.Throw<ArgumentOutOfRangeException>(
             () =>
                 new CachingBehavior<MockCacheableRequest, string>(
                     _cache,

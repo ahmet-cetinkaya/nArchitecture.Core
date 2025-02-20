@@ -94,7 +94,7 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
                     authenticator.Code!,
                     cancellationToken
                 );
-                Sms.Abstractions.Sms sms = new(
+                NArchitecture.Core.Sms.Abstractions.Sms sms = new(
                     PhoneNumber: destination!,
                     Content: string.Format(smsTemplate.MessageTemplate, authenticator.Code)
                 )

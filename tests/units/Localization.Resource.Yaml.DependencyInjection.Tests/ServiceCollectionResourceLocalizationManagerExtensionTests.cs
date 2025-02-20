@@ -1,11 +1,8 @@
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using NArchitecture.Core.Localization.Abstractions;
-using NArchitecture.Core.Localization.Resource.Yaml;
-using NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection;
 using Shouldly;
 
-namespace Core.Localization.Resource.Yaml.DependencyInjection.Tests;
+namespace NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection.Tests;
 
 public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDisposable
 {
@@ -34,8 +31,8 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         _ = _services.AddYamlResourceLocalization();
 
         // Assert
-        var serviceProvider = _services.BuildServiceProvider();
-        var localizationService = serviceProvider.GetService<ILocalizationService>();
+        ServiceProvider serviceProvider = _services.BuildServiceProvider();
+        ILocalizationService? localizationService = serviceProvider.GetService<ILocalizationService>();
 
         localizationService.ShouldNotBe(null);
         localizationService!.GetType().ShouldBe(typeof(ResourceLocalizationManager));
@@ -51,8 +48,8 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         _ = _services.AddYamlResourceLocalization();
 
         // Assert
-        var serviceProvider = _services.BuildServiceProvider();
-        var localizationService = serviceProvider.GetService<ILocalizationService>();
+        ServiceProvider serviceProvider = _services.BuildServiceProvider();
+        ILocalizationService? localizationService = serviceProvider.GetService<ILocalizationService>();
 
         localizationService.ShouldNotBe(null);
         localizationService!.GetType().ShouldBe(typeof(ResourceLocalizationManager));
@@ -72,8 +69,8 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         _ = _services.AddYamlResourceLocalization();
 
         // Assert
-        var serviceProvider = _services.BuildServiceProvider();
-        var localizationService = serviceProvider.GetService<ILocalizationService>();
+        ServiceProvider serviceProvider = _services.BuildServiceProvider();
+        ILocalizationService? localizationService = serviceProvider.GetService<ILocalizationService>();
 
         localizationService.ShouldNotBe(null);
         localizationService!.GetType().ShouldBe(typeof(ResourceLocalizationManager));
@@ -91,8 +88,8 @@ public class ServiceCollectionResourceLocalizationManagerExtensionTests : IDispo
         _ = _services.AddYamlResourceLocalization();
 
         // Assert
-        var serviceProvider = _services.BuildServiceProvider();
-        var localizationService = serviceProvider.GetService<ILocalizationService>();
+        ServiceProvider serviceProvider = _services.BuildServiceProvider();
+        ILocalizationService? localizationService = serviceProvider.GetService<ILocalizationService>();
 
         localizationService.ShouldNotBe(null);
         localizationService!.GetType().ShouldBe(typeof(ResourceLocalizationManager));

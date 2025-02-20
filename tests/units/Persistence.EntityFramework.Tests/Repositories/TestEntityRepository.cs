@@ -1,9 +1,8 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
 using NArchitecture.Core.Persistence.EntityFramework.Repositories;
 
-namespace Core.Persistence.EntityFramework.Tests.Repositories;
+namespace NArchitecture.Core.Persistence.EntityFramework.Tests.Repositories;
 
 public class TestEntity : BaseEntity<Guid>
 {

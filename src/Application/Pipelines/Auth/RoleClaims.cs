@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace NArchitecture.Core.Application.Pipelines.Authorization;
+namespace NArchitecture.Core.Application.Pipelines.Auth;
 
 /// <summary>
 /// Represents role claims for authorization.
@@ -33,6 +33,7 @@ public readonly ref struct RoleClaims(string[]? identityRoles, string[]? require
             if (role.AsSpan().Trim().Equals(adminRole, StringComparison.OrdinalIgnoreCase))
                 return true;
         }
+
         return false;
     }
 
@@ -67,6 +68,7 @@ public readonly ref struct RoleClaims(string[]? identityRoles, string[]? require
                     return true;
             }
         }
+
         return !hasAnyValidRequiredRole;
     }
 

@@ -2,13 +2,10 @@ using MailKit;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Moq;
-using NArchitecture.Core.Mailing.Abstractions;
-using NArchitecture.Core.Mailing.MailKit;
 using NArchitecture.Core.Mailing.MailKit.Models;
 using Shouldly;
-using Xunit;
 
-namespace Core.Mailing.Tests;
+namespace NArchitecture.Core.Mailing.MailKit.Tests;
 
 public class MailKitMailServiceTests
 {

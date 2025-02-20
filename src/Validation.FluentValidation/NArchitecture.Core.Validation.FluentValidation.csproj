@@ -6,7 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
-        <RootNamespace>NArchitecture.Core.$(AssemblyName)</RootNamespace>
     </PropertyGroup>
 
     <!-- Build Configuration -->

@@ -1,7 +1,6 @@
 using Amazon.Translate;
 using Amazon.Translate.Model;
 using Moq;
-using NArchitecture.Core.Translation.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Translation.AmazonTranslate.Tests;
@@ -114,7 +113,7 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
     )
     {
         // Act & Assert
-        var exception = await Should.ThrowAsync<ArgumentException>(
+        ArgumentException exception = await Should.ThrowAsync<ArgumentException>(
             async () => await _manager.TranslateAsync(text, targetLang, sourceLang)
         );
         exception.Message.ShouldContain(expectedErrorMessage);

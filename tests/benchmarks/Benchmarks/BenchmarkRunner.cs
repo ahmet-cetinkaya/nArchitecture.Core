@@ -9,8 +9,10 @@ public static class BenchmarkRunner
     private static readonly string LogDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
     private static readonly string LastBenchmarkFilePath = Path.Combine(LogDirectory, "last-benchmark.txt");
 
-    public static void RunBenchmarksInteractively(Assembly assembly) =>
+    public static void RunBenchmarksInteractively(Assembly assembly)
+    {
         RunBenchmarksInteractivelyAsync(assembly).GetAwaiter().GetResult();
+    }
 
     public static async Task RunBenchmarksInteractivelyAsync(Assembly assembly, bool silent = false)
     {
@@ -22,7 +24,7 @@ public static class BenchmarkRunner
                 .GetTypes()
                 .Where(t => t.Name.EndsWith("Benchmarks"))
                 .Where(t => !t.IsAbstract && !t.IsInterface)
-                .OrderBy(t => GetRelativePath(t)) // Sort by relative path
+                .OrderBy(GetRelativePath) // Sort by relative path
                 .ToList();
 
             if (benchmarkTypes is [])

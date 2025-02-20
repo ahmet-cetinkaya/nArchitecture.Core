@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NArchitecture.Core.Persistence.EntityFramework.Tests.Repositories;
 using Shouldly;
 using Xunit;
 
@@ -14,8 +15,8 @@ public partial class EfRepositoryBaseTests
     public async Task Add_ShouldAddEntityAndSetCreationDate(bool isAsync)
     {
         // Arrange
-        var entity = CreateTestEntity();
-        var beforeAdd = DateTime.UtcNow;
+        TestEntity entity = CreateTestEntity();
+        DateTime beforeAdd = DateTime.UtcNow;
 
         // Act
         if (isAsync)
@@ -30,7 +31,7 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var dbEntity = await Context.TestEntities.FindAsync(entity.Id);
+        TestEntity? dbEntity = await Context.TestEntities.FindAsync(entity.Id);
         _ = dbEntity.ShouldNotBeNull();
         dbEntity.Name.ShouldBe(entity.Name);
         dbEntity.Description.ShouldBe(entity.Description);
@@ -46,10 +47,9 @@ public partial class EfRepositoryBaseTests
     public async Task Add_ShouldThrowWhenEntityIsNull(bool isAsync)
     {
         // Arrange & Act & Assert
-        if (isAsync)
-            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.AddAsync(null!));
-        else
-            _ = Should.Throw<ArgumentNullException>(() => Repository.Add(null!));
+        _ = isAsync
+            ? await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.AddAsync(null!))
+            : Should.Throw<ArgumentNullException>(() => Repository.Add(null!));
     }
 
     [Theory(DisplayName = "BulkAdd/BulkAddAsync - Should add multiple entities")]
@@ -64,8 +64,8 @@ public partial class EfRepositoryBaseTests
     public async Task BulkAdd_ShouldAddMultipleEntities(int entityCount, bool isAsync)
     {
         // Arrange
-        var entities = CreateTestEntities(entityCount);
-        var beforeAdd = DateTime.UtcNow;
+        List<TestEntity> entities = CreateTestEntities(entityCount);
+        DateTime beforeAdd = DateTime.UtcNow;
 
         // Act
         if (isAsync)
@@ -80,9 +80,9 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var dbEntities = await Context.TestEntities.ToListAsync();
+        List<TestEntity> dbEntities = await Context.TestEntities.ToListAsync();
         dbEntities.Count.ShouldBe(entityCount);
-        foreach (var entity in dbEntities)
+        foreach (TestEntity? entity in dbEntities)
         {
             entity.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeAdd);
             entity.CreatedAt.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
@@ -114,9 +114,8 @@ public partial class EfRepositoryBaseTests
     public async Task BulkAdd_ShouldThrowWhenCollectionIsNull(bool isAsync)
     {
         // Arrange & Act & Assert
-        if (isAsync)
-            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkAddAsync(null!));
-        else
-            _ = Should.Throw<ArgumentNullException>(() => Repository.BulkAdd(null!));
+        _ = isAsync
+            ? await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkAddAsync(null!))
+            : Should.Throw<ArgumentNullException>(() => Repository.BulkAdd(null!));
     }
 }

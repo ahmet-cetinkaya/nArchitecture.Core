@@ -1,11 +1,11 @@
 using System.Security.Authentication;
 using MediatR;
 using Moq;
-using NArchitecture.Core.Application.Pipelines.Authorization;
+using NArchitecture.Core.Application.Pipelines.Auth;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using Shouldly;
 
-namespace NArchitecture.Core.Application.Tests.Pipelines.Authorization;
+namespace NArchitecture.Core.Application.Tests.Pipelines.Auth;
 
 /// <summary>
 /// Mock request class implementing ISecuredRequest for testing.
@@ -50,7 +50,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenIdentityRolesIsNull_ShouldThrowAuthenticationException()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(null!, Array.Empty<string>());
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(null!, Array.Empty<string>());
 
         // Act & Assert
         _ = await Should.ThrowAsync<AuthenticationException>(
@@ -65,10 +65,10 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenNoRequiredRoles_ShouldSucceed()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull();
@@ -81,10 +81,10 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenUserHasAdminRole_ShouldSucceedRegardlessOfRequiredRoles()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(["admin"], ["editor", "manager"]);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["admin"], ["editor", "manager"]);
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull("Admin role should bypass all role checks");
@@ -162,12 +162,12 @@ public class AuthorizationBehaviorTests
     private async Task AssertRoleAccess(string[] userRoles, string[] requiredRoles, bool shouldSucceed)
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(userRoles, requiredRoles);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(userRoles, requiredRoles);
 
         if (shouldSucceed)
         {
             // Act
-            var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+            Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
             // Assert
             exception.ShouldBeNull(
@@ -175,12 +175,10 @@ public class AuthorizationBehaviorTests
             );
         }
         else
-        {
             // Act & Assert
             _ = await Should.ThrowAsync<AuthorizationException>(
                 async () => await _behavior.Handle(request, _next, CancellationToken.None)
             );
-        }
     }
 
     /// <summary>
@@ -190,7 +188,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenUserHasNoRoles_ShouldThrowAuthorizationException()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(Array.Empty<string>(), ["editor"]);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(Array.Empty<string>(), ["editor"]);
 
         // Act & Assert
         _ = await Should.ThrowAsync<AuthorizationException>(
@@ -205,10 +203,10 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenRequiredRolesIsEmpty_ShouldSucceed()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull("Empty required roles should allow access");
@@ -221,10 +219,10 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenRequiredRolesIsWhitespace_ShouldSucceed()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(["user"], [" "]);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], [" "]);
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull("Whitespace required roles should allow access");
@@ -237,10 +235,10 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenRequiredRolesIsNull_ShouldSucceed()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(["user"], null!);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], null!);
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull("Null required roles should allow access");
@@ -253,10 +251,10 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenRolesContainSpecialCharacters_ShouldMatchExactly()
     {
         // Arrange
-        var request = new MockSecuredRequest().SetRoles(["editor@domain.com"], ["editor@domain.com"]);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["editor@domain.com"], ["editor@domain.com"]);
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull("Roles with special characters should match exactly");
@@ -303,10 +301,10 @@ public class AuthorizationBehaviorTests
         // Arrange
         string[] identityRoles = ["user", null!, "editor"];
         string[] requiredRoles = ["editor", null!];
-        var request = new MockSecuredRequest().SetRoles(identityRoles, requiredRoles);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(identityRoles, requiredRoles);
 
         // Act
-        var exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
         // Assert
         exception.ShouldBeNull();

@@ -16,7 +16,10 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
         TUserId userId,
         string permissionName,
         CancellationToken cancellationToken = default
-    ) => _userRepository.HasPermissionAsync(userId, permissionName, cancellationToken);
+    )
+    {
+        return _userRepository.HasPermissionAsync(userId, permissionName, cancellationToken);
+    }
 
     public virtual Task<bool> HasPermissionAsync(ClaimsPrincipal principal, string permissionName)
     {
@@ -29,7 +32,10 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
         TUserId userId,
         IEnumerable<string> permissionNames,
         CancellationToken cancellationToken = default
-    ) => _userRepository.HasAnyPermissionAsync(userId, permissionNames, cancellationToken);
+    )
+    {
+        return _userRepository.HasAnyPermissionAsync(userId, permissionNames, cancellationToken);
+    }
 
     public virtual Task<bool> HasAnyPermissionAsync(ClaimsPrincipal principal, IEnumerable<string> permissionNames)
     {
@@ -42,7 +48,10 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
         TUserId userId,
         IEnumerable<string> permissionNames,
         CancellationToken cancellationToken = default
-    ) => _userRepository.HasAllPermissionsAsync(userId, permissionNames, cancellationToken);
+    )
+    {
+        return _userRepository.HasAllPermissionsAsync(userId, permissionNames, cancellationToken);
+    }
 
     public virtual Task<bool> HasAllPermissionsAsync(ClaimsPrincipal principal, IEnumerable<string> permissionNames)
     {
@@ -54,5 +63,8 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
     public virtual Task<ICollection<OperationClaim<TOperationClaimId>>> GetUserOperationClaimsAsync(
         TUserId userId,
         CancellationToken cancellationToken = default
-    ) => _userRepository.GetOperationClaimsAsync(userId, cancellationToken);
+    )
+    {
+        return _userRepository.GetOperationClaimsAsync(userId, cancellationToken);
+    }
 }

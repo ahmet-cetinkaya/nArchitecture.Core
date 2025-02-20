@@ -1,7 +1,7 @@
 using NArchitecture.Core.Security.Authentication;
 using Shouldly;
 
-namespace Core.Security.Tests.Authentication;
+namespace NArchitecture.Core.Security.Tests.Authentication;
 
 [Trait("Category", "Unit")]
 public class DefaultJwtAuthenticationConfigurationTests
@@ -32,7 +32,6 @@ public class DefaultJwtAuthenticationConfigurationTests
     }
 
     [Theory(DisplayName = "Should throw ArgumentException for invalid constructor parameters")]
-#pragma warning disable xUnit1012 // Null should only be used for nullable parameters
     [InlineData(null, ValidIssuer, ValidAudience)]
     [InlineData("", ValidIssuer, ValidAudience)]
     [InlineData("short", ValidIssuer, ValidAudience)]
@@ -40,12 +39,11 @@ public class DefaultJwtAuthenticationConfigurationTests
     [InlineData(ValidSecurityKey, "", ValidAudience)]
     [InlineData(ValidSecurityKey, ValidIssuer, null)]
     [InlineData(ValidSecurityKey, ValidIssuer, "")]
-#pragma warning restore xUnit1012 // Null should only be used for nullable parameters
-    public void Should_Throw_ArgumentException_For_Invalid_Parameters(string securityKey, string issuer, string audience)
+    public void Should_Throw_ArgumentException_For_Invalid_Parameters(string? securityKey, string? issuer, string? audience)
     {
         // Arrange & Act & Assert
         _ = Should.Throw<ArgumentException>(
-            () => new DefaultJwtAuthenticationConfiguration(securityKey, issuer, audience, ValidExpiration)
+            () => new DefaultJwtAuthenticationConfiguration(securityKey!, issuer!, audience!, ValidExpiration)
         );
     }
 

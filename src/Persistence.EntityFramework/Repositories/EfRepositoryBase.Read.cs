@@ -187,7 +187,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
 
         if (size <= 0)
             throw new ArgumentException(ReadMessages.PageSizeMustBeGreaterThanZero, nameof(size));
-        if (size == int.MaxValue || size > MaxPageSize)
+        if (size is int.MaxValue or > MaxPageSize)
             throw new ArgumentException(ReadMessages.PageSizeTooLarge, nameof(size));
 
         if (index >= int.MaxValue / size)

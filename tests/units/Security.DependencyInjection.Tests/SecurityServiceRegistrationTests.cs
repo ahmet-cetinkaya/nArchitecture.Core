@@ -3,9 +3,8 @@ using NArchitecture.Core.Mailing.Abstractions;
 using NArchitecture.Core.Security.Abstractions.Authentication;
 using NArchitecture.Core.Security.Abstractions.Authenticator;
 using NArchitecture.Core.Security.Abstractions.Authenticator.Enums;
-using NArchitecture.Core.Security.DependencyInjection;
 
-namespace Core.Security.DependencyInjection.Tests;
+namespace NArchitecture.Core.Security.DependencyInjection.Tests;
 
 public class SecurityServiceRegistrationTests
 {
@@ -17,14 +16,14 @@ public class SecurityServiceRegistrationTests
         IServiceCollection services = new ServiceCollection();
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
         var authConfig = new Mock<IAuthenticatorConfiguration>();
-        _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns(new HashSet<AuthenticatorType>());
+        _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([]);
         SetupRequiredRepositories(services);
 
         // Act
         _ = services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
 
         // Assert
-        var provider = services.BuildServiceProvider();
+        ServiceProvider provider = services.BuildServiceProvider();
         _ = provider.GetService<IAuthenticator<Guid, int>>().ShouldNotBeNull();
         _ = provider.GetService<IAuthenticationService<Guid, int>>().ShouldNotBeNull();
     }
@@ -87,26 +86,22 @@ public class SecurityServiceRegistrationTests
         var authConfig = new Mock<IAuthenticatorConfiguration>();
         _ = authConfig.Setup(x => x.EnabledAuthenticatorTypes).Returns([AuthenticatorType.Email]);
         SetupRequiredRepositories(services);
-        _ = services.AddScoped<IMailService>(_ => new Mock<IMailService>().Object);
+        _ = services.AddScoped(_ => new Mock<IMailService>().Object);
 
         // Act
         _ = services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
 
         // Assert
-        var provider = services.BuildServiceProvider();
+        ServiceProvider provider = services.BuildServiceProvider();
         _ = provider.GetService<IMailService>().ShouldNotBeNull();
     }
 
     private static void SetupRequiredRepositories(IServiceCollection services)
     {
-        _ = services.AddScoped<IUserRepository<Guid, int, int>>(_ => new Mock<IUserRepository<Guid, int, int>>().Object);
+        _ = services.AddScoped(_ => new Mock<IUserRepository<Guid, int, int>>().Object);
 
-        _ = services.AddScoped<IRefreshTokenRepository<int, Guid, int>>(_ =>
-            new Mock<IRefreshTokenRepository<int, Guid, int>>().Object
-        );
+        _ = services.AddScoped(_ => new Mock<IRefreshTokenRepository<int, Guid, int>>().Object);
 
-        _ = services.AddScoped<IUserAuthenticatorRepository<Guid, int>>(_ =>
-            new Mock<IUserAuthenticatorRepository<Guid, int>>().Object
-        );
+        _ = services.AddScoped(_ => new Mock<IUserAuthenticatorRepository<Guid, int>>().Object);
     }
 }

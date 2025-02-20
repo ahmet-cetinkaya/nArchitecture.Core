@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;
+using NArchitecture.Core.Validation.FluentValidation;
 using Shouldly;
 using FluentIValidator = FluentValidation.IValidator<NArchitecture.Core.Validation.FluentValidation.Tests.TestClass>;
 
@@ -20,7 +21,7 @@ public class FluentValidatorAdapterTests
         var instance = new TestClass();
 
         // Act
-        var result = adapter.Validate(instance);
+        Abstractions.ValidationResult result = adapter.Validate(instance);
 
         // Assert
         result.IsValid.ShouldBeTrue();
@@ -45,7 +46,7 @@ public class FluentValidatorAdapterTests
         var instance = new TestClass();
 
         // Act
-        var result = adapter.Validate(instance);
+        Abstractions.ValidationResult result = adapter.Validate(instance);
 
         // Assert
         result.IsValid.ShouldBeFalse();

@@ -70,14 +70,14 @@ public class ValidationBehaviorTests
         static Task<DummyResponse> Next() => Task.FromResult(new DummyResponse());
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<ValidationException>(
+        ValidationException exception = await Should.ThrowAsync<ValidationException>(
             () => behavior.Handle(dummyRequest, Next, CancellationToken.None)
         );
 
         // Assert
         exception.Errors.ShouldNotBeEmpty();
-        var validationError = exception.Errors.FirstOrDefault();
-        validationError.ShouldNotBe(default(ValidationError));
+        ValidationError validationError = exception.Errors.FirstOrDefault();
+        validationError.ShouldNotBe(default);
         validationError.PropertyName.ShouldBe(propertyName);
         validationError.Errors!.ShouldContain(errorMessage);
 
@@ -96,7 +96,7 @@ public class ValidationBehaviorTests
         var expectedResponse = new DummyResponse { Result = "OK" };
 
         // Act
-        var response = await behavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
+        DummyResponse response = await behavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
 
         // Assert
         _ = response.ShouldNotBeNull();
@@ -120,7 +120,7 @@ public class ValidationBehaviorTests
         var expectedResponse = new DummyResponse { Result = "OK" };
 
         // Act
-        var response = await behavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
+        DummyResponse response = await behavior.Handle(request, () => Task.FromResult(expectedResponse), CancellationToken.None);
 
         // Assert
         _ = response.ShouldNotBeNull();
@@ -146,7 +146,7 @@ public class ValidationBehaviorTests
         var request = new DummyRequest();
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<ValidationException>(
+        ValidationException exception = await Should.ThrowAsync<ValidationException>(
             () => behavior.Handle(request, () => Task.FromResult(new DummyResponse()), CancellationToken.None)
         );
 

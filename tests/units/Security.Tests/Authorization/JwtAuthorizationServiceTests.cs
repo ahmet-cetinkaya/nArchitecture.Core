@@ -5,7 +5,7 @@ using NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 using NArchitecture.Core.Security.Authorization;
 using Shouldly;
 
-namespace Core.Security.Tests.Authorization;
+namespace NArchitecture.Core.Security.Tests.Authorization;
 
 public class JwtAuthorizationServiceTests
 {
@@ -96,14 +96,14 @@ public class JwtAuthorizationServiceTests
         var userId = Guid.NewGuid();
         var expectedClaims = new List<OperationClaim<Guid>>
         {
-            new OperationClaim<Guid>("admin") { Id = Guid.NewGuid() },
-            new OperationClaim<Guid>("user") { Id = Guid.NewGuid() },
+            new("admin") { Id = Guid.NewGuid() },
+            new("user") { Id = Guid.NewGuid() },
         };
 
         _ = _userRepositoryMock.Setup(r => r.GetOperationClaimsAsync(userId, default)).ReturnsAsync(expectedClaims);
 
         // Act
-        var result = await _authorizationService.GetUserOperationClaimsAsync(userId);
+        ICollection<OperationClaim<Guid>> result = await _authorizationService.GetUserOperationClaimsAsync(userId);
 
         // Assert
         _ = result.ShouldNotBeNull();

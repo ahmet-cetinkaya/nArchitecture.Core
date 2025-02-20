@@ -3,12 +3,11 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using Elastic.Clients.Elasticsearch;
 using NArchitecture.Core.SearchEngine.Abstractions.Models;
-using NArchitecture.Core.SearchEngine.ElasticSearch;
 using NArchitecture.Core.SearchEngine.ElasticSearch.Constants;
 using NArchitecture.Core.SearchEngine.ElasticSearch.Models;
 using Shouldly;
 
-namespace Core.SearchEngine.ElasticSearch.Tests;
+namespace NArchitecture.Core.SearchEngine.ElasticSearch.Tests;
 
 /// <summary>
 /// Collection definition for ElasticSearch tests to disable parallel execution.
@@ -48,7 +47,7 @@ public class ElasticSearchFixture : IAsyncLifetime
         _httpPort = GetRandomPort();
         _transportPort = GetRandomPort();
 
-        var dockerUri = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        Uri dockerUri = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? new Uri("npipe://./pipe/docker_engine")
             : new Uri("unix:///var/run/docker.sock");
         _dockerClient = new DockerClientConfiguration(dockerUri).CreateClient();
@@ -60,13 +59,9 @@ public class ElasticSearchFixture : IAsyncLifetime
         _elasticHost = Environment.GetEnvironmentVariable("ELASTICSEARCH_URL") ?? $"http://localhost:{_httpPort}";
 
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELASTICSEARCH_URL")))
-        {
             await InitializeLocalContainer();
-        }
         else
-        {
             _skipContainerCreation = true;
-        }
 
         var config = new ElasticSearchConfig
         {
@@ -83,7 +78,7 @@ public class ElasticSearchFixture : IAsyncLifetime
             AnalyzeWildcard = true,
         };
 
-        var settings = new ElasticsearchClientSettings(new Uri(config.ConnectionString))
+        ElasticsearchClientSettings settings = new ElasticsearchClientSettings(new Uri(config.ConnectionString))
             .DefaultIndex("_all")
             .EnableDebugMode()
             .PrettyJson()
@@ -110,10 +105,13 @@ public class ElasticSearchFixture : IAsyncLifetime
     {
         try
         {
-            var containers = await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters { All = true });
+            IList<ContainerListResponse> containers = await _dockerClient.Containers.ListContainersAsync(
+                new ContainersListParameters { All = true }
+            );
 
-            foreach (var container in containers.Where(c => c.Names.Any(n => n.Contains("elasticsearch-test-"))))
-            {
+            foreach (
+                ContainerListResponse? container in containers.Where(c => c.Names.Any(n => n.Contains("elasticsearch-test-")))
+            )
                 try
                 {
                     _ = await _dockerClient.Containers.StopContainerAsync(container.ID, new ContainerStopParameters());
@@ -123,7 +121,6 @@ public class ElasticSearchFixture : IAsyncLifetime
                 {
                     // Ignore errors during cleanup
                 }
-            }
         }
         catch
         {
@@ -135,7 +132,7 @@ public class ElasticSearchFixture : IAsyncLifetime
     {
         await CleanupExistingContainers();
 
-        var createContainerResponse = await _dockerClient.Containers.CreateContainerAsync(
+        CreateContainerResponse createContainerResponse = await _dockerClient.Containers.CreateContainerAsync(
             new CreateContainerParameters
             {
                 Image = "docker.elastic.co/elasticsearch/elasticsearch:8.9.2",
@@ -176,13 +173,13 @@ public class ElasticSearchFixture : IAsyncLifetime
         {
             // Local environment health check
             using var httpClient = new HttpClient();
-            var maxAttempts = 60;
-            var attempt = 0;
+            int maxAttempts = 60;
+            int attempt = 0;
             while (attempt < maxAttempts)
             {
                 try
                 {
-                    var response = await httpClient.GetAsync($"http://localhost:{_httpPort}/_cluster/health");
+                    HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:{_httpPort}/_cluster/health");
                     if (response.IsSuccessStatusCode)
                     {
                         await Task.Delay(5000);
@@ -193,6 +190,7 @@ public class ElasticSearchFixture : IAsyncLifetime
                 {
                     // Ignore exceptions while waiting
                 }
+
                 attempt++;
                 await Task.Delay(2000);
             }
@@ -204,14 +202,14 @@ public class ElasticSearchFixture : IAsyncLifetime
         {
             // CI environment health check
             using var httpClient = new HttpClient();
-            var maxAttempts = 30;
-            var attempt = 0;
+            int maxAttempts = 30;
+            int attempt = 0;
 
             while (attempt < maxAttempts)
             {
                 try
                 {
-                    var response = await httpClient.GetAsync($"{_elasticHost}/_cluster/health");
+                    HttpResponseMessage response = await httpClient.GetAsync($"{_elasticHost}/_cluster/health");
                     if (response.IsSuccessStatusCode)
                         break;
                 }
@@ -219,6 +217,7 @@ public class ElasticSearchFixture : IAsyncLifetime
                 {
                     // Ignore exceptions while waiting
                 }
+
                 attempt++;
                 await Task.Delay(1000);
             }
@@ -306,7 +305,10 @@ public class ElasticSearchManagerTests
     /// <summary>
     /// Resets the test data to its initial state.
     /// </summary>
-    private Task ResetTestDataAsync() => _fixture.ResetIndexAsync();
+    private Task ResetTestDataAsync()
+    {
+        return _fixture.ResetIndexAsync();
+    }
 
     /// <summary>
     /// Tests that attempt to create an index that already exists returns appropriate error.
@@ -319,7 +321,7 @@ public class ElasticSearchManagerTests
         var indexModel = new IndexModel(TestIndex, TestAlias);
 
         // Act
-        var result = await _manager.CreateIndexAsync(indexModel);
+        SearchResult result = await _manager.CreateIndexAsync(indexModel);
 
         // Assert
         result.Success.ShouldBeFalse();
@@ -342,7 +344,7 @@ public class ElasticSearchManagerTests
         };
 
         // Act
-        var result = await _manager.GetAllSearch<TestDocument>(parameters);
+        List<SearchGetModel<TestDocument>> result = await _manager.GetAllSearch<TestDocument>(parameters);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -371,7 +373,7 @@ public class ElasticSearchManagerTests
         };
 
         // Act
-        var result = await _manager.GetSearchByField<TestDocument>(parameters);
+        List<SearchGetModel<TestDocument>> result = await _manager.GetSearchByField<TestDocument>(parameters);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -394,13 +396,13 @@ public class ElasticSearchManagerTests
         );
 
         // Act
-        var result = await _manager.UpdateAsync(document);
+        SearchResult result = await _manager.UpdateAsync(document);
 
         // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
-        var updated = await _manager.GetAllSearch<TestDocument>(
+        List<SearchGetModel<TestDocument>> updated = await _manager.GetAllSearch<TestDocument>(
             new SearchParameters
             {
                 IndexName = TestIndex,
@@ -422,13 +424,13 @@ public class ElasticSearchManagerTests
         var document = new SearchDocument("1", TestIndex);
 
         // Act
-        var result = await _manager.DeleteAsync(document);
+        SearchResult result = await _manager.DeleteAsync(document);
 
         // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
-        var searchResult = await _manager.GetAllSearch<TestDocument>(
+        List<SearchGetModel<TestDocument>> searchResult = await _manager.GetAllSearch<TestDocument>(
             new SearchParameters
             {
                 IndexName = TestIndex,
@@ -446,11 +448,11 @@ public class ElasticSearchManagerTests
     public async Task CreateIndexAsync_WhenIndexDoesNotExist_ShouldCreateSuccessfully()
     {
         // Arrange
-        var uniqueIndex = $"new-test-index-{Guid.NewGuid():N}";
+        string uniqueIndex = $"new-test-index-{Guid.NewGuid():N}";
         var indexModel = new IndexModel(uniqueIndex, "test-alias");
 
         // Act
-        var result = await _manager.CreateIndexAsync(indexModel);
+        SearchResult result = await _manager.CreateIndexAsync(indexModel);
 
         // Assert
         result.Success.ShouldBeTrue();
@@ -465,20 +467,20 @@ public class ElasticSearchManagerTests
     {
         // Arrange
         await ResetTestDataAsync();
-        var documents = new[]
+        TestDocument[] documents = new[]
         {
             new TestDocument { Name = "Test1", Description = "Description1" },
             new TestDocument { Name = "Test2", Description = "Description2" },
         };
 
         // Act
-        var result = await _manager.InsertManyAsync(TestIndex, documents);
+        SearchResult result = await _manager.InsertManyAsync(TestIndex, documents);
 
         // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
-        var searchResult = await _manager.GetAllSearch<TestDocument>(
+        List<SearchGetModel<TestDocument>> searchResult = await _manager.GetAllSearch<TestDocument>(
             new SearchParameters
             {
                 IndexName = TestIndex,
@@ -499,7 +501,7 @@ public class ElasticSearchManagerTests
         await ResetTestDataAsync();
 
         // Act
-        var result = await _manager.GetIndexList();
+        IDictionary<string, object> result = await _manager.GetIndexList();
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -524,7 +526,7 @@ public class ElasticSearchManagerTests
         };
 
         // Act
-        var result = await _manager.GetSearchBySimpleQueryString<TestDocument>(parameters);
+        List<SearchGetModel<TestDocument>> result = await _manager.GetSearchBySimpleQueryString<TestDocument>(parameters);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -547,13 +549,13 @@ public class ElasticSearchManagerTests
         );
 
         // Act
-        var result = await _manager.UpdateByElasticIdAsync(document);
+        SearchResult result = await _manager.UpdateByElasticIdAsync(document);
 
         // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
-        var updated = await _manager.GetAllSearch<TestDocument>(
+        List<SearchGetModel<TestDocument>> updated = await _manager.GetAllSearch<TestDocument>(
             new SearchParameters
             {
                 IndexName = TestIndex,

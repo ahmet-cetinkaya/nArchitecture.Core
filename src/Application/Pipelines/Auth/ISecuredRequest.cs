@@ -1,4 +1,4 @@
-﻿namespace NArchitecture.Core.Application.Pipelines.Authorization;
+﻿namespace NArchitecture.Core.Application.Pipelines.Auth;
 
 /// <summary>
 /// Interface for requests that require authorization.

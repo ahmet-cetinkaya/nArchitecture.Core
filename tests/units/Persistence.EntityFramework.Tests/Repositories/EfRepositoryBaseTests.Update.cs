@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NArchitecture.Core.Persistence.EntityFramework.Tests.Repositories;
 using Shouldly;
 using Xunit;
 
@@ -14,22 +15,19 @@ public partial class EfRepositoryBaseTests
     public async Task Update_ShouldUpdateEntityPropertiesAndSetUpdateDate(bool isAsync)
     {
         // Arrange
-        var entity = await CreateAndAddTestEntity();
-        var originalCreatedDate = entity.CreatedAt;
-        var beforeUpdate = DateTime.UtcNow;
+        TestEntity entity = await CreateAndAddTestEntity();
+        DateTime originalCreatedDate = entity.CreatedAt;
+        DateTime beforeUpdate = DateTime.UtcNow;
 
         entity.Name = "Updated Name";
         entity.Description = "Updated Description";
 
         // Act
-        if (isAsync)
-            _ = await Repository.UpdateAsync(entity);
-        else
-            _ = Repository.Update(entity);
+        _ = isAsync ? await Repository.UpdateAsync(entity) : Repository.Update(entity);
         _ = await Repository.SaveChangesAsync();
 
         // Assert
-        var updatedEntity = await Context.TestEntities.FindAsync(entity.Id);
+        TestEntity? updatedEntity = await Context.TestEntities.FindAsync(entity.Id);
         _ = updatedEntity.ShouldNotBeNull();
         updatedEntity.Name.ShouldBe("Updated Name");
         updatedEntity.Description.ShouldBe("Updated Description");
@@ -47,10 +45,9 @@ public partial class EfRepositoryBaseTests
     public async Task Update_ShouldThrowWhenEntityIsNull(bool isAsync)
     {
         // Act & Assert
-        if (isAsync)
-            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.UpdateAsync(null!));
-        else
-            _ = Should.Throw<ArgumentNullException>(() => Repository.Update(null!));
+        _ = isAsync
+            ? await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.UpdateAsync(null!))
+            : Should.Throw<ArgumentNullException>(() => Repository.Update(null!));
     }
 
     [Theory(DisplayName = "Update/UpdateAsync - Should handle entity with relationships")]
@@ -61,24 +58,21 @@ public partial class EfRepositoryBaseTests
     public async Task Update_ShouldHandleEntityWithRelationships(bool isAsync)
     {
         // Arrange
-        var parent = await CreateAndAddTestEntity();
-        var child = CreateTestEntity();
+        TestEntity parent = await CreateAndAddTestEntity();
+        TestEntity child = CreateTestEntity();
         child.ParentId = parent.Id;
         _ = await Repository.AddAsync(child);
         _ = await Repository.SaveChangesAsync();
 
         child.Name = "Updated Child";
-        var beforeUpdate = DateTime.UtcNow;
+        DateTime beforeUpdate = DateTime.UtcNow;
 
         // Act
-        if (isAsync)
-            _ = await Repository.UpdateAsync(child);
-        else
-            _ = Repository.Update(child);
+        _ = isAsync ? await Repository.UpdateAsync(child) : Repository.Update(child);
         _ = await Repository.SaveChangesAsync();
 
         // Assert
-        var updatedChild = await Context.TestEntities.Include(e => e.Parent).FirstOrDefaultAsync(e => e.Id == child.Id);
+        TestEntity? updatedChild = await Context.TestEntities.Include(e => e.Parent).FirstOrDefaultAsync(e => e.Id == child.Id);
 
         _ = updatedChild.ShouldNotBeNull();
         updatedChild.Name.ShouldBe("Updated Child");
@@ -98,12 +92,12 @@ public partial class EfRepositoryBaseTests
     public async Task BulkUpdate_ShouldUpdateMultipleEntities(int entityCount, bool isAsync)
     {
         // Arrange
-        var entities = CreateTestEntities(entityCount);
+        List<TestEntity> entities = CreateTestEntities(entityCount);
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
-        var beforeUpdate = DateTime.UtcNow;
+        DateTime beforeUpdate = DateTime.UtcNow;
 
-        foreach (var entity in entities)
+        foreach (TestEntity entity in entities)
         {
             entity.Name = $"Updated {entity.Name}";
             entity.Description = $"Updated {entity.Description}";
@@ -122,9 +116,9 @@ public partial class EfRepositoryBaseTests
         }
 
         // Assert
-        var updatedEntities = await Context.TestEntities.ToListAsync();
+        List<TestEntity> updatedEntities = await Context.TestEntities.ToListAsync();
         updatedEntities.Count.ShouldBe(entityCount);
-        foreach (var entity in updatedEntities)
+        foreach (TestEntity? entity in updatedEntities)
         {
             entity.Name.ShouldStartWith("Updated");
             entity.Description.ShouldStartWith("Updated");
@@ -141,10 +135,9 @@ public partial class EfRepositoryBaseTests
     public async Task BulkUpdate_ShouldThrowWhenCollectionIsNull(bool isAsync)
     {
         // Act & Assert
-        if (isAsync)
-            _ = await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkUpdateAsync(null!));
-        else
-            _ = Should.Throw<ArgumentNullException>(() => Repository.BulkUpdate(null!));
+        _ = isAsync
+            ? await Should.ThrowAsync<ArgumentNullException>(async () => await Repository.BulkUpdateAsync(null!))
+            : Should.Throw<ArgumentNullException>(() => Repository.BulkUpdate(null!));
     }
 
     [Theory]
@@ -166,7 +159,7 @@ public partial class EfRepositoryBaseTests
 
     private async Task<TestEntity> CreateAndAddTestEntity()
     {
-        var entity = CreateTestEntity();
+        TestEntity entity = CreateTestEntity();
         _ = await Repository.AddAsync(entity);
         _ = await Repository.SaveChangesAsync();
         return entity;

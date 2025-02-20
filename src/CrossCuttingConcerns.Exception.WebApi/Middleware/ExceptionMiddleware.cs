@@ -2,8 +2,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Handlers;
-using NArchitecture.Core.CrossCuttingConcerns.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Middleware;
 

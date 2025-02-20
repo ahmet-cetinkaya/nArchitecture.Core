@@ -12,5 +12,5 @@ public interface ITranslationService
     /// <param name="to">The target language code.</param>
     /// <param name="from">The source language code. Defaults to "en" (English).</param>
     /// <returns>The translated text.</returns>
-    public Task<string> TranslateAsync(string text, string to, string from = "en");
+    Task<string> TranslateAsync(string text, string to, string from = "en");
 }

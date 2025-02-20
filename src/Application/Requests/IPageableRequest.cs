@@ -2,6 +2,6 @@
 
 public interface IPageableRequest
 {
-    public int PageIndex { get; set; }
-    public int PageSize { get; set; }
+    int PageIndex { get; set; }
+    int PageSize { get; set; }
 }

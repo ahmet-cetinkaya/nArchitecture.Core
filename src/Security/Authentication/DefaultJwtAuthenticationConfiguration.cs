@@ -51,21 +51,33 @@ public class DefaultJwtAuthenticationConfiguration : IJwtAuthenticationConfigura
     private const string DefaultTokenExpired = "The authentication token has expired. Please log in again to continue.";
     private const string DefaultTokenAlreadyRevoked = "This token has already been revoked. No further action is needed.";
 
-    public virtual ValueTask<string> GetUserNotFoundMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultUserNotFound);
+    public virtual ValueTask<string> GetUserNotFoundMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultUserNotFound);
+    }
 
-    public virtual ValueTask<string> GetInvalidPasswordMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultInvalidPassword);
+    public virtual ValueTask<string> GetInvalidPasswordMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultInvalidPassword);
+    }
 
-    public virtual ValueTask<string> GetInvalidRefreshTokenMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultInvalidRefreshToken);
+    public virtual ValueTask<string> GetInvalidRefreshTokenMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultInvalidRefreshToken);
+    }
 
-    public virtual ValueTask<string> GetTokenRevokedMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultTokenRevoked);
+    public virtual ValueTask<string> GetTokenRevokedMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultTokenRevoked);
+    }
 
-    public virtual ValueTask<string> GetTokenExpiredMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultTokenExpired);
+    public virtual ValueTask<string> GetTokenExpiredMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultTokenExpired);
+    }
 
-    public virtual ValueTask<string> GetTokenAlreadyRevokedMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultTokenAlreadyRevoked);
+    public virtual ValueTask<string> GetTokenAlreadyRevokedMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultTokenAlreadyRevoked);
+    }
 }

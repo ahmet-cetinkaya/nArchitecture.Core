@@ -1,20 +1,20 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Moq;
-using NArchitecture.Core.Security.WebApi.Swagger;
 using Shouldly;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Core.Security.WebApi.Swagger.Tests;
+namespace NArchitecture.Core.Security.WebApi.Swagger.Tests;
 
 [Trait("Category", "Security")]
 public class BearerTokenSecurityOperationFilterTests
 {
     private static OperationFilterContext CreateOperationContext()
     {
-        var methodInfo = typeof(BearerTokenSecurityOperationFilterTests).GetMethod(nameof(DummyEndpoint))!;
+        System.Reflection.MethodInfo methodInfo = typeof(BearerTokenSecurityOperationFilterTests).GetMethod(
+            nameof(DummyEndpoint)
+        )!;
         var controllerActionDescriptor = new ControllerActionDescriptor { MethodInfo = methodInfo };
         var apiDescription = new ApiDescription { ActionDescriptor = controllerActionDescriptor };
         var schemaRegistry = new Mock<ISchemaGenerator>();
@@ -30,8 +30,8 @@ public class BearerTokenSecurityOperationFilterTests
     {
         // Arrange
         var filter = new BearerTokenSecurityOperationFilter();
-        var operation = new OpenApiOperation { Security = new List<OpenApiSecurityRequirement>() };
-        var context = CreateOperationContext();
+        var operation = new OpenApiOperation { Security = [] };
+        OperationFilterContext context = CreateOperationContext();
 
         // Act
         filter.Apply(operation, context);
@@ -61,8 +61,8 @@ public class BearerTokenSecurityOperationFilterTests
                 new string[] { }
             },
         };
-        var operation = new OpenApiOperation { Security = new List<OpenApiSecurityRequirement> { existingRequirement } };
-        var context = CreateOperationContext();
+        var operation = new OpenApiOperation { Security = [existingRequirement] };
+        OperationFilterContext context = CreateOperationContext();
 
         // Act
         filter.Apply(operation, context);
@@ -79,7 +79,7 @@ public class BearerTokenSecurityOperationFilterTests
         // Arrange
         var filter = new BearerTokenSecurityOperationFilter();
         var operation = new OpenApiOperation { Security = null! };
-        var context = CreateOperationContext();
+        OperationFilterContext context = CreateOperationContext();
 
         // Act
         filter.Apply(operation, context);
@@ -99,12 +99,8 @@ public class BearerTokenSecurityOperationFilterTests
     {
         // Arrange
         var filter = new BearerTokenSecurityOperationFilter();
-        var operation = new OpenApiOperation
-        {
-            Security = new List<OpenApiSecurityRequirement>(),
-            OperationId = $"{operationType}Test",
-        };
-        var context = CreateOperationContext();
+        var operation = new OpenApiOperation { Security = [], OperationId = $"{operationType}Test" };
+        OperationFilterContext context = CreateOperationContext();
 
         // Act
         filter.Apply(operation, context);

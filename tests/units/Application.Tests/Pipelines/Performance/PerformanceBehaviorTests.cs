@@ -36,14 +36,14 @@ public class PerformanceBehaviorTests
             .Callback<string>(msg => loggedMessage = msg)
             .Returns(Task.CompletedTask);
 
-        RequestHandlerDelegate<TestResponse> next = () =>
+        Task<TestResponse> next()
         {
             Thread.Sleep(1100); // Simulate work that takes longer than interval
             return Task.FromResult(response);
-        };
+        }
 
         // Act
-        var result = await _behavior.Handle(request, next, CancellationToken.None);
+        TestResponse result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         result.ShouldBe(response);
@@ -64,10 +64,10 @@ public class PerformanceBehaviorTests
         var request = new TestRequest { IntervalOptions = new(1) };
         var response = new TestResponse();
 
-        RequestHandlerDelegate<TestResponse> next = () => Task.FromResult(response);
+        Task<TestResponse> next() => Task.FromResult(response);
 
         // Act
-        var result = await _behavior.Handle(request, next, CancellationToken.None);
+        TestResponse result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         result.ShouldBe(response);
@@ -84,7 +84,7 @@ public class PerformanceBehaviorTests
         var request = new TestRequest { IntervalOptions = new(1) };
         var expectedException = new InvalidOperationException("Test exception");
 
-        RequestHandlerDelegate<TestResponse> next = () => throw expectedException;
+        Task<TestResponse> next() => throw expectedException;
 
         // Act & Assert
         _ = await Should.ThrowAsync<InvalidOperationException>(
@@ -113,14 +113,14 @@ public class PerformanceBehaviorTests
             .Callback<string>(msg => loggedMessage = msg)
             .Returns(Task.CompletedTask);
 
-        RequestHandlerDelegate<TestResponse> next = () =>
+        Task<TestResponse> next()
         {
             Thread.Sleep(100); // Simulate some work
             return Task.FromResult(response);
-        };
+        }
 
         // Act
-        var result = await _behavior.Handle(request, next, CancellationToken.None);
+        TestResponse result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         result.ShouldBe(response);
@@ -144,15 +144,15 @@ public class PerformanceBehaviorTests
 
         _ = _loggerMock
             .Setup(x => x.InformationAsync(It.IsAny<string>()))
-            .Callback<string>(msg => loggedMessages.Add(msg))
+            .Callback<string>(loggedMessages.Add)
             .Returns(Task.CompletedTask);
 
-        RequestHandlerDelegate<TestResponse> fastNext = () => Task.FromResult(response);
-        RequestHandlerDelegate<TestResponse> slowNext = () =>
+        Task<TestResponse> fastNext() => Task.FromResult(response);
+        Task<TestResponse> slowNext()
         {
             Thread.Sleep(1200);
             return Task.FromResult(response);
-        };
+        }
 
         // Act
         _ = await _behavior.Handle(request, fastNext, CancellationToken.None);

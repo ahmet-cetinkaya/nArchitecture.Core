@@ -32,11 +32,11 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
 
         // Act
         _ = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
-        var provider = services.BuildServiceProvider();
-        var authenticationScheme = provider.GetRequiredService<IAuthenticationSchemeProvider>();
+        ServiceProvider provider = services.BuildServiceProvider();
+        IAuthenticationSchemeProvider authenticationScheme = provider.GetRequiredService<IAuthenticationSchemeProvider>();
 
         // Assert
-        var scheme = await authenticationScheme.GetDefaultAuthenticateSchemeAsync();
+        AuthenticationScheme? scheme = await authenticationScheme.GetDefaultAuthenticateSchemeAsync();
         _ = scheme.ShouldNotBeNull();
         scheme.Name.ShouldBe(JwtBearerDefaults.AuthenticationScheme);
     }
@@ -64,9 +64,9 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
 
         // Assert
-        var provider = services.BuildServiceProvider();
-        var options = provider.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>();
-        var jwtOptions = options.Get(JwtBearerDefaults.AuthenticationScheme);
+        ServiceProvider provider = services.BuildServiceProvider();
+        IOptionsMonitor<JwtBearerOptions> options = provider.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>();
+        JwtBearerOptions jwtOptions = options.Get(JwtBearerDefaults.AuthenticationScheme);
 
         jwtOptions.TokenValidationParameters.ShouldSatisfyAllConditions(
             param => param.ValidateIssuerSigningKey.ShouldBeTrue(),
@@ -105,7 +105,9 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns(securityKey!);
 
         // Act & Assert
-        var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        ArgumentNullException exception = Should.Throw<ArgumentNullException>(
+            () => services.ConfigureJwtAuthentication(mockJwtConfig.Object)
+        );
         exception.ParamName.ShouldBe("jwtConfiguration.SecurityKey");
     }
 
@@ -120,7 +122,9 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns(shortKey);
 
         // Act & Assert
-        var exception = Should.Throw<ArgumentException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        ArgumentException exception = Should.Throw<ArgumentException>(
+            () => services.ConfigureJwtAuthentication(mockJwtConfig.Object)
+        );
         exception.Message.ShouldContain("16 characters");
     }
 
@@ -135,7 +139,9 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = mockJwtConfig.Setup(c => c.Issuer).Returns(string.Empty);
 
         // Act & Assert
-        var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        ArgumentNullException exception = Should.Throw<ArgumentNullException>(
+            () => services.ConfigureJwtAuthentication(mockJwtConfig.Object)
+        );
         exception.ParamName.ShouldBe("jwtConfiguration.Issuer");
     }
 
@@ -150,7 +156,9 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = mockJwtConfig.Setup(c => c.Audience).Returns(string.Empty);
 
         // Act & Assert
-        var exception = Should.Throw<ArgumentNullException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        ArgumentNullException exception = Should.Throw<ArgumentNullException>(
+            () => services.ConfigureJwtAuthentication(mockJwtConfig.Object)
+        );
         exception.ParamName.ShouldBe("jwtConfiguration.Audience");
     }
 
@@ -188,7 +196,9 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = mockJwtConfig.Setup(c => c.ClockSkew).Returns(TimeSpan.FromMinutes(skewMinutes));
 
         // Act & Assert
-        var exception = Should.Throw<ArgumentException>(() => services.ConfigureJwtAuthentication(mockJwtConfig.Object));
+        ArgumentException exception = Should.Throw<ArgumentException>(
+            () => services.ConfigureJwtAuthentication(mockJwtConfig.Object)
+        );
         exception.ParamName.ShouldBe("jwtConfiguration.ClockSkew");
         exception.Message.ShouldContain("negative");
     }
@@ -202,7 +212,7 @@ public class ServiceCollectionJwtAuthenticationExtensionsTests
         _ = mockJwtConfig.Setup(c => c.SecurityKey).Returns("very-long-secure-key-for-testing-purposes-min-16-chars");
 
         // Act
-        var result = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
+        IServiceCollection result = services.ConfigureJwtAuthentication(mockJwtConfig.Object);
 
         // Assert
         result.ShouldBe(services);

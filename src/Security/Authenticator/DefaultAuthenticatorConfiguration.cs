@@ -31,32 +31,52 @@ public class DefaultAuthenticatorConfiguration : IAuthenticatorConfiguration
     public virtual ValueTask<EmailTemplateConfiguration> GetEmailTemplateAsync(
         string code,
         CancellationToken cancellationToken = default
-    ) => ValueTask.FromResult(DefaultEmailTemplate);
+    )
+    {
+        return ValueTask.FromResult(DefaultEmailTemplate);
+    }
 
     public virtual ValueTask<SmsTemplateConfiguration> GetSmsTemplateAsync(
         string code,
         CancellationToken cancellationToken = default
-    ) => ValueTask.FromResult(DefaultSmsTemplate);
+    )
+    {
+        return ValueTask.FromResult(DefaultSmsTemplate);
+    }
 
-    public virtual ValueTask<string> GetAuthenticatorNotFoundMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultAuthenticatorNotFound);
+    public virtual ValueTask<string> GetAuthenticatorNotFoundMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultAuthenticatorNotFound);
+    }
 
-    public virtual ValueTask<string> GetCodeExpiredMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultCodeExpired);
+    public virtual ValueTask<string> GetCodeExpiredMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultCodeExpired);
+    }
 
-    public virtual ValueTask<string> GetDestinationRequiredMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultDestinationRequired);
+    public virtual ValueTask<string> GetDestinationRequiredMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultDestinationRequired);
+    }
 
-    public virtual ValueTask<string> GetInvalidCodeMessageAsync(CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(DefaultInvalidCode);
+    public virtual ValueTask<string> GetInvalidCodeMessageAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(DefaultInvalidCode);
+    }
 
     public virtual ValueTask<string> GetUnsupportedTypeMessageAsync(
         AuthenticatorType type,
         CancellationToken cancellationToken = default
-    ) => ValueTask.FromResult(string.Format(DefaultUnsupportedType, type));
+    )
+    {
+        return ValueTask.FromResult(string.Format(DefaultUnsupportedType, type));
+    }
 
     public virtual ValueTask<string> GetAuthenticatorTypeNotEnabledMessageAsync(
         AuthenticatorType type,
         CancellationToken cancellationToken = default
-    ) => ValueTask.FromResult($"Authenticator type {type} is not enabled in the configuration.");
+    )
+    {
+        return ValueTask.FromResult($"Authenticator type {type} is not enabled in the configuration.");
+    }
 }

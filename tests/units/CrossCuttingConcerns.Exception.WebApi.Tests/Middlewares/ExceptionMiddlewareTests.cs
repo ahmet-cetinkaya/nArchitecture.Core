@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Middleware;
-using NArchitecture.Core.CrossCuttingConcerns.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
 using NArchitecture.Core.Validation.Abstractions;
 using Shouldly;
 
-namespace Core.CrossCuttingConcerns.Exception.WebApi.Tests.Middlewares;
+namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Tests.Middlewares;
 
 /// <summary>
 /// Tests for verifying the exception handling middleware functionality.
@@ -35,7 +35,7 @@ public class ExceptionMiddlewareTests
     public async Task Invoke_WhenNoException_ShouldCompleteSuccessfully()
     {
         // Arrange
-        RequestDelegate next = async (context) => await Task.CompletedTask;
+        static async Task next(HttpContext context) => await Task.CompletedTask;
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act
@@ -52,8 +52,8 @@ public class ExceptionMiddlewareTests
     public async Task Invoke_WhenBusinessException_ShouldReturn400StatusCode()
     {
         // Arrange
-        var exceptionMessage = "Business rule violated";
-        RequestDelegate next = _ => throw new BusinessException(exceptionMessage);
+        string exceptionMessage = "Business rule violated";
+        Task next(HttpContext _) => throw new BusinessException(exceptionMessage);
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act
@@ -72,7 +72,7 @@ public class ExceptionMiddlewareTests
     {
         // Arrange
         var validationErrors = new List<ValidationError> { new("Property", new List<string> { "Error message" }) };
-        RequestDelegate next = _ => throw new ValidationException(validationErrors);
+        Task next(HttpContext _) => throw new ValidationException(validationErrors);
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act
@@ -89,7 +89,7 @@ public class ExceptionMiddlewareTests
     public async Task Invoke_WhenAuthorizationException_ShouldReturn401StatusCode()
     {
         // Arrange
-        RequestDelegate next = _ => throw new AuthorizationException("Unauthorized access");
+        static Task next(HttpContext _) => throw new AuthorizationException("Unauthorized access");
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act
@@ -106,7 +106,7 @@ public class ExceptionMiddlewareTests
     public async Task Invoke_WhenNotFoundException_ShouldReturn404StatusCode()
     {
         // Arrange
-        RequestDelegate next = _ => throw new NotFoundException("Resource not found");
+        static Task next(HttpContext _) => throw new NotFoundException("Resource not found");
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act
@@ -134,7 +134,7 @@ public class ExceptionMiddlewareTests
 
         try
         {
-            var logDetail = JsonSerializer.Deserialize<LogDetail>(logJson);
+            LogDetail? logDetail = JsonSerializer.Deserialize<LogDetail>(logJson);
             return logDetail != null && (string.IsNullOrWhiteSpace(logDetail.User) ? "?" : logDetail.User) == expectedUser;
         }
         catch
@@ -152,7 +152,7 @@ public class ExceptionMiddlewareTests
         // Arrange
         const string expectedUserName = "testUser";
         SetupUserIdentity(expectedUserName);
-        RequestDelegate next = _ => throw new System.Exception("Test exception");
+        static Task next(HttpContext _) => throw new System.Exception("Test exception");
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act
@@ -177,7 +177,7 @@ public class ExceptionMiddlewareTests
     {
         // Arrange
         SetupUserIdentity(userName);
-        RequestDelegate next = _ => throw new System.Exception("Test exception");
+        static Task next(HttpContext _) => throw new System.Exception("Test exception");
         var middleware = new ExceptionMiddleware(next, _contextAccessorMock.Object, _loggerMock.Object);
 
         // Act

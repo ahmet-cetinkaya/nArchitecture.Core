@@ -1,7 +1,7 @@
 using NArchitecture.Core.Security.Cryptography.Generation;
 using Shouldly;
 
-namespace Core.Security.Tests.Cryptography.Generation;
+namespace NArchitecture.Core.Security.Tests.Cryptography.Generation;
 
 [Trait("Category", "Security")]
 [Trait("Class", "CodeGenerator")]
@@ -9,7 +9,10 @@ public class CodeGeneratorTests
 {
     private readonly CodeGenerator _codeGenerator;
 
-    public CodeGeneratorTests() => _codeGenerator = new();
+    public CodeGeneratorTests()
+    {
+        _codeGenerator = new();
+    }
 
     [Theory(DisplayName = "GenerateNumeric should create numeric string with exact length")]
     [InlineData(6)]
@@ -60,7 +63,7 @@ public class CodeGeneratorTests
 
         // Assert
         result.Length.ShouldBe(length);
-        result.All(c => char.IsLetterOrDigit(c)).ShouldBeTrue();
+        result.All(char.IsLetterOrDigit).ShouldBeTrue();
         result.All(c => char.IsUpper(c) || char.IsDigit(c)).ShouldBeTrue();
     }
 

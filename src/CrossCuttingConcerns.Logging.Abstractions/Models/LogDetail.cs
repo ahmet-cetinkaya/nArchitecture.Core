@@ -1,4 +1,4 @@
-﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging;
+﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
 
 /// <summary>
 /// Represents detailed information about a logging event.

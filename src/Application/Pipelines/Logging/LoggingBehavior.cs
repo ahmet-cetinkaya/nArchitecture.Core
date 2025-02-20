@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using MediatR;
-using NArchitecture.Core.CrossCuttingConcerns.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
 
 namespace NArchitecture.Core.Application.Pipelines.Logging;
 
@@ -184,7 +184,10 @@ file class ValueDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IDisposable
     public ValueDictionary(int capacity)
         : base(capacity) { }
 
-    public void Dispose() => Clear();
+    public void Dispose()
+    {
+        Clear();
+    }
 }
 
 file static class SpanExtensions

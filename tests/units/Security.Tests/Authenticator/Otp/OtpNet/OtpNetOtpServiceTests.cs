@@ -1,7 +1,7 @@
 using NArchitecture.Core.Security.Authenticator.Otp.OtpNet;
 using Shouldly;
 
-namespace Core.Security.Tests.Authenticator.Otp.OtpNet;
+namespace NArchitecture.Core.Security.Tests.Authenticator.Otp.OtpNet;
 
 public class OtpNetOtpServiceTests
 {

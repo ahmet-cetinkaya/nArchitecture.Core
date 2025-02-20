@@ -4,10 +4,9 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Moq;
 using NArchitecture.Core.Localization.Abstractions;
-using NArchitecture.Core.Localization.WebApi;
 using Shouldly;
 
-namespace Core.Localization.WebApi.Tests;
+namespace NArchitecture.Core.Localization.WebApi.Tests;
 
 public class LocalizationMiddlewareTests
 {
@@ -23,7 +22,7 @@ public class LocalizationMiddlewareTests
         _httpContext = new DefaultHttpContext();
 
         // Setup the next delegate with explicit Task return
-        var task = Task.CompletedTask;
+        Task task = Task.CompletedTask;
         _ = _nextMock.Setup(x => x.Invoke(It.IsAny<HttpContext>())).Returns(task);
 
         _middleware = new LocalizationMiddleware(_nextMock.Object);
@@ -45,7 +44,7 @@ public class LocalizationMiddlewareTests
         await _middleware.Invoke(_httpContext, _localizationServiceMock.Object);
 
         // Assert
-        var immutableExpectedLocales = expectedLocales.ToImmutableArray();
+        ImmutableArray<string> immutableExpectedLocales = expectedLocales.ToImmutableArray();
         _localizationServiceMock.VerifySet(x =>
             x.AcceptLocales = It.Is<ImmutableArray<string>>(locales =>
                 locales.Length == immutableExpectedLocales.Length && locales.All(l => immutableExpectedLocales.Contains(l))
@@ -80,7 +79,7 @@ public class LocalizationMiddlewareTests
         await _middleware.Invoke(_httpContext, _localizationServiceMock.Object);
 
         // Assert
-        var immutableExpectedLocales = expectedOrderedLocales.ToImmutableArray();
+        ImmutableArray<string> immutableExpectedLocales = expectedOrderedLocales.ToImmutableArray();
         _localizationServiceMock.VerifySet(x =>
             x.AcceptLocales = It.Is<ImmutableArray<string>>(locales =>
                 locales.Length == immutableExpectedLocales.Length
@@ -96,10 +95,10 @@ public class LocalizationMiddlewareTests
         _httpContext.Request.Headers[HeaderNames.AcceptLanguage] = "invalid,header;q=invalid";
 
         // Act
-        Func<Task> act = () => _middleware.Invoke(_httpContext, _localizationServiceMock.Object);
+        Task act() => _middleware.Invoke(_httpContext, _localizationServiceMock.Object);
 
         // Assert
-        var exception = await Record.ExceptionAsync(act);
+        Exception exception = await Record.ExceptionAsync(act);
         exception.ShouldBe(null);
         verifyNextMiddlewareWasCalled();
     }
@@ -124,7 +123,7 @@ public class LocalizationMiddlewareTests
         await _middleware.Invoke(_httpContext, _localizationServiceMock.Object);
 
         // Assert
-        var immutableExpectedLocales = expectedLocales.ToImmutableArray();
+        ImmutableArray<string> immutableExpectedLocales = expectedLocales.ToImmutableArray();
         _localizationServiceMock.VerifySet(x =>
             x.AcceptLocales = It.Is<ImmutableArray<string>>(locales =>
                 locales.SequenceEqual(immutableExpectedLocales, EqualityComparer<string>.Default)
@@ -134,7 +133,7 @@ public class LocalizationMiddlewareTests
 
     private void verifyNextMiddlewareWasCalled()
     {
-        var expectedContext = _httpContext;
+        DefaultHttpContext expectedContext = _httpContext;
         _nextMock.Verify(x => x.Invoke(It.Is<HttpContext>(ctx => ReferenceEquals(ctx, expectedContext))), Times.Once);
     }
 }

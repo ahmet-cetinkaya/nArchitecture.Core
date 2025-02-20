@@ -1,6 +1,6 @@
 ﻿using MimeKit;
 
-namespace NArchitecture.Core.Mailing.Abstractions;
+namespace NArchitecture.Core.Mailing.Abstractions.Models;
 
 /// <summary>
 /// Represents an immutable email message structure with its content and recipients.

@@ -1,4 +1,4 @@
-﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging;
+﻿namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
 
 /// <summary>
 /// Extends LogDetail to include exception information for error logging.

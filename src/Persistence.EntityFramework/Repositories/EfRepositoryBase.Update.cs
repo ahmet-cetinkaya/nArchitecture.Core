@@ -83,6 +83,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
                 EditEntityPropertiesToUpdate(entity);
                 Context.Entry(entity).State = EntityState.Modified;
             }
+
             return entities;
         }
         catch (DbUpdateConcurrencyException ex)
@@ -95,6 +96,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
                 );
                 ValidateEntityState(failedEntity, databaseEntity);
             }
+
             throw;
         }
     }
@@ -123,6 +125,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
                 EditEntityPropertiesToUpdate(entity);
                 Context.Entry(entity).State = EntityState.Modified;
             }
+
             return entities;
         }
         catch (DbUpdateConcurrencyException ex)
@@ -134,6 +137,7 @@ public partial class EfRepositoryBase<TEntity, TEntityId, TContext>
                     await GetDatabaseValuesAsync(failedEntity, cancellationToken);
                 ValidateEntityState(failedEntity, databaseEntity);
             }
+
             throw;
         }
     }

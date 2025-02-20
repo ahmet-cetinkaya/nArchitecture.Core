@@ -64,8 +64,10 @@ public class ElasticSearchManager : ISearchEngine
     /// </summary>
     /// <param name="isValid">Indicates if the operation was successful.</param>
     /// <param name="errorReason">Optional error reason if operation failed.</param>
-    private static SearchResult CreateResponse(bool isValid, string? errorReason = null) =>
-        new(isValid, isValid ? Messages.Success : errorReason ?? Messages.UnknownError);
+    private static SearchResult CreateResponse(bool isValid, string? errorReason = null)
+    {
+        return new(isValid, isValid ? Messages.Success : errorReason ?? Messages.UnknownError);
+    }
 
     /// <inheritdoc/>
     public async Task<SearchResult> InsertAsync(SearchDocumentWithData document)

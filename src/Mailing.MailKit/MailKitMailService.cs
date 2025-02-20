@@ -2,6 +2,7 @@
 using MimeKit;
 using MimeKit.Cryptography;
 using NArchitecture.Core.Mailing.Abstractions;
+using NArchitecture.Core.Mailing.Abstractions.Models;
 using NArchitecture.Core.Mailing.MailKit.Models;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
@@ -105,9 +106,7 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
             email.Headers.Add("List-Unsubscribe", $"<{mail.UnsubscribeLink}>");
 
         BodyBuilder bodyBuilder = new() { TextBody = mail.TextBody, HtmlBody = mail.HtmlBody };
-        mail.Attachments?.Where(attachment => attachment is not null)
-            .ToList()
-            .ForEach(attachment => bodyBuilder.Attachments.Add(attachment));
+        mail.Attachments?.Where(attachment => attachment is not null).ToList().ForEach(bodyBuilder.Attachments.Add);
 
         email.Body = bodyBuilder.ToMessageBody();
         email.Prepare(EncodingConstraint.SevenBit);
@@ -141,10 +140,12 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
         }
     }
 
-    private bool hasValidDkimSettings() =>
-        !string.IsNullOrWhiteSpace(_mailSettings.DkimPrivateKey)
-        && !string.IsNullOrWhiteSpace(_mailSettings.DkimSelector)
-        && !string.IsNullOrWhiteSpace(_mailSettings.DomainName);
+    private bool hasValidDkimSettings()
+    {
+        return !string.IsNullOrWhiteSpace(_mailSettings.DkimPrivateKey)
+            && !string.IsNullOrWhiteSpace(_mailSettings.DkimSelector)
+            && !string.IsNullOrWhiteSpace(_mailSettings.DomainName);
+    }
 
     private void applyDkimSignature(MimeMessage email)
     {

@@ -1,8 +1,7 @@
-using NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File;
 using Serilog;
 using Shouldly;
 
-namespace Core.CrossCuttingConcerns.Logging.Serilog.File.Tests;
+namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.Tests;
 
 public class SerilogFileLoggerTests : IDisposable
 {
@@ -15,7 +14,7 @@ public class SerilogFileLoggerTests : IDisposable
     public SerilogFileLoggerTests()
     {
         _baseTestPath = Path.Combine(Path.GetTempPath(), $"narch_tests_{Guid.NewGuid()}");
-        _testPaths = new List<string>();
+        _testPaths = [];
         _ = Directory.CreateDirectory(_baseTestPath);
     }
 
@@ -48,7 +47,6 @@ public class SerilogFileLoggerTests : IDisposable
     private void cleanupTestPaths()
     {
         foreach (string path in _testPaths.ToList())
-        {
             try
             {
                 if (Directory.Exists(path))
@@ -61,7 +59,6 @@ public class SerilogFileLoggerTests : IDisposable
             {
                 System.Diagnostics.Debug.WriteLine($"Warning: Failed to cleanup test path {path}: {ex.Message}");
             }
-        }
     }
 
     private static void EnsureDirectoryExists(string path)
@@ -90,6 +87,7 @@ public class SerilogFileLoggerTests : IDisposable
                 return;
             await Task.Delay(50);
         }
+
         throw new TimeoutException($"Timeout waiting for log file creation in {path}");
     }
 
@@ -100,7 +98,7 @@ public class SerilogFileLoggerTests : IDisposable
     public async Task InformationAsync_ShouldWriteToLogFile()
     {
         // Arrange
-        var (testPath, logger) = createTestLogger(nameof(InformationAsync_ShouldWriteToLogFile));
+        (string testPath, SerilogFileLogger logger) = createTestLogger(nameof(InformationAsync_ShouldWriteToLogFile));
         string testMessage = "Test information message";
 
         // Act
@@ -128,8 +126,10 @@ public class SerilogFileLoggerTests : IDisposable
     public async Task LogMethods_ShouldWriteCorrectLogLevel(string message, string methodName)
     {
         // Arrange
-        var (testPath, logger) = createTestLogger($"{nameof(LogMethods_ShouldWriteCorrectLogLevel)}_{methodName}");
-        var method = typeof(SerilogFileLogger).GetMethod(methodName);
+        (string testPath, SerilogFileLogger logger) = createTestLogger(
+            $"{nameof(LogMethods_ShouldWriteCorrectLogLevel)}_{methodName}"
+        );
+        System.Reflection.MethodInfo? method = typeof(SerilogFileLogger).GetMethod(methodName);
 
         // Act
         await (Task)method!.Invoke(logger, new object[] { message })!;
@@ -157,10 +157,10 @@ public class SerilogFileLoggerTests : IDisposable
     public async Task Logger_ShouldRespectFileSizeLimit()
     {
         // Arrange
-        var (testPath, logger) = createTestLogger(nameof(Logger_ShouldRespectFileSizeLimit));
+        (string testPath, SerilogFileLogger logger) = createTestLogger(nameof(Logger_ShouldRespectFileSizeLimit));
         Directory.Exists(testPath).ShouldBeTrue($"Test directory was not created: {testPath}");
 
-        string largeMessage = new string('x', 150);
+        string largeMessage = new('x', 150);
 
         try
         {
@@ -197,8 +197,8 @@ public class SerilogFileLoggerTests : IDisposable
     public async Task Logger_ShouldRespectRetainedFileLimit()
     {
         // Arrange
-        var (testPath, logger) = createTestLogger(nameof(Logger_ShouldRespectRetainedFileLimit));
-        string largeMessage = new string('x', 40); // Message size close to file size limit
+        (string testPath, SerilogFileLogger logger) = createTestLogger(nameof(Logger_ShouldRespectRetainedFileLimit));
+        string largeMessage = new('x', 40); // Message size close to file size limit
 
         // Act
         for (int i = 0; i < 10; i++) // Write enough to create multiple files

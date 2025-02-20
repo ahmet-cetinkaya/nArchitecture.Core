@@ -8,5 +8,8 @@ namespace NArchitecture.Core.Mailing.MailKit;
 public class DefaultSmtpClientFactory : ISmtpClientFactory
 {
     /// <inheritdoc/>
-    public ISmtpClient Create() => new SmtpClient();
+    public ISmtpClient Create()
+    {
+        return new SmtpClient();
+    }
 }

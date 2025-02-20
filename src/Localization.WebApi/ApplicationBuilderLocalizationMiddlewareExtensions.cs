@@ -1,6 +1,6 @@
-﻿namespace NArchitecture.Core.Localization.WebApi;
+﻿using Microsoft.AspNetCore.Builder;
 
-using Microsoft.AspNetCore.Builder;
+namespace NArchitecture.Core.Localization.WebApi;
 
 /// <summary>
 /// Extension methods for adding the LocalizationMiddleware to the application's request pipeline.

@@ -1,4 +1,6 @@
-﻿namespace NArchitecture.Core.Mailing.Abstractions;
+﻿using NArchitecture.Core.Mailing.Abstractions.Models;
+
+namespace NArchitecture.Core.Mailing.Abstractions;
 
 /// <summary>
 /// Defines the contract for sending mail asynchronously.

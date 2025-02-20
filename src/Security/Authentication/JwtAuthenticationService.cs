@@ -49,11 +49,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         return new(token, expiresAt);
     }
 
-    protected virtual SecurityKey CreateSecurityKey(string securityKey) =>
-        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
+    protected virtual SecurityKey CreateSecurityKey(string securityKey)
+    {
+        return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
+    }
 
-    protected virtual SigningCredentials CreateSigningCredentials(SecurityKey securityKey) =>
-        new(securityKey, SecurityAlgorithms.HmacSha512Signature);
+    protected virtual SigningCredentials CreateSigningCredentials(SecurityKey securityKey)
+    {
+        return new(securityKey, SecurityAlgorithms.HmacSha512Signature);
+    }
 
     protected virtual RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> CreateRefreshToken(
         User<TUserId, TUserAuthenticatorId> user,

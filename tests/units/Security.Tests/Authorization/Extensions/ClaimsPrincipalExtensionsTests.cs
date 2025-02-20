@@ -2,7 +2,7 @@ using System.Security.Claims;
 using NArchitecture.Core.Security.Authorization.Extensions;
 using Shouldly;
 
-namespace Core.Security.Tests.Authorization.Extensions;
+namespace NArchitecture.Core.Security.Tests.Authorization.Extensions;
 
 public class ClaimsPrincipalExtensionsTests
 {
@@ -43,13 +43,13 @@ public class ClaimsPrincipalExtensionsTests
     public void GetClaims_ShouldReturnAllValues_ForSpecifiedClaimType()
     {
         // Arrange
-        var expectedRoles = new[] { "admin", "user", "manager" };
-        var claims = expectedRoles.Select(role => new Claim(ClaimTypes.Role, role));
+        string[] expectedRoles = new[] { "admin", "user", "manager" };
+        IEnumerable<Claim> claims = expectedRoles.Select(role => new Claim(ClaimTypes.Role, role));
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);
 
         // Act
-        var result = principal.GetClaims(ClaimTypes.Role);
+        ICollection<string>? result = principal.GetClaims(ClaimTypes.Role);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -64,7 +64,7 @@ public class ClaimsPrincipalExtensionsTests
         var principal = new ClaimsPrincipal(new ClaimsIdentity());
 
         // Act
-        var result = principal.GetClaims(ClaimTypes.Role);
+        ICollection<string>? result = principal.GetClaims(ClaimTypes.Role);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -76,13 +76,13 @@ public class ClaimsPrincipalExtensionsTests
     public void GetOperationClaims_ShouldReturnAllRoleClaims()
     {
         // Arrange
-        var expectedRoles = new[] { "admin", "user", "manager" };
-        var claims = expectedRoles.Select(role => new Claim(ClaimTypes.Role, role));
+        string[] expectedRoles = new[] { "admin", "user", "manager" };
+        IEnumerable<Claim> claims = expectedRoles.Select(role => new Claim(ClaimTypes.Role, role));
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);
 
         // Act
-        var result = principal.GetOperationClaims();
+        ICollection<string>? result = principal.GetOperationClaims();
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -94,7 +94,7 @@ public class ClaimsPrincipalExtensionsTests
     public void GetUserIdClaim_ShouldReturnNameIdentifierValue()
     {
         // Arrange
-        var expectedUserId = Guid.NewGuid().ToString();
+        string expectedUserId = Guid.NewGuid().ToString();
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, expectedUserId) });
         var principal = new ClaimsPrincipal(identity);
 

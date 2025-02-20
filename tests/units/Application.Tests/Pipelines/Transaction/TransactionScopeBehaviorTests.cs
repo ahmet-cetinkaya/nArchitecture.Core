@@ -23,10 +23,10 @@ public class TransactionScopeBehaviorTests
         // Arrange
         var request = new TestRequest();
         var expectedResponse = new TestResponse();
-        RequestHandlerDelegate<TestResponse> next = () => Task.FromResult(expectedResponse);
+        Task<TestResponse> next() => Task.FromResult(expectedResponse);
 
         // Act
-        var result = await _behavior.Handle(request, next, CancellationToken.None);
+        TestResponse result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -42,10 +42,10 @@ public class TransactionScopeBehaviorTests
         // Arrange
         var request = new TestRequest();
         var expectedException = new InvalidOperationException("Test exception");
-        RequestHandlerDelegate<TestResponse> next = () => throw expectedException;
+        Task<TestResponse> next() => throw expectedException;
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<InvalidOperationException>(
+        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(
             async () => await _behavior.Handle(request, next, CancellationToken.None)
         );
 
@@ -61,16 +61,16 @@ public class TransactionScopeBehaviorTests
         // Arrange
         var request = new TestRequest();
         var expectedResponse = new TestResponse();
-        RequestHandlerDelegate<TestResponse> next = async () =>
+        async Task<TestResponse> next()
         {
             using var nestedScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             await Task.Delay(100); // Simulate some work
             nestedScope.Complete();
             return expectedResponse;
-        };
+        }
 
         // Act
-        var result = await _behavior.Handle(request, next, CancellationToken.None);
+        TestResponse result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         result.ShouldBe(expectedResponse);
@@ -85,17 +85,17 @@ public class TransactionScopeBehaviorTests
         // Arrange
         var request = new TestRequest();
         var expectedResponse = new TestResponse();
-        var transactionExists = false;
+        bool transactionExists = false;
 
-        RequestHandlerDelegate<TestResponse> next = async () =>
+        async Task<TestResponse> next()
         {
             await Task.Delay(1000); // Simulate long-running operation
             transactionExists = System.Transactions.Transaction.Current != null;
             return expectedResponse;
-        };
+        }
 
         // Act
-        var result = await _behavior.Handle(request, next, CancellationToken.None);
+        TestResponse result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         result.ShouldBe(expectedResponse);

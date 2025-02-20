@@ -6,7 +6,7 @@ using NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.HttpProblemDetail
 using NArchitecture.Core.Validation.Abstractions;
 using Shouldly;
 
-namespace Core.CrossCuttingConcerns.Exception.WebApi.Tests.Handlers;
+namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Tests.Handlers;
 
 /// <summary>
 /// Tests for verifying HTTP exception handler responses.
@@ -49,7 +49,7 @@ public class HttpExceptionHandlerTests
 
         // Act
         await _handler.HandleException(exception);
-        var problemDetails = await GetResponseBody<BusinessProblemDetails>();
+        BusinessProblemDetails problemDetails = await GetResponseBody<BusinessProblemDetails>();
 
         // Assert
         _handler.Response.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
@@ -72,7 +72,7 @@ public class HttpExceptionHandlerTests
 
         // Act
         await _handler.HandleException(exception);
-        var problemDetails = await GetResponseBody<ValidationProblemDetails>();
+        ValidationProblemDetails problemDetails = await GetResponseBody<ValidationProblemDetails>();
 
         // Assert
         _handler.Response.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
@@ -93,7 +93,7 @@ public class HttpExceptionHandlerTests
 
         // Act
         await _handler.HandleException(exception);
-        var problemDetails = await GetResponseBody<AuthorizationProblemDetails>();
+        AuthorizationProblemDetails problemDetails = await GetResponseBody<AuthorizationProblemDetails>();
 
         // Assert
         _handler.Response.StatusCode.ShouldBe(StatusCodes.Status401Unauthorized);
@@ -112,7 +112,7 @@ public class HttpExceptionHandlerTests
 
         // Act
         await _handler.HandleException(exception);
-        var problemDetails = await GetResponseBody<NotFoundProblemDetails>();
+        NotFoundProblemDetails problemDetails = await GetResponseBody<NotFoundProblemDetails>();
 
         // Assert
         _handler.Response.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
@@ -130,11 +130,11 @@ public class HttpExceptionHandlerTests
     {
         // Arrange
         var exception = new System.Exception(errorMessage);
-        var expectedMessage = string.IsNullOrWhiteSpace(errorMessage) ? "An internal server error occurred" : errorMessage;
+        string expectedMessage = string.IsNullOrWhiteSpace(errorMessage) ? "An internal server error occurred" : errorMessage;
 
         // Act
         await _handler.HandleException(exception);
-        var problemDetails = await GetResponseBody<InternalServerErrorProblemDetails>();
+        InternalServerErrorProblemDetails problemDetails = await GetResponseBody<InternalServerErrorProblemDetails>();
 
         // Assert
         _handler.Response.StatusCode.ShouldBe(StatusCodes.Status500InternalServerError);

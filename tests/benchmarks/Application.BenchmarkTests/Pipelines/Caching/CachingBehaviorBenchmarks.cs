@@ -7,7 +7,7 @@ using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 
-namespace NArchitecture.Core.Application.Benchmarks.Pipelines.Caching;
+namespace NArchitecture.Core.Application.BenchmarkTests.Pipelines.Caching;
 
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
@@ -71,6 +71,7 @@ internal class CachingBehaviorBenchmarks
             var request = new TestRequest { CacheKey = $"test-key-{i}" };
             tasks.Add(_behavior.Handle(request, () => Task.FromResult($"test-response-{i}"), CancellationToken.None));
         }
+
         await Task.WhenAll(tasks);
     }
 
@@ -95,6 +96,7 @@ internal class CachingBehaviorBenchmarks
             var request = new TestRequest { CacheKey = $"test-key-{i}" };
             tasks.Add(_behavior.Handle(request, () => Task.FromResult("cached-response"), CancellationToken.None));
         }
+
         await Task.WhenAll(tasks);
     }
 

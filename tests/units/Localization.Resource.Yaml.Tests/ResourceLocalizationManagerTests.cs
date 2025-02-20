@@ -12,19 +12,19 @@ public class ResourceLocalizationManagerTests
     {
         _testDataPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         _ = Directory.CreateDirectory(_testDataPath);
-        _testResources = new Dictionary<string, Dictionary<string, string>>();
+        _testResources = [];
         SetupTestData();
     }
 
     private void SetupTestData()
     {
-        var enContent =
+        string enContent =
             @"
 hello: Hello
 world: World
 greeting: Hello, World!
 ";
-        var trContent =
+        string trContent =
             @"
 hello: Merhaba
 world: Dünya
@@ -40,7 +40,7 @@ greeting: Merhaba, Dünya!
 
     private void CreateTestYamlFile(string locale, string section, string content)
     {
-        var filePath = Path.Combine(_testDataPath, $"{section}.{locale}.yaml");
+        string filePath = Path.Combine(_testDataPath, $"{section}.{locale}.yaml");
         File.WriteAllText(filePath, content);
     }
 
@@ -67,11 +67,10 @@ greeting: Merhaba, Dünya!
     public async Task GetLocalizedAsync_WithValidKey_ShouldReturnLocalizedString(string key, string locale, string expected)
     {
         // Arrange
-        var manager = new ResourceLocalizationManager(_testResources);
-        manager.AcceptLocales = new[] { locale };
+        var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = new[] { locale } };
 
         // Act
-        var result = await manager.GetLocalizedAsync(key);
+        string result = await manager.GetLocalizedAsync(key);
 
         // Assert
         result.ShouldBe(expected);
@@ -81,12 +80,11 @@ greeting: Merhaba, Dünya!
     public async Task GetLocalizedAsync_WithInvalidKey_ShouldReturnKeyItself()
     {
         // Arrange
-        var manager = new ResourceLocalizationManager(_testResources);
-        manager.AcceptLocales = new[] { "tr" };
-        var invalidKey = "nonexistent_key";
+        var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = new[] { "tr" } };
+        string invalidKey = "nonexistent_key";
 
         // Act
-        var result = await manager.GetLocalizedAsync(invalidKey);
+        string result = await manager.GetLocalizedAsync(invalidKey);
 
         // Assert
         result.ShouldBe(invalidKey);
@@ -96,11 +94,10 @@ greeting: Merhaba, Dünya!
     public async Task GetLocalizedAsync_WithInvalidLocale_ShouldFallbackToDefaultLocale()
     {
         // Arrange
-        var manager = new ResourceLocalizationManager(_testResources);
-        manager.AcceptLocales = new[] { "invalid-locale", "en" };
+        var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = new[] { "invalid-locale", "en" } };
 
         // Act
-        var result = await manager.GetLocalizedAsync("hello");
+        string result = await manager.GetLocalizedAsync("hello");
 
         // Assert
         result.ShouldBe("Hello");
@@ -110,11 +107,10 @@ greeting: Merhaba, Dünya!
     public async Task GetLocalizedAsync_WithMultipleAcceptLocales_ShouldUseFirstAvailable()
     {
         // Arrange
-        var manager = new ResourceLocalizationManager(_testResources);
-        manager.AcceptLocales = new[] { "fr", "tr", "en" };
+        var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = new[] { "fr", "tr", "en" } };
 
         // Act
-        var result = await manager.GetLocalizedAsync("hello");
+        string result = await manager.GetLocalizedAsync("hello");
 
         // Assert
         result.ShouldBe("Merhaba");
@@ -124,8 +120,7 @@ greeting: Merhaba, Dünya!
     public void GetLocalizedAsync_WithNullAcceptLocales_ShouldThrowException()
     {
         // Arrange
-        var manager = new ResourceLocalizationManager(_testResources);
-        manager.AcceptLocales = null;
+        var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = null };
 
         // Act & Assert
         _ = Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
@@ -135,7 +130,7 @@ greeting: Merhaba, Dünya!
     public async Task GetLocalizedAsync_WithCustomSection_ShouldReturnLocalizedString()
     {
         // Arrange
-        var customContent = "customKey: Custom Value";
+        string customContent = "customKey: Custom Value";
         CreateTestYamlFile("en", "custom", customContent);
         var resources = new Dictionary<string, Dictionary<string, string>>
         {
@@ -144,11 +139,10 @@ greeting: Merhaba, Dünya!
                 new Dictionary<string, string> { { "custom", Path.Combine(_testDataPath, "custom.en.yaml") } }
             },
         };
-        var manager = new ResourceLocalizationManager(resources);
-        manager.AcceptLocales = new[] { "en" };
+        var manager = new ResourceLocalizationManager(resources) { AcceptLocales = new[] { "en" } };
 
         // Act
-        var result = await manager.GetLocalizedAsync("customKey", "custom");
+        string result = await manager.GetLocalizedAsync("customKey", "custom");
 
         // Assert
         result.ShouldBe("Custom Value");
