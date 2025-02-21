@@ -140,7 +140,7 @@ public partial class EfRepositoryBaseTests
             : Should.Throw<ArgumentNullException>(() => Repository.BulkUpdate(null!));
     }
 
-    [Theory]
+    [Theory(DisplayName = "BulkUpdate - Should handle empty collection")]
     [Trait("Category", "Update")]
     [Trait("Method", "BulkUpdate")]
     [InlineData(true)]

@@ -1,8 +1,8 @@
 using System.Data;
+using NArchitecture.Core.Localization.Resource.Yaml;
 using Shouldly;
 
-namespace NArchitecture.Core.Localization.Resource.Yaml.Tests;
-
+[Trait("Category", "Localization")]
 public class ResourceLocalizationManagerTests
 {
     private readonly string _testDataPath;
@@ -12,7 +12,7 @@ public class ResourceLocalizationManagerTests
     {
         _testDataPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         _ = Directory.CreateDirectory(_testDataPath);
-        _testResources = [];
+        _testResources = new Dictionary<string, Dictionary<string, string>>();
         SetupTestData();
     }
 
@@ -50,17 +50,17 @@ greeting: Merhaba, Dünya!
             Directory.Delete(_testDataPath, true);
     }
 
-    [Fact]
+    [Fact(DisplayName = "Constructor should initialize resource data successfully")]
     public void Constructor_ShouldInitializeResourceData()
     {
         // Arrange & Act
         var manager = new ResourceLocalizationManager(_testResources);
 
         // Assert
-        manager.ShouldNotBe(null);
+        manager.ShouldNotBeNull();
     }
 
-    [Theory]
+    [Theory(DisplayName = "GetLocalizedAsync should return localized string for valid key and locale")]
     [InlineData("hello", "tr", "Merhaba")]
     [InlineData("world", "tr", "Dünya")]
     [InlineData("greeting", "tr", "Merhaba, Dünya!")]
@@ -76,7 +76,7 @@ greeting: Merhaba, Dünya!
         result.ShouldBe(expected);
     }
 
-    [Fact]
+    [Fact(DisplayName = "GetLocalizedAsync should return the key itself when key not found")]
     public async Task GetLocalizedAsync_WithInvalidKey_ShouldReturnKeyItself()
     {
         // Arrange
@@ -90,7 +90,7 @@ greeting: Merhaba, Dünya!
         result.ShouldBe(invalidKey);
     }
 
-    [Fact]
+    [Fact(DisplayName = "GetLocalizedAsync should fallback to default locale when invalid locale provided")]
     public async Task GetLocalizedAsync_WithInvalidLocale_ShouldFallbackToDefaultLocale()
     {
         // Arrange
@@ -103,7 +103,7 @@ greeting: Merhaba, Dünya!
         result.ShouldBe("Hello");
     }
 
-    [Fact]
+    [Fact(DisplayName = "GetLocalizedAsync should use first available locale among multiple accept locales")]
     public async Task GetLocalizedAsync_WithMultipleAcceptLocales_ShouldUseFirstAvailable()
     {
         // Arrange
@@ -116,17 +116,17 @@ greeting: Merhaba, Dünya!
         result.ShouldBe("Merhaba");
     }
 
-    [Fact]
+    [Fact(DisplayName = "GetLocalizedAsync should throw exception when AcceptLocales is null")]
     public void GetLocalizedAsync_WithNullAcceptLocales_ShouldThrowException()
     {
         // Arrange
         var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = null };
 
         // Act & Assert
-        _ = Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
+        Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
     }
 
-    [Fact]
+    [Fact(DisplayName = "GetLocalizedAsync should return localized string for custom section")]
     public async Task GetLocalizedAsync_WithCustomSection_ShouldReturnLocalizedString()
     {
         // Arrange

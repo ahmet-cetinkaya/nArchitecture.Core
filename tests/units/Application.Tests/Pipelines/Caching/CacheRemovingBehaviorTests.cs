@@ -17,6 +17,7 @@ public class MockCacheRemoverRequest : IRequest<int>, ICacheRemoverRequest
         new CacheRemoverOptions(bypassCache: false, cacheKey: string.Empty, cacheGroupKey: System.Array.Empty<string>());
 }
 
+[Trait("Category", "CacheRemoving")]
 public class CacheRemovingBehaviorTests
 {
     private readonly IDistributedCache _cache;
@@ -33,37 +34,28 @@ public class CacheRemovingBehaviorTests
         _nextDelegate = () => Task.FromResult(42);
     }
 
-    /// <summary>
-    /// Verifies that a specific cache key is successfully removed when provided in the request.
-    /// This test ensures the basic cache removal functionality works for single keys.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should remove from cache when cache key is provided")]
     public async Task Handle_WhenCacheKeyProvided_ShouldRemoveFromCache()
     {
-        // Arrange
+        // Arrange: Create a request with a specific cache key.
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: "test-key", cacheGroupKey: null),
         };
         await _cache.SetAsync("test-key", Encoding.UTF8.GetBytes("test-value"));
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
+        // Assert: Verify the cache key is removed.
         byte[]? result = await _cache.GetAsync("test-key");
         result.ShouldBeNull("Cache key should be removed from cache");
     }
 
-    /// <summary>
-    /// Validates that when a group key is provided, all associated cache entries are removed,
-    /// including the group metadata and sliding expiration information.
-    /// This test ensures proper cleanup of group-based caching.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should remove entire group when group key is provided")]
     public async Task Handle_WhenGroupKeyProvided_ShouldRemoveEntireGroup()
     {
-        // Arrange
+        // Arrange: Setup a cache group with keys.
         string groupKey = "group1";
         var cachedKeys = new HashSet<string> { "key1", "key2" };
         string serializedKeys = JsonSerializer.Serialize(cachedKeys);
@@ -78,13 +70,13 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: new[] { groupKey }),
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: [groupKey]),
         };
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
+        // Assert: Verify all group keys and metadata are removed.
         foreach (string key in cachedKeys)
         {
             byte[]? value = await _cache.GetAsync(key);
@@ -98,16 +90,11 @@ public class CacheRemovingBehaviorTests
         slidingValue.ShouldBeNull("Sliding expiration key should be removed");
     }
 
-    /// <summary>
-    /// Tests the behavior when multiple cache groups need to be removed.
-    /// Verifies that all cache entries, group metadata, and sliding expiration data
-    /// are properly removed for each specified group.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should remove all groups when multiple group keys are provided")]
     public async Task Handle_WhenMultipleGroupKeysProvided_ShouldRemoveAllGroups()
     {
-        // Arrange
-        string[] groupKeys = new[] { "group1", "group2" };
+        // Arrange: Create a request with multiple cache group keys.
+        string[] groupKeys = ["group1", "group2"];
         var cachedKeys1 = new HashSet<string> { "key1", "key2" };
         var cachedKeys2 = new HashSet<string> { "key3", "key4" };
 
@@ -117,7 +104,6 @@ public class CacheRemovingBehaviorTests
         {
             await _cache.SetAsync(key, Encoding.UTF8.GetBytes($"value-{key}"));
         }
-
         await _cache.SetAsync("group1SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
         // Setup second group
@@ -126,7 +112,6 @@ public class CacheRemovingBehaviorTests
         {
             await _cache.SetAsync(key, Encoding.UTF8.GetBytes($"value-{key}"));
         }
-
         await _cache.SetAsync("group2SlidingExpiration", Encoding.UTF8.GetBytes("30"));
 
         var request = new MockCacheRemoverRequest
@@ -134,17 +119,17 @@ public class CacheRemovingBehaviorTests
             CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: groupKeys),
         };
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
-        foreach (string? key in cachedKeys1.Concat(cachedKeys2))
+        // Assert: Verify all keys across groups are removed.
+        foreach (string key in cachedKeys1.Concat(cachedKeys2))
         {
             byte[]? value = await _cache.GetAsync(key);
             value.ShouldBeNull($"Cache key '{key}' should be removed");
         }
 
-        foreach (string? groupKey in groupKeys)
+        foreach (string groupKey in groupKeys)
         {
             byte[]? groupValue = await _cache.GetAsync(groupKey);
             groupValue.ShouldBeNull($"Group key '{groupKey}' should be removed");
@@ -154,44 +139,30 @@ public class CacheRemovingBehaviorTests
         }
     }
 
-    /// <summary>
-    /// Ensures the behavior handles non-existent group keys gracefully without affecting
-    /// other cache entries. This test verifies the system's resilience when dealing
-    /// with missing cache groups.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should handle gracefully when group key does not exist")]
     public async Task Handle_WhenGroupKeyDoesNotExist_ShouldHandleGracefully()
     {
-        // Arrange
+        // Arrange: Create a request with a non-existent cache group.
         string existingKey = "existing-key";
         await _cache.SetAsync(existingKey, Encoding.UTF8.GetBytes("test-value"));
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(
-                bypassCache: false,
-                cacheKey: null,
-                cacheGroupKey: new[] { "non-existent-group" }
-            ),
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: ["non-existent-group"]),
         };
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
+        // Assert: Verify existing keys are unaffected.
         byte[]? existingValue = await _cache.GetAsync(existingKey);
-        _ = existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
+        existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
     }
 
-    /// <summary>
-    /// Verifies that when BypassCache is set to true, no cache operations are performed
-    /// regardless of the provided cache keys or group keys. This test ensures the bypass
-    /// functionality works as expected.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should skip cache operations when bypass cache is true")]
     public async Task Handle_WhenBypassCacheIsTrue_ShouldSkipCacheOperations()
     {
-        // Arrange
+        // Arrange: Create request with bypass flag.
         string testKey = "test-key";
         string groupKey = "group1";
         await _cache.SetAsync(testKey, Encoding.UTF8.GetBytes("test-value"));
@@ -199,28 +170,24 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: true, cacheKey: testKey, cacheGroupKey: new[] { groupKey }),
+            CacheOptions = new CacheRemoverOptions(bypassCache: true, cacheKey: testKey, cacheGroupKey: [groupKey]),
         };
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
+        // Assert: Verify cache remains unchanged.
         byte[]? value = await _cache.GetAsync(testKey);
-        _ = value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
+        value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
 
         byte[]? groupValue = await _cache.GetAsync(groupKey);
-        _ = groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
+        groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
     }
 
-    /// <summary>
-    /// Confirms that the next delegate in the pipeline is always called regardless
-    /// of cache operations. This ensures the behavior doesn't break the request pipeline.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should always call next delegate")]
     public async Task Handle_ShouldAlwaysCallNextDelegate()
     {
-        // Arrange
+        // Arrange: Prepare a request and a next delegate.
         bool nextDelegateCalled = false;
         var request = new MockCacheRemoverRequest();
         Task<int> next()
@@ -229,23 +196,14 @@ public class CacheRemovingBehaviorTests
             return Task.FromResult(42);
         }
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, next, CancellationToken.None);
 
-        // Assert
+        // Assert: Verify next delegate is invoked.
         nextDelegateCalled.ShouldBeTrue("Next delegate should always be called");
     }
 
-    /// <summary>
-    /// Tests various combinations of cache configurations to ensure proper behavior
-    /// in different scenarios. This parameterized test covers multiple use cases:
-    /// - No cache key or group keys
-    /// - Only cache key
-    /// - Only group keys
-    /// - Both cache key and group keys
-    /// - Bypass cache with both types of keys
-    /// </summary>
-    [Theory]
+    [Theory(DisplayName = "Handle should behave correctly when different request configurations are provided")]
     [InlineData(null, null, false)]
     [InlineData("test-key", null, false)]
     [InlineData(null, new[] { "group1" }, false)]
@@ -257,7 +215,7 @@ public class CacheRemovingBehaviorTests
         bool bypassCache
     )
     {
-        // Arrange
+        // Arrange: Create request with provided configurations.
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(bypassCache: bypassCache, cacheKey: cacheKey, cacheGroupKey: groupKeys),
@@ -267,17 +225,19 @@ public class CacheRemovingBehaviorTests
             await _cache.SetAsync(cacheKey, Encoding.UTF8.GetBytes("test-value"));
 
         if (groupKeys != null)
+        {
             foreach (string groupKey in groupKeys)
             {
                 var groupData = new HashSet<string> { "key1" };
                 await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
                 await _cache.SetAsync("key1", Encoding.UTF8.GetBytes("value1"));
             }
+        }
 
-        // Act
+        // Act: Execute cache removal behavior.
         int result = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
+        // Assert: Verify the behavior returns expected result and cache is modified accordingly.
         result.ShouldBe(42);
 
         if (!bypassCache)
@@ -299,150 +259,119 @@ public class CacheRemovingBehaviorTests
         }
     }
 
-    /// <summary>
-    /// Verifies that the behavior handles empty group key arrays without throwing exceptions.
-    /// This edge case test ensures system stability when provided with empty collections.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should not throw exception when group key is empty")]
     public async Task Handle_WithEmptyGroupKey_ShouldNotThrowException()
     {
-        // Arrange
+        // Arrange: Create a request with empty group key.
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: Array.Empty<string>()),
         };
 
-        // Act
+        // Act: Execute cache removal behavior.
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
 
-        // Assert
+        // Assert: Verify no exception is thrown.
         exception.ShouldBeNull();
     }
 
-    /// <summary>
-    /// Tests the behavior's handling of corrupted or invalid JSON data in group cache entries.
-    /// Ensures the system fails gracefully and throws appropriate exceptions when
-    /// encountering malformed cache data.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should handle gracefully when group key data is invalid")]
     public async Task Handle_WithInvalidGroupKeyData_ShouldHandleGracefully()
     {
-        // Arrange
+        // Arrange: Setup cache with invalid group key data.
         const string groupKey = "invalid-group";
         await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes("invalid-json"));
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: new[] { groupKey }),
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: [groupKey]),
         };
 
-        // Act
+        // Act: Execute cache removal behavior.
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
 
-        // Assert
-        _ = exception.ShouldNotBeNull();
-        _ = exception.ShouldBeOfType<JsonException>();
+        // Assert: Verify that an appropriate exception is raised.
+        exception.ShouldNotBeNull();
+        exception.ShouldBeOfType<JsonException>();
     }
 
-    /// <summary>
-    /// Verifies that the behavior properly respects cancellation tokens and
-    /// terminates operations when cancellation is requested. This ensures
-    /// the system remains responsive and can be interrupted when needed.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should respect cancellation token when cancellation is requested")]
     public async Task Handle_WithCancellation_ShouldRespectCancellationToken()
     {
-        // Arrange
+        // Arrange: Create request and cancel token.
         var cts = new CancellationTokenSource();
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: new[] { "test-group" }
-            ),
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: "test-key", cacheGroupKey: ["test-group"]),
         };
 
-        // Set up some cache data to ensure we hit the cache operations
         await _cache.SetAsync("test-group", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new HashSet<string> { "test-key" })));
         await _cache.SetAsync("test-key", Encoding.UTF8.GetBytes("test-value"));
 
-        cts.Cancel(); // Cancel before execution
+        cts.Cancel();
 
-        // Act & Assert
-        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
+        // Act & Assert: Verify OperationCanceledException is thrown.
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             _ = await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
     }
 
-    /// <summary>
-    /// Tests that cancellation is properly handled during group key processing
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should stop processing when cancellation occurs during group processing")]
     public async Task Handle_WithCancellationDuringGroupKeyProcessing_ShouldStopProcessing()
     {
-        // Arrange
+        // Arrange: Configure cache groups and cancellation.
         var cts = new CancellationTokenSource();
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(
                 bypassCache: false,
                 cacheKey: null,
-                cacheGroupKey: new[] { "group1", "group2", "group3" } // Multiple groups to ensure we hit the loop
+                cacheGroupKey: ["group1", "group2", "group3"]
             ),
         };
 
-        // Set up cache data
         var groupData = new HashSet<string> { "key1" };
         foreach (string groupKey in request.CacheOptions.CacheGroupKey!)
         {
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
         }
 
-        // Set up next delegate to cancel during execution
         Task<int> next()
         {
-            cts.Cancel(); // Cancel during execution
+            cts.Cancel();
             return Task.FromResult(42);
         }
 
-        // Act & Assert
-        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             _ = await _behavior.Handle(request, next, cts.Token);
         });
 
-        // Verify that not all groups were processed
         byte[]? lastGroupValue = await _cache.GetAsync("group3");
-        _ = lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
+        lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
     }
 
-    /// <summary>
-    /// Tests cancellation handling during group processing loop
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should break and stop processing when cancellation is requested during loop")]
     public async Task Handle_WhenCancellationRequestedDuringLoop_ShouldBreakAndStopProcessing()
     {
-        // Arrange
+        // Arrange: Prepare multiple groups and a cancellation token.
         var cts = new CancellationTokenSource();
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(
                 bypassCache: false,
                 cacheKey: null,
-                cacheGroupKey: new[] { "group1", "group2", "group3", "group4" }
+                cacheGroupKey: ["group1", "group2", "group3", "group4"]
             ),
         };
 
-        // Setup cache data
         foreach (string groupKey in request.CacheOptions.CacheGroupKey!)
         {
             var groupData = new HashSet<string> { "testKey" };
             await _cache.SetAsync(groupKey, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(groupData)));
         }
 
-        // Cancel after first group is processed
         int processedGroups = 0;
         _ = _loggerMock
             .Setup(x => x.InformationAsync(It.IsAny<string>()))
@@ -457,48 +386,36 @@ public class CacheRemovingBehaviorTests
             })
             .Returns(Task.CompletedTask);
 
-        // Act & Assert
-        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             _ = await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
 
-        // Verify only first group was processed
         (await _cache.GetAsync("group1")).ShouldBeNull("First group should be processed");
-        _ = (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
-        _ = (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
-        _ = (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
+        (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
+        (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
+        (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
     }
 
-    /// <summary>
-    /// Tests that logger information is properly called for each group
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should log information when processing groups")]
     public async Task Handle_WhenProcessingGroups_ShouldLogInformation()
     {
-        // Arrange
+        // Arrange: Setup cache groups and mock logger.
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(
-                bypassCache: false,
-                cacheKey: null,
-                cacheGroupKey: new[] { "group1", "group2" }
-            ),
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: ["group1", "group2"]),
         };
 
-        // Setup cache data with different number of keys per group
         var group1Keys = new HashSet<string> { "key1", "key2" };
         var group2Keys = new HashSet<string> { "key3" };
         await _cache.SetAsync("group1", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(group1Keys)));
         await _cache.SetAsync("group2", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(group2Keys)));
 
-        // Act
+        // Act: Execute cache removal behavior.
         _ = await _behavior.Handle(request, _nextDelegate, CancellationToken.None);
 
-        // Assert
-        // Verify logger was called with correct group names and key counts
+        // Assert: Verify logger logs the correct information.
         _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(m => m.Contains("group1") && m.Contains("2"))), Times.Once);
-
         _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(m => m.Contains("group2") && m.Contains("1"))), Times.Once);
     }
 }

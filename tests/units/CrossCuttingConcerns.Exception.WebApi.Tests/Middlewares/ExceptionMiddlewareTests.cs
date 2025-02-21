@@ -11,9 +11,7 @@ using Shouldly;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Tests.Middlewares;
 
-/// <summary>
-/// Tests for verifying the exception handling middleware functionality.
-/// </summary>
+[Trait("Category", "Exception")]
 public class ExceptionMiddlewareTests
 {
     private readonly Mock<ILogger> _loggerMock;
@@ -28,10 +26,7 @@ public class ExceptionMiddlewareTests
         _ = _contextAccessorMock.Setup(x => x.HttpContext).Returns(_httpContext);
     }
 
-    /// <summary>
-    /// Tests successful request handling without exceptions.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Invoke should complete successfully when no exception occurs")]
     public async Task Invoke_WhenNoException_ShouldCompleteSuccessfully()
     {
         // Arrange
@@ -45,10 +40,7 @@ public class ExceptionMiddlewareTests
         _loggerMock.Verify(x => x.InformationAsync(It.IsAny<string>()), Times.Never);
     }
 
-    /// <summary>
-    /// Tests handling of business exceptions with 400 status code.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Invoke should return 400 status code for business exceptions")]
     public async Task Invoke_WhenBusinessException_ShouldReturn400StatusCode()
     {
         // Arrange
@@ -64,10 +56,7 @@ public class ExceptionMiddlewareTests
         _loggerMock.Verify(x => x.InformationAsync(It.Is<string>(s => s.IndexOf(exceptionMessage) >= 0)));
     }
 
-    /// <summary>
-    /// Tests handling of validation exceptions with 400 status code.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Invoke should return 400 status code for validation exceptions")]
     public async Task Invoke_WhenValidationException_ShouldReturn400StatusCode()
     {
         // Arrange
@@ -82,10 +71,7 @@ public class ExceptionMiddlewareTests
         _httpContext.Response.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
     }
 
-    /// <summary>
-    /// Tests handling of authorization exceptions with 401 status code.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Invoke should return 401 status code for authorization exceptions")]
     public async Task Invoke_WhenAuthorizationException_ShouldReturn401StatusCode()
     {
         // Arrange
@@ -99,10 +85,7 @@ public class ExceptionMiddlewareTests
         _httpContext.Response.StatusCode.ShouldBe(StatusCodes.Status401Unauthorized);
     }
 
-    /// <summary>
-    /// Tests handling of not found exceptions with 404 status code.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Invoke should return 404 status code for not found exceptions")]
     public async Task Invoke_WhenNotFoundException_ShouldReturn404StatusCode()
     {
         // Arrange
@@ -143,10 +126,7 @@ public class ExceptionMiddlewareTests
         }
     }
 
-    /// <summary>
-    /// Tests logging of authenticated user information.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Invoke should log authenticated user name when exception occurs")]
     public async Task Invoke_WithAuthenticatedUser_ShouldLogUserName()
     {
         // Arrange
@@ -166,10 +146,7 @@ public class ExceptionMiddlewareTests
         );
     }
 
-    /// <summary>
-    /// Tests logging behavior when user is not authenticated.
-    /// </summary>
-    [Theory]
+    [Theory(DisplayName = "Invoke should log question mark for unauthenticated or empty user name")]
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]

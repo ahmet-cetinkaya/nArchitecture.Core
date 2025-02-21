@@ -1,5 +1,6 @@
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
 using NArchitecture.Core.Mailing.Abstractions;
+using NArchitecture.Core.Mailing.Abstractions.Models;
 using NArchitecture.Core.Security.Abstractions.Authenticator;
 using NArchitecture.Core.Security.Abstractions.Authenticator.Entities;
 using NArchitecture.Core.Security.Abstractions.Authenticator.Enums;

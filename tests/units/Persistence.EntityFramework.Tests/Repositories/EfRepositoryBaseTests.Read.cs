@@ -81,7 +81,7 @@ public partial class EfRepositoryBaseTests
     public async Task GetAll_ShouldRespectPredicateFilter(bool isAsync)
     {
         // Arrange
-        TestEntity[] entities = new[] { CreateTestEntity("Match"), CreateTestEntity("Match"), CreateTestEntity("NoMatch") };
+        TestEntity[] entities = [CreateTestEntity("Match"), CreateTestEntity("Match"), CreateTestEntity("NoMatch")];
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
 
@@ -177,12 +177,12 @@ public partial class EfRepositoryBaseTests
     public async Task GetListByDynamic_ShouldApplyDynamicFilters(bool isAsync)
     {
         // Arrange
-        TestEntity[] entities = new[]
-        {
+        TestEntity[] entities =
+        [
             CreateTestEntity("High Priority"),
             CreateTestEntity("Medium Priority"),
             CreateTestEntity("Low Priority"),
-        };
+        ];
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
 
@@ -251,7 +251,7 @@ public partial class EfRepositoryBaseTests
     public async Task GetRandom_ShouldRespectPredicate(bool isAsync)
     {
         // Arrange
-        TestEntity[] entities = new[] { CreateTestEntity("Target"), CreateTestEntity("Target"), CreateTestEntity("NonTarget") };
+        TestEntity[] entities = [CreateTestEntity("Target"), CreateTestEntity("Target"), CreateTestEntity("NonTarget")];
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
 
@@ -319,7 +319,7 @@ public partial class EfRepositoryBaseTests
     public async Task Count_ShouldRespectPredicate(bool isAsync)
     {
         // Arrange
-        TestEntity[] entities = new[] { CreateTestEntity("Match"), CreateTestEntity("Match"), CreateTestEntity("NoMatch") };
+        TestEntity[] entities = [CreateTestEntity("Match"), CreateTestEntity("Match"), CreateTestEntity("NoMatch")];
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
 
@@ -576,7 +576,7 @@ public partial class EfRepositoryBaseTests
     public async Task GetList_ShouldRespectOrderByParameter(bool isAsync)
     {
         // Arrange
-        TestEntity[] entities = new[] { CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B") };
+        TestEntity[] entities = [CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B")];
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
 
@@ -629,7 +629,7 @@ public partial class EfRepositoryBaseTests
     public async Task GetListByDynamic_ShouldHandleSortParameters(bool isAsync)
     {
         // Arrange
-        TestEntity[] entities = new[] { CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B") };
+        TestEntity[] entities = [CreateTestEntity("A"), CreateTestEntity("C"), CreateTestEntity("B")];
         _ = await Repository.BulkAddAsync(entities);
         _ = await Repository.SaveChangesAsync();
 

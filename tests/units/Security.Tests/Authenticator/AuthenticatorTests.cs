@@ -25,7 +25,7 @@ public class AuthenticatorTests
     private readonly Authenticator<Guid, Guid> _authenticator;
     private readonly CancellationToken _cancellationToken;
 
-    private static readonly byte[] TestCodeSeed = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+    private static readonly byte[] TestCodeSeed = [1, 2, 3, 4, 5, 6, 7, 8];
 
     public AuthenticatorTests()
     {
@@ -179,7 +179,7 @@ public class AuthenticatorTests
             _mockSmsService.Verify(
                 s =>
                     s.SendAsync(
-                        It.Is<Sms>(sms =>
+                        It.Is<Sms.Abstractions.Sms>(sms =>
                             sms.PhoneNumber == destination
                             && sms.Priority == 1
                             && sms.CustomParameters != null
@@ -613,7 +613,7 @@ public class AuthenticatorTests
                 .Setup(c => c.GetSmsTemplateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SmsTemplateConfiguration("Test {0}"));
             _ = _mockSmsService
-                .Setup(s => s.SendAsync(It.IsAny<Sms>(), It.IsAny<CancellationToken>()))
+                .Setup(s => s.SendAsync(It.IsAny<Sms.Abstractions.Sms>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("SMS service error"));
         }
 
@@ -880,10 +880,10 @@ public class AuthenticatorTests
             .Returns(code);
 
         // Setup SMS service to capture the sent SMS and return CompletedTask
-        Sms? capturedSms = null;
+        Sms.Abstractions.Sms? capturedSms = null;
         _ = _mockSmsService
-            .Setup(s => s.SendAsync(It.IsAny<Sms>(), It.IsAny<CancellationToken>()))
-            .Callback<Sms, CancellationToken>((sms, _) => capturedSms = sms)
+            .Setup(s => s.SendAsync(It.IsAny<Sms.Abstractions.Sms>(), It.IsAny<CancellationToken>()))
+            .Callback<Sms.Abstractions.Sms, CancellationToken>((sms, _) => capturedSms = sms)
             .Returns(Task.CompletedTask);
 
         // Act

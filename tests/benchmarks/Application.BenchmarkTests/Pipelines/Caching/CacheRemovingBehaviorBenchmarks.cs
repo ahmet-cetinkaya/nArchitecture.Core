@@ -30,7 +30,7 @@ public class CacheRemovingBehaviorBenchmarks
 
         _behavior = new CacheRemovingBehavior<TestRequest, string>(_cacheMock.Object, _loggerMock.Object);
 
-        _request = new TestRequest { CacheKey = "test-key", CacheGroupKey = new[] { "group1", "group2" } };
+        _request = new TestRequest { CacheKey = "test-key", CacheGroupKey = ["group1", "group2"] };
     }
 
     [Benchmark(Baseline = true, Description = "Baseline - No Cache Operations")]

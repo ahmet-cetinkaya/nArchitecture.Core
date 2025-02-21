@@ -1,7 +1,9 @@
 using MailKit;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using Moq;
+using NArchitecture.Core.Mailing.Abstractions.Models;
 using NArchitecture.Core.Mailing.MailKit.Models;
 using Shouldly;
 
@@ -91,7 +93,7 @@ public class MailKitMailServiceTests
                 x.ConnectAsync(
                     _mailSettings.Server,
                     _mailSettings.Port,
-                    It.IsAny<MailKit.Security.SecureSocketOptions>(),
+                    It.IsAny<SecureSocketOptions>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -121,14 +123,11 @@ public class MailKitMailServiceTests
                 x.ConnectAsync(
                     It.IsAny<string>(),
                     It.IsAny<int>(),
-                    It.IsAny<MailKit.Security.SecureSocketOptions>(),
+                    It.IsAny<SecureSocketOptions>(),
                     It.IsAny<CancellationToken>()
                 )
             )
-            .Returns(
-                (string host, int port, MailKit.Security.SecureSocketOptions options, CancellationToken token) =>
-                    Task.FromCanceled(token)
-            );
+            .Returns((string host, int port, SecureSocketOptions options, CancellationToken token) => Task.FromCanceled(token));
 
         _ = _smtpClientMock
             .Setup(x => x.DisconnectAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))

@@ -5,6 +5,7 @@ using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Transaction;
 
+[Trait("Category", "Transaction")]
 public class TransactionScopeBehaviorTests
 {
     private readonly TransactionScopeBehavior<TestRequest, TestResponse> _behavior;
@@ -14,10 +15,7 @@ public class TransactionScopeBehaviorTests
         _behavior = new();
     }
 
-    /// <summary>
-    /// Should complete transaction when operation succeeds.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should complete transaction when operation succeeds")]
     public async Task Handle_WhenSuccessful_ShouldCompleteTransaction()
     {
         // Arrange
@@ -33,10 +31,7 @@ public class TransactionScopeBehaviorTests
         result.ShouldBe(expectedResponse);
     }
 
-    /// <summary>
-    /// Should rollback transaction when operation throws exception.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should rollback transaction when operation throws exception")]
     public async Task Handle_WhenExceptionOccurs_ShouldRollbackTransaction()
     {
         // Arrange
@@ -52,10 +47,7 @@ public class TransactionScopeBehaviorTests
         exception.ShouldBe(expectedException);
     }
 
-    /// <summary>
-    /// Should handle nested transaction scopes correctly.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should handle nested transactions correctly")]
     public async Task Handle_WithNestedTransactions_ShouldHandleCorrectly()
     {
         // Arrange
@@ -76,10 +68,7 @@ public class TransactionScopeBehaviorTests
         result.ShouldBe(expectedResponse);
     }
 
-    /// <summary>
-    /// Should maintain transaction throughout long-running operations.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should maintain transaction during long running operations")]
     public async Task Handle_WithLongRunningOperation_ShouldMaintainTransaction()
     {
         // Arrange
@@ -102,7 +91,6 @@ public class TransactionScopeBehaviorTests
         transactionExists.ShouldBeTrue("Transaction should have been active during operation");
     }
 
-    // Test request classes
     private class TestRequest : IRequest<TestResponse>, ITransactionalRequest { }
 
     private class TestResponse { }

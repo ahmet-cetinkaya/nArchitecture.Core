@@ -55,7 +55,7 @@ public class ClaimCollectionExtensionsTests
     {
         // Arrange
         var claims = new List<Claim>();
-        string[] operationClaims = new[] { "admin", "user", "manager" };
+        string[] operationClaims = ["admin", "user", "manager"];
 
         // Act
         claims.AddOperationClaim(operationClaims);

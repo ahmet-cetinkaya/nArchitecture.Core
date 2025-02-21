@@ -3,14 +3,12 @@ using Shouldly;
 
 namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.Tests;
 
+[Trait("Category", "SerilogFileLogger")]
 public class SerilogFileLoggerTests : IDisposable
 {
     private readonly string _baseTestPath;
     private readonly List<string> _testPaths;
 
-    /// <summary>
-    /// Initializes test environment by creating a temporary log directory and configuring the logger.
-    /// </summary>
     public SerilogFileLoggerTests()
     {
         _baseTestPath = Path.Combine(Path.GetTempPath(), $"narch_tests_{Guid.NewGuid()}");
@@ -91,10 +89,7 @@ public class SerilogFileLoggerTests : IDisposable
         throw new TimeoutException($"Timeout waiting for log file creation in {path}");
     }
 
-    /// <summary>
-    /// Verifies that InformationAsync correctly writes messages to the log file.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "InformationAsync should write to log file")]
     public async Task InformationAsync_ShouldWriteToLogFile()
     {
         // Arrange
@@ -112,12 +107,7 @@ public class SerilogFileLoggerTests : IDisposable
         logContent.ShouldContain(testMessage);
     }
 
-    /// <summary>
-    /// Verifies that all logging methods correctly write messages with appropriate log levels.
-    /// </summary>
-    /// <param name="message">The test message to log</param>
-    /// <param name="methodName">The name of the logging method to test</param>
-    [Theory]
+    [Theory(DisplayName = "Log methods should write correct log level")]
     [InlineData("Debug test message", nameof(SerilogFileLogger.DebugAsync))]
     [InlineData("Error test message", nameof(SerilogFileLogger.ErrorAsync))]
     [InlineData("Warning test message", nameof(SerilogFileLogger.WarningAsync))]
@@ -150,10 +140,7 @@ public class SerilogFileLoggerTests : IDisposable
         }
     }
 
-    /// <summary>
-    /// Verifies that the logger creates new log files when size limit is reached.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Logger should respect file size limit")]
     public async Task Logger_ShouldRespectFileSizeLimit()
     {
         // Arrange
@@ -190,10 +177,7 @@ public class SerilogFileLoggerTests : IDisposable
         }
     }
 
-    /// <summary>
-    /// Verifies that the logger maintains the configured maximum number of log files.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Logger should respect retained file limit")]
     public async Task Logger_ShouldRespectRetainedFileLimit()
     {
         // Arrange
@@ -217,9 +201,6 @@ public class SerilogFileLoggerTests : IDisposable
         );
     }
 
-    /// <summary>
-    /// Cleans up test resources by removing the temporary log directory.
-    /// </summary>
     public void Dispose()
     {
         cleanupTestPaths();

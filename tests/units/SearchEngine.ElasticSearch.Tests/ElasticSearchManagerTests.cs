@@ -9,24 +9,15 @@ using Shouldly;
 
 namespace NArchitecture.Core.SearchEngine.ElasticSearch.Tests;
 
-/// <summary>
-/// Collection definition for ElasticSearch tests to disable parallel execution.
-/// </summary>
 [CollectionDefinition("ElasticSearch", DisableParallelization = true)]
 public class ElasticSearchCollection : ICollectionFixture<ElasticSearchFixture> { }
 
-/// <summary>
-/// Sample document class for testing purposes.
-/// </summary>
 public class TestDocument
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Test fixture that manages the ElasticSearch Docker container and test data.
-/// </summary>
 public class ElasticSearchFixture : IAsyncLifetime
 {
     private readonly string _containerName;
@@ -55,7 +46,6 @@ public class ElasticSearchFixture : IAsyncLifetime
 
     private async Task InitializeManager()
     {
-        // Get the host from environment or use localhost
         _elasticHost = Environment.GetEnvironmentVariable("ELASTICSEARCH_URL") ?? $"http://localhost:{_httpPort}";
 
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELASTICSEARCH_URL")))
@@ -89,18 +79,12 @@ public class ElasticSearchFixture : IAsyncLifetime
         _client = new ElasticsearchClient(settings);
     }
 
-    /// <summary>
-    /// Gets a random available port number for Docker container binding.
-    /// </summary>
     private static int GetRandomPort()
     {
         var random = new Random();
         return random.Next(10000, 60000);
     }
 
-    /// <summary>
-    /// Cleans up any existing test containers from previous runs.
-    /// </summary>
     private async Task CleanupExistingContainers()
     {
         try
@@ -117,15 +101,9 @@ public class ElasticSearchFixture : IAsyncLifetime
                     _ = await _dockerClient.Containers.StopContainerAsync(container.ID, new ContainerStopParameters());
                     await _dockerClient.Containers.RemoveContainerAsync(container.ID, new ContainerRemoveParameters());
                 }
-                catch
-                {
-                    // Ignore errors during cleanup
-                }
+                catch { }
         }
-        catch
-        {
-            // Ignore errors during cleanup
-        }
+        catch { }
     }
 
     private async Task InitializeLocalContainer()
@@ -162,16 +140,12 @@ public class ElasticSearchFixture : IAsyncLifetime
         _ = await _dockerClient.Containers.StartContainerAsync(_containerId, null);
     }
 
-    /// <summary>
-    /// Initializes the test environment by starting ElasticSearch container and creating test data.
-    /// </summary>
     public async Task InitializeAsync()
     {
         await InitializeManager();
 
         if (!_skipContainerCreation)
         {
-            // Local environment health check
             using var httpClient = new HttpClient();
             int maxAttempts = 60;
             int attempt = 0;
@@ -186,10 +160,7 @@ public class ElasticSearchFixture : IAsyncLifetime
                         break;
                     }
                 }
-                catch
-                {
-                    // Ignore exceptions while waiting
-                }
+                catch { }
 
                 attempt++;
                 await Task.Delay(2000);
@@ -200,7 +171,6 @@ public class ElasticSearchFixture : IAsyncLifetime
         }
         else
         {
-            // CI environment health check
             using var httpClient = new HttpClient();
             int maxAttempts = 30;
             int attempt = 0;
@@ -213,10 +183,7 @@ public class ElasticSearchFixture : IAsyncLifetime
                     if (response.IsSuccessStatusCode)
                         break;
                 }
-                catch
-                {
-                    // Ignore exceptions while waiting
-                }
+                catch { }
 
                 attempt++;
                 await Task.Delay(1000);
@@ -226,7 +193,6 @@ public class ElasticSearchFixture : IAsyncLifetime
                 throw new Exception("Could not connect to Elasticsearch service.");
         }
 
-        // Create test index and insert test data
         _ = await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
         await Task.Delay(1000);
 
@@ -240,28 +206,20 @@ public class ElasticSearchFixture : IAsyncLifetime
         await Task.Delay(1000);
     }
 
-    /// <summary>
-    /// Resets the test index to a known state with initial test data.
-    /// </summary>
     public async Task ResetIndexAsync()
     {
         try
         {
             _ = await _client.Indices.DeleteAsync(TestIndex);
-            await Task.Delay(1000); // Increased delay for better stability
+            await Task.Delay(1000);
         }
-        catch
-        {
-            // Ignore if index doesn't exist
-        }
+        catch { }
 
-        await Task.Delay(1000); // Additional delay before creating new index
+        await Task.Delay(1000);
 
-        // Create fresh index
         _ = await Manager.CreateIndexAsync(new IndexModel(TestIndex, TestAlias));
         await Task.Delay(1000);
 
-        // Insert initial test document
         _ = await Manager.InsertAsync(
             new SearchDocumentWithData(
                 Id: "1",
@@ -272,9 +230,6 @@ public class ElasticSearchFixture : IAsyncLifetime
         await Task.Delay(1000);
     }
 
-    /// <summary>
-    /// Cleans up resources by stopping and removing the Docker container.
-    /// </summary>
     public async Task DisposeAsync()
     {
         if (!_skipContainerCreation && _containerId != null)
@@ -285,9 +240,6 @@ public class ElasticSearchFixture : IAsyncLifetime
     }
 }
 
-/// <summary>
-/// Integration tests for ElasticSearchManager implementation.
-/// </summary>
 [Collection("ElasticSearch")]
 public class ElasticSearchManagerTests
 {
@@ -302,39 +254,28 @@ public class ElasticSearchManagerTests
         _manager = fixture.Manager;
     }
 
-    /// <summary>
-    /// Resets the test data to its initial state.
-    /// </summary>
     private Task ResetTestDataAsync()
     {
         return _fixture.ResetIndexAsync();
     }
 
-    /// <summary>
-    /// Tests that attempt to create an index that already exists returns appropriate error.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "CreateIndexAsync should return error when index exists")]
+    [Trait("Category", "ElasticSearch")]
     public async Task CreateIndexAsync_WhenIndexExists_ShouldReturnError()
     {
-        // Arrange
         await ResetTestDataAsync();
         var indexModel = new IndexModel(TestIndex, TestAlias);
 
-        // Act
         SearchResult result = await _manager.CreateIndexAsync(indexModel);
 
-        // Assert
         result.Success.ShouldBeFalse();
         result.Message.ShouldBe(Messages.IndexAlreadyExists);
     }
 
-    /// <summary>
-    /// Tests that GetAllSearch returns all documents from the specified index.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "GetAllSearch should return documents from index")]
+    [Trait("Category", "ElasticSearch")]
     public async Task GetAllSearch_ShouldReturnDocuments()
     {
-        // Arrange
         await ResetTestDataAsync();
         var parameters = new SearchParameters
         {
@@ -343,25 +284,20 @@ public class ElasticSearchManagerTests
             Size = 10,
         };
 
-        // Act
         List<SearchGetModel<TestDocument>> result = await _manager.GetAllSearch<TestDocument>(parameters);
 
-        // Assert
         _ = result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
         result.Count.ShouldBe(1);
         result[0].Item.Name.ShouldBe("Test");
     }
 
-    /// <summary>
-    /// Tests that search by field returns documents matching the specified field value.
-    /// </summary>
-    [Theory]
+    [Theory(DisplayName = "GetSearchByField should return matching documents based on field value")]
     [InlineData("name", "Test")]
     [InlineData("description", "Sample")]
+    [Trait("Category", "ElasticSearch")]
     public async Task GetSearchByField_WithValidParameters_ShouldReturnMatchingDocuments(string fieldName, string value)
     {
-        // Arrange
         await ResetTestDataAsync();
         var parameters = new SearchByFieldParameters
         {
@@ -372,22 +308,17 @@ public class ElasticSearchManagerTests
             Size = 10,
         };
 
-        // Act
         List<SearchGetModel<TestDocument>> result = await _manager.GetSearchByField<TestDocument>(parameters);
 
-        // Assert
         _ = result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
         _ = result[0].Item.ShouldBeOfType<TestDocument>();
     }
 
-    /// <summary>
-    /// Tests that document update operation works successfully.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "UpdateAsync should update a valid document successfully")]
+    [Trait("Category", "ElasticSearch")]
     public async Task UpdateAsync_WithValidDocument_ShouldUpdateSuccessfully()
     {
-        // Arrange
         await ResetTestDataAsync();
         var document = new SearchDocumentWithData(
             Id: "1",
@@ -395,10 +326,8 @@ public class ElasticSearchManagerTests
             Data: new TestDocument { Name = "Updated Test", Description = "Updated Description" }
         );
 
-        // Act
         SearchResult result = await _manager.UpdateAsync(document);
 
-        // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
@@ -413,20 +342,15 @@ public class ElasticSearchManagerTests
         updated[0].Item.Name.ShouldBe("Updated Test");
     }
 
-    /// <summary>
-    /// Tests that document deletion operation works successfully.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "DeleteAsync should delete a valid document successfully")]
+    [Trait("Category", "ElasticSearch")]
     public async Task DeleteAsync_WithValidDocument_ShouldDeleteSuccessfully()
     {
-        // Arrange
         await ResetTestDataAsync();
         var document = new SearchDocument("1", TestIndex);
 
-        // Act
         SearchResult result = await _manager.DeleteAsync(document);
 
-        // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
@@ -441,42 +365,32 @@ public class ElasticSearchManagerTests
         searchResult.ShouldBeEmpty();
     }
 
-    /// <summary>
-    /// Tests that new index creation works when index doesn't exist.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "CreateIndexAsync should create index when it does not exist")]
+    [Trait("Category", "ElasticSearch")]
     public async Task CreateIndexAsync_WhenIndexDoesNotExist_ShouldCreateSuccessfully()
     {
-        // Arrange
         string uniqueIndex = $"new-test-index-{Guid.NewGuid():N}";
         var indexModel = new IndexModel(uniqueIndex, "test-alias");
 
-        // Act
         SearchResult result = await _manager.CreateIndexAsync(indexModel);
 
-        // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
     }
 
-    /// <summary>
-    /// Tests that bulk insert operation works correctly for multiple documents.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "InsertManyAsync should insert multiple documents successfully")]
+    [Trait("Category", "ElasticSearch")]
     public async Task InsertManyAsync_WithValidDocuments_ShouldInsertSuccessfully()
     {
-        // Arrange
         await ResetTestDataAsync();
-        TestDocument[] documents = new[]
-        {
+        TestDocument[] documents =
+        [
             new TestDocument { Name = "Test1", Description = "Description1" },
             new TestDocument { Name = "Test2", Description = "Description2" },
-        };
+        ];
 
-        // Act
         SearchResult result = await _manager.InsertManyAsync(TestIndex, documents);
 
-        // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
@@ -488,34 +402,26 @@ public class ElasticSearchManagerTests
                 Size = 10,
             }
         );
-        searchResult.Count.ShouldBe(3); // 1 existing + 2 new documents
+        searchResult.Count.ShouldBe(3);
     }
 
-    /// <summary>
-    /// Tests that GetIndexList returns all available indices.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "GetIndexList should return all indices")]
+    [Trait("Category", "ElasticSearch")]
     public async Task GetIndexList_ShouldReturnAllIndices()
     {
-        // Arrange
         await ResetTestDataAsync();
 
-        // Act
         IDictionary<string, object> result = await _manager.GetIndexList();
 
-        // Assert
         _ = result.ShouldNotBeNull();
         result.Count.ShouldBeGreaterThan(0);
         result.ShouldContainKey(TestIndex);
     }
 
-    /// <summary>
-    /// Tests that simple query string search returns matching documents.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "GetSearchBySimpleQueryString should return matching documents")]
+    [Trait("Category", "ElasticSearch")]
     public async Task GetSearchBySimpleQueryString_ShouldReturnMatchingDocuments()
     {
-        // Arrange
         await ResetTestDataAsync();
         var parameters = new SearchByQueryParameters
         {
@@ -525,22 +431,17 @@ public class ElasticSearchManagerTests
             Size = 10,
         };
 
-        // Act
         List<SearchGetModel<TestDocument>> result = await _manager.GetSearchBySimpleQueryString<TestDocument>(parameters);
 
-        // Assert
         _ = result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
         result[0].Item.Name.ShouldBe("Test");
     }
 
-    /// <summary>
-    /// Tests that document update by ElasticId works successfully.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "UpdateByElasticIdAsync should update document using ElasticId successfully")]
+    [Trait("Category", "ElasticSearch")]
     public async Task UpdateByElasticIdAsync_WithValidDocument_ShouldUpdateSuccessfully()
     {
-        // Arrange
         await ResetTestDataAsync();
         var document = new SearchDocumentWithData(
             Id: "1",
@@ -548,10 +449,8 @@ public class ElasticSearchManagerTests
             Data: new TestDocument { Name = "Updated Via ElasticId", Description = "Updated Description" }
         );
 
-        // Act
         SearchResult result = await _manager.UpdateByElasticIdAsync(document);
 
-        // Assert
         result.Success.ShouldBeTrue();
         result.Message.ShouldBe(Messages.Success);
 
@@ -566,16 +465,12 @@ public class ElasticSearchManagerTests
         updated[0].Item.Name.ShouldBe("Updated Via ElasticId");
     }
 
-    /// <summary>
-    /// Tests that updating document with null index name throws ArgumentNullException.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "UpdateByElasticIdAsync should throw exception when index name is null")]
+    [Trait("Category", "ElasticSearch")]
     public async Task UpdateByElasticIdAsync_WithNullIndexName_ShouldThrowArgumentNullException()
     {
-        // Arrange
         var document = new SearchDocumentWithData(Id: "1", IndexName: "", Data: new TestDocument());
 
-        // Act & Assert
         _ = await Should.ThrowAsync<ArgumentNullException>(async () => await _manager.UpdateByElasticIdAsync(document));
     }
 }

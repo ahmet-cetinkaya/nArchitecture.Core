@@ -407,11 +407,11 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         TestEntity entity = await CreateAndAddTestEntity();
-        DetailEntity[] details = new[]
-        {
+        DetailEntity[] details =
+        [
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 1" },
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" },
-        };
+        ];
         entity.Details = details.ToList();
         _ = await Context.SaveChangesAsync();
 
@@ -447,11 +447,7 @@ public partial class EfRepositoryBaseTests
     {
         // Arrange
         TestEntity entity = await CreateAndAddTestEntity();
-        TagEntity[] tags = new[]
-        {
-            new TagEntity { Name = "Tag 1" },
-            new TagEntity { Name = "Tag 2" },
-        };
+        TagEntity[] tags = [new TagEntity { Name = "Tag 1" }, new TagEntity { Name = "Tag 2" }];
         await Context.Tags.AddRangeAsync(tags);
         _ = await Context.SaveChangesAsync();
 
@@ -500,19 +496,15 @@ public partial class EfRepositoryBaseTests
         _ = await Context.SingleDetails.AddAsync(singleDetail);
 
         // Add one-to-many
-        DetailEntity[] details = new[]
-        {
+        DetailEntity[] details =
+        [
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 1" },
             new DetailEntity { TestEntityId = entity.Id, Detail = "Detail 2" },
-        };
+        ];
         await Context.Details.AddRangeAsync(details);
 
         // Add many-to-many
-        TagEntity[] tags = new[]
-        {
-            new TagEntity { Name = "Tag 1" },
-            new TagEntity { Name = "Tag 2" },
-        };
+        TagEntity[] tags = [new TagEntity { Name = "Tag 1" }, new TagEntity { Name = "Tag 2" }];
         await Context.Tags.AddRangeAsync(tags);
 
         _ = await Context.SaveChangesAsync();

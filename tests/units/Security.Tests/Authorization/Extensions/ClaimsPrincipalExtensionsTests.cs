@@ -43,7 +43,7 @@ public class ClaimsPrincipalExtensionsTests
     public void GetClaims_ShouldReturnAllValues_ForSpecifiedClaimType()
     {
         // Arrange
-        string[] expectedRoles = new[] { "admin", "user", "manager" };
+        string[] expectedRoles = ["admin", "user", "manager"];
         IEnumerable<Claim> claims = expectedRoles.Select(role => new Claim(ClaimTypes.Role, role));
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);
@@ -76,7 +76,7 @@ public class ClaimsPrincipalExtensionsTests
     public void GetOperationClaims_ShouldReturnAllRoleClaims()
     {
         // Arrange
-        string[] expectedRoles = new[] { "admin", "user", "manager" };
+        string[] expectedRoles = ["admin", "user", "manager"];
         IEnumerable<Claim> claims = expectedRoles.Select(role => new Claim(ClaimTypes.Role, role));
         var identity = new ClaimsIdentity(claims);
         var principal = new ClaimsPrincipal(identity);

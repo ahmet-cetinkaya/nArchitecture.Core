@@ -7,10 +7,6 @@ using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Auth;
 
-/// <summary>
-/// Mock request class implementing ISecuredRequest for testing.
-/// Uses ReadOnlySpan for efficient role claim handling.
-/// </summary>
 public sealed class MockSecuredRequest : ISecuredRequest, IRequest<int>
 {
     private string[]? _identityRoles;
@@ -30,6 +26,7 @@ public sealed class MockSecuredRequest : ISecuredRequest, IRequest<int>
     }
 }
 
+[Trait("Category", "Authorization")]
 public class AuthorizationBehaviorTests
 {
     private readonly RequestHandlerDelegate<int> _next;
@@ -43,87 +40,69 @@ public class AuthorizationBehaviorTests
         _behavior = new();
     }
 
-    /// <summary>
-    /// Tests that authentication exception is thrown when identity roles are null
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should throw authentication exception when IdentityRoles is null")]
     public async Task Handle_WhenIdentityRolesIsNull_ShouldThrowAuthenticationException()
     {
-        // Arrange
+        // Arrange: Create a request with null IdentityRoles.
         MockSecuredRequest request = new MockSecuredRequest().SetRoles(null!, Array.Empty<string>());
 
-        // Act & Assert
+        // Act & Assert: Verify the correct exception is thrown.
         _ = await Should.ThrowAsync<AuthenticationException>(
             async () => await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
 
-    /// <summary>
-    /// Tests that authorization succeeds when no roles are required
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed when no required roles are provided")]
     public async Task Handle_WhenNoRequiredRoles_ShouldSucceed()
     {
-        // Arrange
+        // Arrange: Create a request with no required roles.
         MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
 
-        // Act
+        // Act: Execute authorization behavior.
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
-        // Assert
+        // Assert: Verify the operation succeeds.
         exception.ShouldBeNull();
     }
 
-    /// <summary>
-    /// Tests that admin role bypasses all role requirements
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed regardless of required roles when user has admin role")]
     public async Task Handle_WhenUserHasAdminRole_ShouldSucceedRegardlessOfRequiredRoles()
     {
-        // Arrange
+        // Arrange: Create a request with admin role.
         MockSecuredRequest request = new MockSecuredRequest().SetRoles(["admin"], ["editor", "manager"]);
 
-        // Act
+        // Act: Execute authorization behavior.
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
 
-        // Assert
+        // Assert: Verify access is granted.
         exception.ShouldBeNull("Admin role should bypass all role checks");
     }
 
-    /// <summary>
-    /// Tests that editor role access is granted when required
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed when user has editor role")]
     public async Task Handle_WhenUserHasEditorRole_ShouldSucceed()
     {
+        // Arrange: Create a request with editor role.
         await AssertRoleAccess(["editor"], ["editor"], true);
     }
 
-    /// <summary>
-    /// Tests that multiple role combinations are properly validated
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed when user has multiple valid roles")]
     public async Task Handle_WhenUserHasMultipleValidRoles_ShouldSucceed()
     {
+        // Arrange: Create requests with multiple valid roles.
         await AssertRoleAccess(["editor", "user"], ["editor", "user"], true);
         await AssertRoleAccess(["manager", "editor"], ["editor", "manager"], true);
     }
 
-    /// <summary>
-    /// Tests that role matching is case-insensitive
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed when user roles have different cases")]
     public async Task Handle_WhenUserRolesHaveDifferentCases_ShouldSucceed()
     {
+        // Arrange: Create requests with variant casing.
         await AssertRoleAccess(["EDITOR"], ["editor"], true);
         await AssertRoleAccess(["Editor"], ["editor"], true);
         await AssertRoleAccess(["editor"], ["EDITOR"], true);
     }
 
-    /// <summary>
-    /// Tests that admin role is recognized regardless of case
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed when admin role has different cases")]
     public async Task Handle_WhenAdminRoleHasDifferentCases_ShouldSucceed()
     {
         await AssertRoleAccess(["ADMIN"], ["editor", "manager"], true);
@@ -131,34 +110,178 @@ public class AuthorizationBehaviorTests
         await AssertRoleAccess(["admin"], ["editor", "manager"], true);
     }
 
-    /// <summary>
-    /// Tests that role matching ignores leading and trailing whitespace
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should succeed when roles have whitespace")]
     public async Task Handle_WhenRolesHaveWhitespace_ShouldSucceed()
     {
+        // Arrange: Create a request with roles that include whitespace.
         await AssertRoleAccess([" editor "], [""], true);
         await AssertRoleAccess(["editor"], Array.Empty<string>(), true);
         await AssertRoleAccess([" editor "], [" "], true);
     }
 
-    /// <summary>
-    /// Tests that authorization fails when user lacks any of the required roles
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should throw authorization exception when user lacks required roles")]
     public async Task Handle_WhenUserLacksRequiredRoles_ShouldThrowAuthorizationException()
     {
+        // Arrange: Create a request where user's roles do not match required roles.
         await AssertRoleAccess(["user"], ["admin", "editor"], false);
         await AssertRoleAccess(["guest"], ["editor"], false);
         await AssertRoleAccess(["viewer"], ["manager", "editor"], false);
     }
 
-    /// <summary>
-    /// Helper method to test role-based access scenarios.
-    /// </summary>
-    /// <param name="userRoles">Array of roles assigned to the user</param>
-    /// <param name="requiredRoles">Array of required roles</param>
-    /// <param name="shouldSucceed">Whether the authorization should succeed</param>
+    [Fact(DisplayName = "Handle should throw authorization exception when user has no roles")]
+    public async Task Handle_WhenUserHasNoRoles_ShouldThrowAuthorizationException()
+    {
+        // Arrange: Create a request with an empty set of user roles.
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(Array.Empty<string>(), ["editor"]);
+
+        // Act & Assert: Verify exception is thrown.
+        _ = await Should.ThrowAsync<AuthorizationException>(
+            async () => await _behavior.Handle(request, _next, CancellationToken.None)
+        );
+    }
+
+    [Fact(DisplayName = "Handle should succeed when required roles are empty")]
+    public async Task Handle_WhenRequiredRolesIsEmpty_ShouldSucceed()
+    {
+        // Arrange: Create a request with empty required roles.
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
+
+        // Act: Execute behavior.
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+
+        // Assert: Verify access is granted.
+        exception.ShouldBeNull("Empty required roles should allow access");
+    }
+
+    [Fact(DisplayName = "Handle should succeed when required roles are whitespace")]
+    public async Task Handle_WhenRequiredRolesIsWhitespace_ShouldSucceed()
+    {
+        // Arrange: Create a request with whitespace required roles.
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], [" "]);
+
+        // Act & Assert: Verify operation succeeds.
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+
+        // Assert
+        exception.ShouldBeNull("Whitespace required roles should allow access");
+    }
+
+    [Fact(DisplayName = "Handle should succeed when required roles are null")]
+    public async Task Handle_WhenRequiredRolesIsNull_ShouldSucceed()
+    {
+        // Arrange: Create a request with null required roles.
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], null!);
+
+        // Act & Assert: Verify access is granted.
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+
+        // Assert
+        exception.ShouldBeNull("Null required roles should allow access");
+    }
+
+    [Fact(DisplayName = "Handle should match roles exactly when roles contain special characters")]
+    public async Task Handle_WhenRolesContainSpecialCharacters_ShouldMatchExactly()
+    {
+        // Arrange: Create a request with special character roles.
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["editor@domain.com"], ["editor@domain.com"]);
+
+        // Act & Assert: Verify exact matching.
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+
+        // Assert
+        exception.ShouldBeNull("Roles with special characters should match exactly");
+    }
+
+    [Fact(DisplayName = "Handle should succeed when roles are mixed empty and non-empty")]
+    public async Task Handle_WhenMixedEmptyAndNonEmptyRoles_ShouldSucceed()
+    {
+        // Arrange: Create requests with a mix of empty and valid roles.
+        // Case 1: Empty required role should grant access
+        await AssertRoleAccess(["user"], ["", "editor"], true);
+
+        // Case 2: Non-empty required role should be matched
+        await AssertRoleAccess(["editor"], ["", "editor"], true);
+
+        // Case 3: Empty user role should not affect matching
+        await AssertRoleAccess(["user", "", "editor"], ["editor"], true);
+    }
+
+    [Fact(DisplayName = "Handle should handle boundary conditions correctly")]
+    public async Task Handle_WhenBoundaryConditions_ShouldHandleCorrectly()
+    {
+        // Arrange: Create requests with boundary values.
+        // Empty arrays
+        await AssertRoleAccess(Array.Empty<string>(), Array.Empty<string>(), true);
+
+        // Single empty string vs null
+        await AssertRoleAccess(new[] { "" }, new[] { null! }, true);
+
+        // Mix of empty and valid roles
+        await AssertRoleAccess(["editor", ""], ["", "viewer"], true);
+    }
+
+    [Fact(DisplayName = "Handle should handle null values in role arrays")]
+    public async Task Handle_WhenNullValuesInRoleArrays_ShouldHandle()
+    {
+        // Arrange: Create a request with null values in the role arrays.
+        string[] identityRoles = ["user", null!, "editor"];
+        string[] requiredRoles = ["editor", null!];
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(identityRoles, requiredRoles);
+
+        // Act & Assert: Verify no exception is thrown.
+        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
+
+        // Assert
+        exception.ShouldBeNull();
+    }
+
+    [Fact(DisplayName = "Handle should succeed when multiple whitespace variations exist")]
+    public async Task Handle_WhenMultipleWhitespaceVariations_ShouldSucceed()
+    {
+        // Arrange & Act & Assert: Create and test multiple whitespace scenarios.
+        await AssertRoleAccess(["  editor  ", "\teditor\t", "editor\n"], ["editor"], true);
+        await AssertRoleAccess(["editor"], ["  editor  ", "\teditor\t"], true);
+    }
+
+    [Fact(DisplayName = "Handle should succeed when all roles are empty strings")]
+    public async Task Handle_WhenAllEmptyStrings_ShouldSucceed()
+    {
+        // Arrange: Create a request with all roles empty.
+        await AssertRoleAccess(["", "", ""], ["", "", ""], true);
+    }
+
+    [Fact(DisplayName = "Handle should succeed when admin role has various whitespace")]
+    public async Task Handle_WhenAdminRoleHasVariousWhitespace_ShouldSucceed()
+    {
+        // Arrange: Create a request with admin role having whitespace variations.
+        await AssertRoleAccess([" admin"], ["editor"], true);
+        await AssertRoleAccess(["admin "], ["editor"], true);
+        await AssertRoleAccess(["\tadmin\t"], ["editor"], true);
+        await AssertRoleAccess(["admin\n"], ["editor"], true);
+    }
+
+    [Fact(DisplayName = "Handle should succeed when roles are only whitespace")]
+    public async Task Handle_WhenOnlyWhitespaceRoles_ShouldSucceed()
+    {
+        // Arrange: Create a request where roles are only whitespace.
+        await AssertRoleAccess([" "], [" "], true);
+        await AssertRoleAccess(["\t"], ["\t"], true);
+        await AssertRoleAccess(["\n"], ["\n"], true);
+    }
+
+    [Fact(DisplayName = "RoleClaims should be unauthenticated when IdentityRoles is null")]
+    public void RoleClaims_WhenIdentityRolesIsNull_IsAuthenticatedShouldBeFalse()
+    {
+        // Arrange: Create a RoleClaims instance with null IdentityRoles.
+        var roleClaims = new RoleClaims(null, ["editor"]);
+
+        // Assert: Verify IsAuthenticated is false.
+        roleClaims.IsAuthenticated.ShouldBeFalse();
+
+        // Additional check with HasAnyRequiredRole
+        roleClaims.HasAnyRequiredRole().ShouldBeFalse("Unauthenticated users should not have any roles");
+    }
+
     private async Task AssertRoleAccess(string[] userRoles, string[] requiredRoles, bool shouldSucceed)
     {
         // Arrange
@@ -175,196 +298,11 @@ public class AuthorizationBehaviorTests
             );
         }
         else
+        {
             // Act & Assert
             _ = await Should.ThrowAsync<AuthorizationException>(
                 async () => await _behavior.Handle(request, _next, CancellationToken.None)
             );
-    }
-
-    /// <summary>
-    /// Tests that authorization fails when user has no roles
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenUserHasNoRoles_ShouldThrowAuthorizationException()
-    {
-        // Arrange
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(Array.Empty<string>(), ["editor"]);
-
-        // Act & Assert
-        _ = await Should.ThrowAsync<AuthorizationException>(
-            async () => await _behavior.Handle(request, _next, CancellationToken.None)
-        );
-    }
-
-    /// <summary>
-    /// Tests that authorization succeeds with empty required roles
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenRequiredRolesIsEmpty_ShouldSucceed()
-    {
-        // Arrange
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
-
-        // Act
-        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
-
-        // Assert
-        exception.ShouldBeNull("Empty required roles should allow access");
-    }
-
-    /// <summary>
-    /// Tests that authorization succeeds with whitespace required roles
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenRequiredRolesIsWhitespace_ShouldSucceed()
-    {
-        // Arrange
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], [" "]);
-
-        // Act
-        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
-
-        // Assert
-        exception.ShouldBeNull("Whitespace required roles should allow access");
-    }
-
-    /// <summary>
-    /// Tests that authorization succeeds with null required roles
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenRequiredRolesIsNull_ShouldSucceed()
-    {
-        // Arrange
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], null!);
-
-        // Act
-        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
-
-        // Assert
-        exception.ShouldBeNull("Null required roles should allow access");
-    }
-
-    /// <summary>
-    /// Tests that roles with special characters are matched exactly
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenRolesContainSpecialCharacters_ShouldMatchExactly()
-    {
-        // Arrange
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["editor@domain.com"], ["editor@domain.com"]);
-
-        // Act
-        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
-
-        // Assert
-        exception.ShouldBeNull("Roles with special characters should match exactly");
-    }
-
-    /// <summary>
-    /// Tests that authorization handles mixed roles with precise role matching
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenMixedEmptyAndNonEmptyRoles_ShouldSucceed()
-    {
-        // Case 1: Empty required role should grant access
-        await AssertRoleAccess(["user"], ["", "editor"], true);
-
-        // Case 2: Non-empty required role should be matched
-        await AssertRoleAccess(["editor"], ["", "editor"], true);
-
-        // Case 3: Empty user role should not affect matching
-        await AssertRoleAccess(["user", "", "editor"], ["editor"], true);
-    }
-
-    /// <summary>
-    /// Tests boundary conditions for role matching
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenBoundaryConditions_ShouldHandleCorrectly()
-    {
-        // Empty arrays
-        await AssertRoleAccess(Array.Empty<string>(), Array.Empty<string>(), true);
-
-        // Single empty string vs null
-        await AssertRoleAccess([""], [null!], true);
-
-        // Mix of empty and valid roles
-        await AssertRoleAccess(["editor", ""], ["", "viewer"], true);
-    }
-
-    /// <summary>
-    /// Tests that authorization handles null values in role arrays
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenNullValuesInRoleArrays_ShouldHandle()
-    {
-        // Arrange
-        string[] identityRoles = ["user", null!, "editor"];
-        string[] requiredRoles = ["editor", null!];
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(identityRoles, requiredRoles);
-
-        // Act
-        Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
-
-        // Assert
-        exception.ShouldBeNull();
-    }
-
-    /// <summary>
-    /// Tests that authorization succeeds with multiple whitespace variations
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenMultipleWhitespaceVariations_ShouldSucceed()
-    {
-        await AssertRoleAccess(["  editor  ", "\teditor\t", "editor\n"], ["editor"], true);
-        await AssertRoleAccess(["editor"], ["  editor  ", "\teditor\t"], true);
-    }
-
-    /// <summary>
-    /// Tests that authorization handles empty strings in both identity and required roles
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenAllEmptyStrings_ShouldSucceed()
-    {
-        await AssertRoleAccess(["", "", ""], ["", "", ""], true);
-    }
-
-    /// <summary>
-    /// Tests admin role with various whitespace combinations
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenAdminRoleHasVariousWhitespace_ShouldSucceed()
-    {
-        await AssertRoleAccess([" admin"], ["editor"], true);
-        await AssertRoleAccess(["admin "], ["editor"], true);
-        await AssertRoleAccess(["\tadmin\t"], ["editor"], true);
-        await AssertRoleAccess(["admin\n"], ["editor"], true);
-    }
-
-    /// <summary>
-    /// Tests that authorization handles single whitespace roles
-    /// </summary>
-    [Fact]
-    public async Task Handle_WhenOnlyWhitespaceRoles_ShouldSucceed()
-    {
-        await AssertRoleAccess([" "], [" "], true);
-        await AssertRoleAccess(["\t"], ["\t"], true);
-        await AssertRoleAccess(["\n"], ["\n"], true);
-    }
-
-    /// <summary>
-    /// Tests RoleClaims.IsAuthenticated property directly
-    /// </summary>
-    [Fact]
-    public void RoleClaims_WhenIdentityRolesIsNull_IsAuthenticatedShouldBeFalse()
-    {
-        // Arrange
-        var roleClaims = new RoleClaims(null, ["editor"]);
-
-        // Assert
-        roleClaims.IsAuthenticated.ShouldBeFalse();
-
-        // Additional check with HasAnyRequiredRole
-        roleClaims.HasAnyRequiredRole().ShouldBeFalse("Unauthenticated users should not have any roles");
+        }
     }
 }

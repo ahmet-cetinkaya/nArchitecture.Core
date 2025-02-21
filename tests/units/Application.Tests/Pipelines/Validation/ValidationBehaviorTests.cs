@@ -19,9 +19,6 @@ public class ValidationBehaviorTests
         public string? Result { get; set; }
     }
 
-    /// <summary>
-    /// Tests that a valid request proceeds through the pipeline and returns the expected response.
-    /// </summary>
     [Fact(DisplayName = "Handle_GivenValidRequest_ShouldProceed")]
     public async Task Handle_GivenValidRequest_ShouldProceed()
     {
@@ -47,9 +44,6 @@ public class ValidationBehaviorTests
         validatorMock.Verify(v => v.Validate(It.IsAny<DummyRequest>()), Times.Once);
     }
 
-    /// <summary>
-    /// Tests that an invalid request causes a ValidationException with appropriate error details.
-    /// </summary>
     [Theory(DisplayName = "Handle_GivenInvalidRequest_ShouldThrowValidationException")]
     [InlineData("Name", "Required")]
     [InlineData("Age", "Must be positive")]
@@ -84,9 +78,6 @@ public class ValidationBehaviorTests
         validatorMock.Verify(v => v.Validate(It.IsAny<DummyRequest>()), Times.Once);
     }
 
-    /// <summary>
-    /// Tests that behavior proceeds when no validator is registered.
-    /// </summary>
     [Fact(DisplayName = "Handle_WithNoValidator_ShouldProceed")]
     public async Task Handle_WithNoValidator_ShouldProceed()
     {
@@ -103,9 +94,6 @@ public class ValidationBehaviorTests
         response.Result.ShouldBe("OK");
     }
 
-    /// <summary>
-    /// Tests that null validation results are handled gracefully.
-    /// </summary>
     [Fact(DisplayName = "Handle_WithNullValidationResults_ShouldProceed")]
     public async Task Handle_WithNullValidationResults_ShouldProceed()
     {
@@ -127,9 +115,6 @@ public class ValidationBehaviorTests
         response.Result.ShouldBe("OK");
     }
 
-    /// <summary>
-    /// Tests that when multiple validation errors occur, all errors are collected.
-    /// </summary>
     [Fact(DisplayName = "Handle_WithMultipleValidationErrors_ShouldCollectAllErrors")]
     public async Task Handle_WithMultipleValidationErrors_ShouldCollectAllErrors()
     {

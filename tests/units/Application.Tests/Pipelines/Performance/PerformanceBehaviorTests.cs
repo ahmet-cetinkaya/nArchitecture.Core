@@ -7,6 +7,7 @@ using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Performance;
 
+[Trait("Category", "Performance")]
 public class PerformanceBehaviorTests
 {
     private readonly Mock<ILogger> _loggerMock;
@@ -20,10 +21,7 @@ public class PerformanceBehaviorTests
         _behavior = new(_loggerMock.Object, _stopwatch);
     }
 
-    /// <summary>
-    /// Tests that performance logging occurs when request exceeds interval threshold.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should log performance warning when request exceeds interval threshold")]
     public async Task Handle_WhenRequestExceedsInterval_ShouldLogPerformanceWarning()
     {
         // Arrange
@@ -54,10 +52,7 @@ public class PerformanceBehaviorTests
         loggedMessage.ShouldContain("exceeding the threshold of 1s");
     }
 
-    /// <summary>
-    /// Tests that no logging occurs when request completes within interval threshold.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should not log when request completes within interval threshold")]
     public async Task Handle_WhenRequestWithinInterval_ShouldNotLog()
     {
         // Arrange
@@ -74,10 +69,7 @@ public class PerformanceBehaviorTests
         _loggerMock.Verify(x => x.InformationAsync(It.IsAny<string>()), Times.Never);
     }
 
-    /// <summary>
-    /// Tests that stopwatch is restarted after each request regardless of exceptions.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should restart stopwatch when exception occurs")]
     public async Task Handle_WhenExceptionOccurs_ShouldRestartStopwatch()
     {
         // Arrange
@@ -94,10 +86,7 @@ public class PerformanceBehaviorTests
         _stopwatch.IsRunning.ShouldBeFalse("Stopwatch should be reset even after exception");
     }
 
-    /// <summary>
-    /// Tests behavior with different interval thresholds.
-    /// </summary>
-    [Theory]
+    [Theory(DisplayName = "Handle should log appropriately with different interval thresholds")]
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(5)]
@@ -131,10 +120,7 @@ public class PerformanceBehaviorTests
         }
     }
 
-    /// <summary>
-    /// Tests that multiple sequential requests are timed independently.
-    /// </summary>
-    [Fact]
+    [Fact(DisplayName = "Handle should time multiple requests independently")]
     public async Task Handle_MultipleRequests_ShouldTimeIndependently()
     {
         // Arrange
@@ -164,12 +150,10 @@ public class PerformanceBehaviorTests
         loggedMessages[0].ShouldContain("exceeding the threshold");
     }
 
-    // Changed from private to public
     public class TestRequest : IRequest<TestResponse>, IIntervalRequest
     {
         public IntervalOptions IntervalOptions { get; init; }
     }
 
-    // Changed from private to public
     public class TestResponse { }
 }

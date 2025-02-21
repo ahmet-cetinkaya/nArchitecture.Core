@@ -1,7 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;
-using NArchitecture.Core.Validation.FluentValidation;
 using Shouldly;
 using FluentIValidator = FluentValidation.IValidator<NArchitecture.Core.Validation.FluentValidation.Tests.TestClass>;
 
@@ -13,17 +12,17 @@ public class FluentValidatorAdapterTests
     [Fact(DisplayName = "Validate should return valid result when validation passes")]
     public void Validate_ShouldReturnValidResult_WhenValidationPasses()
     {
-        // Arrange
+        // Arrange: Setup mock validator and create a test instance.
         var mockValidator = new Mock<FluentIValidator>();
         _ = mockValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>())).Returns(new ValidationResult());
 
         var adapter = new FluentValidatorAdapter<TestClass>(mockValidator.Object);
         var instance = new TestClass();
 
-        // Act
+        // Act: Call Validate method.
         Abstractions.ValidationResult result = adapter.Validate(instance);
 
-        // Assert
+        // Assert: Verify the result is valid and error-free.
         result.IsValid.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
     }
@@ -31,7 +30,7 @@ public class FluentValidatorAdapterTests
     [Fact(DisplayName = "Validate should return invalid result with errors when validation fails")]
     public void Validate_ShouldReturnInvalidResultWithErrors_WhenValidationFails()
     {
-        // Arrange
+        // Arrange: Setup mock validator to produce validation errors.
         var mockValidator = new Mock<FluentIValidator>();
         var validationFailures = new List<ValidationFailure>
         {
@@ -45,10 +44,10 @@ public class FluentValidatorAdapterTests
         var adapter = new FluentValidatorAdapter<TestClass>(mockValidator.Object);
         var instance = new TestClass();
 
-        // Act
+        // Act: Call Validate method.
         Abstractions.ValidationResult result = adapter.Validate(instance);
 
-        // Assert
+        // Assert: Verify the result contains the expected errors.
         result.IsValid.ShouldBeFalse();
         result.Errors!.Count().ShouldBe(2);
         result.Errors!.First().PropertyName.ShouldBe("PropertyName1");
@@ -60,20 +59,20 @@ public class FluentValidatorAdapterTests
     [Fact(DisplayName = "Validate should handle null instance gracefully")]
     public void Validate_ShouldHandleNullInstance_Gracefully()
     {
-        // Arrange
+        // Arrange: Configure mock to throw when instance is null.
         var mockValidator = new Mock<FluentIValidator>();
         _ = mockValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<TestClass>>())).Throws<ArgumentNullException>();
 
         var adapter = new FluentValidatorAdapter<TestClass>(mockValidator.Object);
 
-        // Act & Assert
+        // Act & Assert: Expect ArgumentNullException.
         _ = Should.Throw<ArgumentNullException>(() => adapter.Validate(null!));
     }
 
     [Fact(DisplayName = "Constructor should throw when validator is null")]
     public void Constructor_ShouldThrow_WhenValidatorIsNull()
     {
-        // Act & Assert
+        // Act & Assert: Verify constructor throws when passed a null validator.
         _ = Should.Throw<ArgumentNullException>(() => new FluentValidatorAdapter<TestClass>(null!));
     }
 }
