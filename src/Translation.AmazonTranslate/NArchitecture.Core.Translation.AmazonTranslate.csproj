@@ -58,7 +58,7 @@
 
   <!-- Dependencies -->
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Translate" Version="3.7.400.97" />
+    <PackageReference Include="AWSSDK.Translate" Version="3.7.400.99" />
   </ItemGroup>
 
   <!-- Project References -->
