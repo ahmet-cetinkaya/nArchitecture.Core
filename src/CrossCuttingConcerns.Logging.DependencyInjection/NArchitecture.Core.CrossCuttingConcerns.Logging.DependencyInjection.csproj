@@ -44,7 +44,7 @@
   <ItemGroup>
     <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
     <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
-    <None Include="./README.md" Pack="true" PackagePath="assets" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <!-- Dependencies -->
