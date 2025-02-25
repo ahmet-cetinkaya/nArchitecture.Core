@@ -214,7 +214,7 @@ public class AuthorizationBehaviorTests
         await AssertRoleAccess(Array.Empty<string>(), Array.Empty<string>(), true);
 
         // Single empty string vs null
-        await AssertRoleAccess(new[] { "" }, new[] { null! }, true);
+        await AssertRoleAccess([""], null!, true);
 
         // Mix of empty and valid roles
         await AssertRoleAccess(["editor", ""], ["", "viewer"], true);

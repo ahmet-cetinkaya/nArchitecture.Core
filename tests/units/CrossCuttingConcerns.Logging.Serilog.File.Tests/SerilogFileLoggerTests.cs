@@ -122,7 +122,7 @@ public class SerilogFileLoggerTests : IDisposable
         System.Reflection.MethodInfo? method = typeof(SerilogFileLogger).GetMethod(methodName);
 
         // Act
-        await (Task)method!.Invoke(logger, new object[] { message })!;
+        await (Task)method!.Invoke(logger, [message])!;
         await Task.Delay(500); // Increased delay for file creation
 
         // Assert
