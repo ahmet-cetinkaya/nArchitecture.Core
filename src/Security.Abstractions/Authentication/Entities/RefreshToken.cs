@@ -2,7 +2,15 @@
 
 namespace NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 
-public class RefreshToken<TId, TUserId, TUserAuthenticatorId> : BaseEntity<TId>
+public class RefreshToken<
+    TId,
+    TOperationClaimId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserId,
+    TUserInGroupId,
+    TUserOperationClaimId
+> : BaseEntity<TId>
 {
     public TUserId UserId { get; set; }
     public string Token { get; set; }
@@ -13,9 +21,7 @@ public class RefreshToken<TId, TUserId, TUserAuthenticatorId> : BaseEntity<TId>
     public string? ReplacedByToken { get; set; }
     public string? ReasonRevoked { get; set; }
 
-    public virtual User<TUserId, TUserAuthenticatorId>? User { get; set; }
-
-    [Obsolete("This constructor is for ORM etc.. Do not use it in the code.", true)]
+    [Obsolete("This constructor is for ORM, mapper etc.. Do not use it in the code.", true)]
     public RefreshToken()
     {
         UserId = default!;
@@ -31,4 +37,14 @@ public class RefreshToken<TId, TUserId, TUserAuthenticatorId> : BaseEntity<TId>
         ExpiresAt = expiresAt;
         CreatedByIp = createdByIp;
     }
+
+    public virtual User<
+        TUserId,
+        TOperationClaimId,
+        TId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >? User { get; set; }
 }

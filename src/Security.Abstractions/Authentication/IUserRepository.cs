@@ -4,22 +4,34 @@ using NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
 namespace NArchitecture.Core.Security.Abstractions.Authentication;
 
-public interface IUserRepository<TUserId, TUserAuthenticatorId, TOperationClaimId>
-    : IAsyncRepository<User<TUserId, TUserAuthenticatorId>, TUserId>
+public interface IUserRepository<
+    TId,
+    TOperationClaimId,
+    TRefreshTokenId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserInGroupId,
+    TUserOperationClaimId
+>
 {
-    Task<bool> HasPermissionAsync(TUserId userId, string permissionName, CancellationToken cancellationToken = default);
-    Task<bool> HasAnyPermissionAsync(
-        TUserId userId,
-        IEnumerable<string> permissionNames,
-        CancellationToken cancellationToken = default
-    );
-    Task<bool> HasAllPermissionsAsync(
-        TUserId userId,
-        IEnumerable<string> permissionNames,
-        CancellationToken cancellationToken = default
-    );
+    Task<bool> HasPermissionAsync(TId userId, string permissionName, CancellationToken cancellationToken = default);
+
+    Task<bool> HasAnyPermissionAsync(TId id, IEnumerable<string> permissionNames, CancellationToken cancellationToken = default);
+
+    Task<bool> HasAllPermissionsAsync(TId id, IEnumerable<string> permissionNames, CancellationToken cancellationToken = default);
+
     Task<ICollection<OperationClaim<TOperationClaimId>>> GetOperationClaimsAsync(
-        TUserId userId,
+        TId id,
         CancellationToken cancellationToken = default
     );
+
+    Task<User<
+        TId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >?> GetByIdAsync(TId? userId, CancellationToken cancellationToken);
 }

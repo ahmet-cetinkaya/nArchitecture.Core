@@ -14,22 +14,22 @@ namespace NArchitecture.Core.Security.Tests.Authentication;
 
 public class JwtAuthenticationServiceTests
 {
-    private readonly Mock<IRefreshTokenRepository<Guid, Guid, Guid>> _mockRefreshTokenRepository;
-    private readonly Mock<IUserRepository<Guid, Guid, Guid>> _mockUserRepository;
+    private readonly Mock<IRefreshTokenRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid, Guid>> _mockRefreshTokenRepository;
+    private readonly Mock<IUserRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>> _mockUserRepository;
     private readonly Mock<IAuthorizationService<Guid, Guid>> _mockAuthorizationService;
     private readonly Mock<IJwtAuthenticationConfiguration> _mockConfiguration;
-    private readonly JwtAuthenticationService<Guid, Guid, Guid, Guid> _sut;
+    private readonly JwtAuthenticationService<Guid, Guid, Guid, Guid, Guid, Guid, Guid> _sut;
 
     public JwtAuthenticationServiceTests()
     {
-        _mockRefreshTokenRepository = new Mock<IRefreshTokenRepository<Guid, Guid, Guid>>();
-        _mockUserRepository = new Mock<IUserRepository<Guid, Guid, Guid>>();
+        _mockRefreshTokenRepository = new Mock<IRefreshTokenRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid, Guid>>();
+        _mockUserRepository = new Mock<IUserRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>();
         _mockAuthorizationService = new Mock<IAuthorizationService<Guid, Guid>>();
         _mockConfiguration = new Mock<IJwtAuthenticationConfiguration>();
 
         SetupDefaultConfiguration();
 
-        _sut = new JwtAuthenticationService<Guid, Guid, Guid, Guid>(
+        _sut = new JwtAuthenticationService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRefreshTokenRepository.Object,
             _mockUserRepository.Object,
             _mockAuthorizationService.Object,
@@ -57,10 +57,10 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        User<Guid, Guid> user = CreateTestUser(userId);
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(userId);
         var claimId = Guid.NewGuid();
         var operationClaims = new List<OperationClaim<Guid>> { new("TestClaim") { Id = claimId } };
-        var loginRequest = new LoginRequest<Guid, Guid>(user, "correct-password", "127.0.0.1");
+        var loginRequest = new LoginRequest<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(user, "correct-password", "127.0.0.1");
 
         _ = _mockAuthorizationService
             .Setup(x => x.GetUserOperationClaimsAsync(userId, It.IsAny<CancellationToken>()))
@@ -91,8 +91,8 @@ public class JwtAuthenticationServiceTests
     public async Task LoginAsync_WithInvalidPassword_ShouldThrowException()
     {
         // Arrange
-        User<Guid, Guid> user = CreateTestUser(Guid.NewGuid(), "different-password");
-        var loginRequest = new LoginRequest<Guid, Guid>(user, "wrong-password", "127.0.0.1");
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(Guid.NewGuid(), "different-password");
+        var loginRequest = new LoginRequest<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(user, "wrong-password", "127.0.0.1");
 
         _ = _mockConfiguration
             .Setup(x => x.GetInvalidPasswordMessageAsync(It.IsAny<CancellationToken>()))
@@ -108,8 +108,8 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        User<Guid, Guid> user = CreateTestUser(userId);
-        RefreshToken<Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(userId);
+        RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
         var claimId = Guid.NewGuid();
         var operationClaims = new List<OperationClaim<Guid>>
         {
@@ -121,15 +121,7 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync(refreshToken);
 
         _ = _mockUserRepository
-            .Setup(x =>
-                x.GetByIdAsync(
-                    userId,
-                    It.IsAny<Func<IQueryable<User<Guid, Guid>>, IQueryable<User<Guid, Guid>>>>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         _ = _mockAuthorizationService
@@ -152,7 +144,7 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var expiredToken = new RefreshToken<Guid, Guid, Guid>(
+        var expiredToken = new RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             userId,
             Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
             DateTime.UtcNow.AddDays(-1), // Expired
@@ -180,7 +172,7 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var revokedToken = new RefreshToken<Guid, Guid, Guid>(
+        var revokedToken = new RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             userId,
             Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
             DateTime.UtcNow.AddDays(7),
@@ -213,23 +205,15 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        RefreshToken<Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
+        RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
 
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(refreshToken.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(refreshToken);
 
         _ = _mockUserRepository
-            .Setup(x =>
-                x.GetByIdAsync(
-                    userId,
-                    It.IsAny<Func<IQueryable<User<Guid, Guid>>, IQueryable<User<Guid, Guid>>>>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync((User<Guid, Guid>?)null);
+            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((User<Guid, Guid, Guid, Guid, Guid, Guid, Guid>?)null);
 
         _ = _mockConfiguration
             .Setup(x => x.GetUserNotFoundMessageAsync(It.IsAny<CancellationToken>()))
@@ -248,7 +232,7 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        RefreshToken<Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
+        RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
         string ipAddress = "127.0.0.1";
         string reason = "Test revocation";
 
@@ -263,7 +247,7 @@ public class JwtAuthenticationServiceTests
         _mockRefreshTokenRepository.Verify(
             x =>
                 x.UpdateAsync(
-                    It.Is<RefreshToken<Guid, Guid, Guid>>(t =>
+                    It.Is<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(t =>
                         t.Token == refreshToken.Token
                         && t.RevokedAt.HasValue
                         && t.RevokedByIp == ipAddress
@@ -281,7 +265,7 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var activeTokens = new List<RefreshToken<Guid, Guid, Guid>>
+        var activeTokens = new List<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>
         {
             CreateTestRefreshToken(userId),
             CreateTestRefreshToken(userId),
@@ -300,7 +284,9 @@ public class JwtAuthenticationServiceTests
         _mockRefreshTokenRepository.Verify(
             x =>
                 x.UpdateAsync(
-                    It.Is<RefreshToken<Guid, Guid, Guid>>(t => t.RevokedAt.HasValue && t.ReasonRevoked == reason),
+                    It.Is<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(t =>
+                        t.RevokedAt.HasValue && t.ReasonRevoked == reason
+                    ),
                     It.IsAny<CancellationToken>()
                 ),
             Times.Exactly(activeTokens.Count)
@@ -313,7 +299,7 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var alreadyRevokedToken = new RefreshToken<Guid, Guid, Guid>(
+        var alreadyRevokedToken = new RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             userId,
             Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
             DateTime.UtcNow.AddDays(7),
@@ -341,7 +327,7 @@ public class JwtAuthenticationServiceTests
 
         // Verify that UpdateAsync was not called
         _mockRefreshTokenRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<RefreshToken<Guid, Guid, Guid>>(), It.IsAny<CancellationToken>()),
+            x => x.UpdateAsync(It.IsAny<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(), It.IsAny<CancellationToken>()),
             Times.Never
         );
     }
@@ -354,8 +340,8 @@ public class JwtAuthenticationServiceTests
     public async Task LoginAsync_WithVariousPasswords_ShouldHandleAppropriately(string password, string scenario)
     {
         // Arrange
-        User<Guid, Guid> user = CreateTestUser(Guid.NewGuid());
-        var loginRequest = new LoginRequest<Guid, Guid>(user, password, "127.0.0.1");
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(Guid.NewGuid());
+        var loginRequest = new LoginRequest<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(user, password, "127.0.0.1");
 
         _ = _mockConfiguration
             .Setup(x => x.GetInvalidPasswordMessageAsync(It.IsAny<CancellationToken>()))
@@ -373,8 +359,8 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        User<Guid, Guid> user = CreateTestUser(userId);
-        var loginRequest = new LoginRequest<Guid, Guid>(user, "correct-password", "127.0.0.1");
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(userId);
+        var loginRequest = new LoginRequest<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(user, "correct-password", "127.0.0.1");
         var operationClaims = new List<OperationClaim<Guid>> { new("TestClaim") { Id = Guid.NewGuid() } };
 
         DateTime testStartTime = DateTime.UtcNow.AddSeconds(-1); // Add buffer for test execution
@@ -442,15 +428,15 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        User<Guid, Guid> user = CreateTestUser(userId);
-        RefreshToken<Guid, Guid, Guid> oldToken = CreateTestRefreshToken(userId);
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(userId);
+        RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> oldToken = CreateTestRefreshToken(userId);
         var operationClaims = new List<OperationClaim<Guid>> { new("TestClaim") { Id = Guid.NewGuid() } };
 
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(oldToken.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(oldToken);
         _ = _mockUserRepository
-            .Setup(x => x.GetByIdAsync(userId, null, It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _ = _mockAuthorizationService
             .Setup(x => x.GetUserOperationClaimsAsync(userId, It.IsAny<CancellationToken>()))
@@ -463,7 +449,7 @@ public class JwtAuthenticationServiceTests
         _mockRefreshTokenRepository.Verify(
             x =>
                 x.UpdateAsync(
-                    It.Is<RefreshToken<Guid, Guid, Guid>>(t =>
+                    It.Is<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(t =>
                         t.Token == oldToken.Token && t.RevokedAt.HasValue && t.ReplacedByToken == result.RefreshToken.Content
                     ),
                     It.IsAny<CancellationToken>()
@@ -479,7 +465,7 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var emptyTokenList = new List<RefreshToken<Guid, Guid, Guid>>();
+        var emptyTokenList = new List<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>();
 
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetAllActiveByUserIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -490,7 +476,7 @@ public class JwtAuthenticationServiceTests
 
         // Assert
         _mockRefreshTokenRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<RefreshToken<Guid, Guid, Guid>>(), It.IsAny<CancellationToken>()),
+            x => x.UpdateAsync(It.IsAny<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(), It.IsAny<CancellationToken>()),
             Times.Never
         );
     }
@@ -506,8 +492,8 @@ public class JwtAuthenticationServiceTests
     public async Task LoginAsync_WithInvalidPasswordCharacteristics_ShouldThrowBusinessException(string password, string scenario)
     {
         // Arrange
-        User<Guid, Guid> user = CreateTestUser(Guid.NewGuid());
-        var loginRequest = new LoginRequest<Guid, Guid>(user, password, "127.0.0.1");
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(Guid.NewGuid());
+        var loginRequest = new LoginRequest<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(user, password, "127.0.0.1");
 
         _ = _mockConfiguration
             .Setup(x => x.GetInvalidPasswordMessageAsync(It.IsAny<CancellationToken>()))
@@ -525,15 +511,15 @@ public class JwtAuthenticationServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        User<Guid, Guid> user = CreateTestUser(userId);
-        RefreshToken<Guid, Guid, Guid> initialToken = CreateTestRefreshToken(userId);
+        User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(userId);
+        RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> initialToken = CreateTestRefreshToken(userId);
         var operationClaims = new List<OperationClaim<Guid>> { new("TestClaim") { Id = Guid.NewGuid() } };
 
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(initialToken.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(initialToken);
         _ = _mockUserRepository
-            .Setup(x => x.GetByIdAsync(userId, null, It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _ = _mockAuthorizationService
             .Setup(x => x.GetUserOperationClaimsAsync(userId, It.IsAny<CancellationToken>()))
@@ -545,7 +531,7 @@ public class JwtAuthenticationServiceTests
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(firstRefresh.RefreshToken.Content, It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                new RefreshToken<Guid, Guid, Guid>(
+                new RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
                     userId,
                     firstRefresh.RefreshToken.Content,
                     firstRefresh.RefreshToken.ExpiresAt,
@@ -559,7 +545,7 @@ public class JwtAuthenticationServiceTests
         _mockRefreshTokenRepository.Verify(
             x =>
                 x.UpdateAsync(
-                    It.Is<RefreshToken<Guid, Guid, Guid>>(t =>
+                    It.Is<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(t =>
                         t.Token == initialToken.Token && t.ReplacedByToken == firstRefresh.RefreshToken.Content
                     ),
                     It.IsAny<CancellationToken>()
@@ -570,7 +556,7 @@ public class JwtAuthenticationServiceTests
         _mockRefreshTokenRepository.Verify(
             x =>
                 x.UpdateAsync(
-                    It.Is<RefreshToken<Guid, Guid, Guid>>(t =>
+                    It.Is<RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(t =>
                         t.Token == firstRefresh.RefreshToken.Content && t.ReplacedByToken == secondRefresh.RefreshToken.Content
                     ),
                     It.IsAny<CancellationToken>()
@@ -579,18 +565,24 @@ public class JwtAuthenticationServiceTests
         );
     }
 
-    private static User<Guid, Guid> CreateTestUser(Guid userId, string password = "correct-password")
+    private static User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> CreateTestUser(
+        Guid userId,
+        string password = "correct-password"
+    )
     {
         using var hmac = new System.Security.Cryptography.HMACSHA512();
         byte[] passwordSalt = hmac.Key;
         byte[] passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 
-        return new User<Guid, Guid>(passwordSalt: passwordSalt, passwordHash: passwordHash) { Id = userId };
+        return new User<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(passwordSalt: passwordSalt, passwordHash: passwordHash)
+        {
+            Id = userId,
+        };
     }
 
-    private static RefreshToken<Guid, Guid, Guid> CreateTestRefreshToken(Guid userId)
+    private static RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> CreateTestRefreshToken(Guid userId)
     {
-        return new RefreshToken<Guid, Guid, Guid>(
+        return new RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             userId,
             Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
             DateTime.UtcNow.AddDays(7),

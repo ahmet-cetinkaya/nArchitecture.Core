@@ -2,16 +2,19 @@ using NArchitecture.Core.Persistence.Abstractions.Repositories;
 
 namespace NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
-public class UserGroup<TId, TUserId, TUserAuthenticatorId, TUserInGroupId> : BaseEntity<TId>
+public class UserGroup<
+    TId,
+    TOperationClaimId,
+    TRefreshTokenId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserGroupOperationClaimId,
+    TUserId
+> : BaseEntity<TId>
 {
     public string Name { get; set; }
 
-    public virtual ICollection<
-        UserGroupOperationClaim<TId, TId, TUserId, TUserAuthenticatorId, TUserInGroupId, TId>
-    >? GroupOperationClaims { get; set; }
-    public virtual ICollection<UserInGroup<TUserInGroupId, TUserId, TUserAuthenticatorId, TId>>? UserInGroups { get; set; }
-
-    [Obsolete("This constructor is for ORM etc.. Do not use it in the code.", true)]
+    [Obsolete("This constructor is for ORM, mapper etc.. Do not use it in the code.", true)]
     public UserGroup()
     {
         Name = default!;
@@ -21,4 +24,28 @@ public class UserGroup<TId, TUserId, TUserAuthenticatorId, TUserInGroupId> : Bas
     {
         Name = name;
     }
+
+    public virtual ICollection<
+        UserGroupOperationClaim<
+            TUserGroupOperationClaimId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserGroupOperationClaimId,
+            TUserId
+        >
+    >? UserGroupOperationClaims { get; set; }
+    public virtual ICollection<
+        UserInGroup<
+            TId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TId,
+            TUserId,
+            TUserGroupId,
+            TUserGroupOperationClaimId
+        >
+    >? UserInGroups { get; set; }
 }

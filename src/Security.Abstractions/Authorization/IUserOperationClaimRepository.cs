@@ -3,5 +3,13 @@ using NArchitecture.Core.Security.Abstractions.Authorization.Entities;
 
 namespace NArchitecture.Core.Security.Abstractions.Authorization;
 
-public interface IUserOperationClaimRepository<TId, TUserId, TOperationClaimId>
-    : IAsyncRepository<UserOperationClaim<TId, TUserId, TOperationClaimId>, TId> { }
+public interface IUserOperationClaimRepository<
+    TId,
+    TOperationClaimId,
+    TRefreshTokenId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserId,
+    TUserInGroupId,
+    TUserOperationClaimId
+>;

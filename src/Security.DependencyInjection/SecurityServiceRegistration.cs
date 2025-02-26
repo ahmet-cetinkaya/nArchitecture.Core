@@ -18,7 +18,15 @@ namespace NArchitecture.Core.Security.DependencyInjection;
 
 public static class SecurityServiceRegistration
 {
-    public static IServiceCollection AddSecurityServices<TUserId, TUserAuthenticatorId, TOperationClaimId, TRefreshTokenId>(
+    public static IServiceCollection AddSecurityServices<
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >(
         this IServiceCollection services,
         IJwtAuthenticationConfiguration jwtConfiguration,
         IAuthenticatorConfiguration? authenticatorConfiguration = null
@@ -28,17 +36,46 @@ public static class SecurityServiceRegistration
         ValidateRequiredServices(services, config);
 
         _ = services
-            .AddAuthenticatorServices<TUserId, TUserAuthenticatorId>(config)
-            .AddAuthenticationServices<TUserId, TUserAuthenticatorId, TOperationClaimId, TRefreshTokenId>(jwtConfiguration)
-            .AddAuthorizationServices<TUserId, TUserAuthenticatorId, TOperationClaimId>();
+            .AddAuthenticatorServices<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >(config)
+            .AddAuthenticationServices<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >(jwtConfiguration)
+            .AddAuthorizationServices<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >();
 
         return services;
     }
 
-    private static IServiceCollection AddAuthenticatorServices<TUserId, TUserAuthenticatorId>(
-        this IServiceCollection services,
-        IAuthenticatorConfiguration configuration
-    )
+    private static IServiceCollection AddAuthenticatorServices<
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >(this IServiceCollection services, IAuthenticatorConfiguration configuration)
     {
         services.TryAddSingleton<ICodeGenerator, CodeGenerator>();
         services.TryAddSingleton<IAuthenticatorConfiguration>(configuration);
@@ -53,36 +90,88 @@ public static class SecurityServiceRegistration
         if (configuration.EnabledAuthenticatorTypes.Contains(AuthenticatorType.Otp))
             services.TryAddScoped<IOtpService, OtpNetOtpService>();
 
-        services.TryAddScoped<IAuthenticator<TUserId, TUserAuthenticatorId>, Authenticator<TUserId, TUserAuthenticatorId>>();
+        services.TryAddScoped<
+            IAuthenticator<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >,
+            Authenticator<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >
+        >();
 
         return services;
     }
 
     private static IServiceCollection AddAuthenticationServices<
-        TUserId,
-        TUserAuthenticatorId,
         TOperationClaimId,
-        TRefreshTokenId
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
     >(this IServiceCollection services, IJwtAuthenticationConfiguration jwtConfiguration)
     {
         services.TryAddSingleton(jwtConfiguration);
         services.TryAddSingleton<IJwtAuthenticationConfiguration>(jwtConfiguration);
 
         services.TryAddScoped<
-            IAuthenticationService<TUserId, TUserAuthenticatorId>,
-            JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenId, TUserAuthenticatorId>
+            IAuthenticationService<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >,
+            JwtAuthenticationService<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >
         >();
 
         return services;
     }
 
-    private static IServiceCollection AddAuthorizationServices<TUserId, TUserAuthenticatorId, TOperationClaimId>(
-        this IServiceCollection services
-    )
+    private static IServiceCollection AddAuthorizationServices<
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >(this IServiceCollection services)
     {
         services.TryAddScoped<
             IAuthorizationService<TUserId, TOperationClaimId>,
-            JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationClaimId>
+            JwtAuthorizationService<
+                TOperationClaimId,
+                TRefreshTokenId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >
         >();
 
         return services;
@@ -96,15 +185,15 @@ public static class SecurityServiceRegistration
             new[]
             {
                 (
-                    typeof(IUserRepository<,,>),
+                    typeof(IUserRepository<,,,,,,>),
                     "No implementation of IUserRepository<,,> has been registered in the service collection. Please register an implementation before adding security services."
                 ),
                 (
-                    typeof(IRefreshTokenRepository<,,>),
+                    typeof(IRefreshTokenRepository<,,,,,,,>),
                     "No implementation of IRefreshTokenRepository<,,> has been registered in the service collection. Please register an implementation before adding security services."
                 ),
                 (
-                    typeof(IUserAuthenticatorRepository<,>),
+                    typeof(IUserAuthenticatorRepository<,,,,,,>),
                     "No implementation of IUserAuthenticatorRepository<,> has been registered in the service collection. Please register an implementation before adding security services."
                 ),
             }

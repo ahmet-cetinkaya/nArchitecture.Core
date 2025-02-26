@@ -9,8 +9,8 @@ namespace NArchitecture.Core.Security.Tests.Authorization;
 
 public class JwtAuthorizationServiceTests
 {
-    private readonly Mock<IUserRepository<Guid, Guid, Guid>> _userRepositoryMock;
-    private readonly JwtAuthorizationService<Guid, Guid, Guid> _authorizationService;
+    private readonly Mock<IUserRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>> _userRepositoryMock;
+    private readonly JwtAuthorizationService<Guid, Guid, Guid, Guid, Guid, Guid, Guid> _authorizationService;
 
     public JwtAuthorizationServiceTests()
     {

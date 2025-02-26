@@ -16,20 +16,20 @@ namespace NArchitecture.Core.Security.Tests.Authenticator;
 
 public class AuthenticatorTests
 {
-    private readonly Mock<IUserAuthenticatorRepository<Guid, Guid>> _mockRepository;
+    private readonly Mock<IUserAuthenticatorRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>> _mockRepository;
     private readonly Mock<ICodeGenerator> _mockCodeGenerator;
     private readonly Mock<IAuthenticatorConfiguration> _mockConfiguration;
     private readonly Mock<IMailService> _mockMailService;
     private readonly Mock<ISmsService> _mockSmsService;
     private readonly Mock<IOtpService> _mockOtpService;
-    private readonly Authenticator<Guid, Guid> _authenticator;
+    private readonly Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid> _authenticator;
     private readonly CancellationToken _cancellationToken;
 
     private static readonly byte[] TestCodeSeed = [1, 2, 3, 4, 5, 6, 7, 8];
 
     public AuthenticatorTests()
     {
-        _mockRepository = new Mock<IUserAuthenticatorRepository<Guid, Guid>>();
+        _mockRepository = new Mock<IUserAuthenticatorRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>();
         _mockCodeGenerator = new Mock<ICodeGenerator>();
         _mockConfiguration = new Mock<IAuthenticatorConfiguration>();
         _mockMailService = new Mock<IMailService>();
@@ -54,44 +54,24 @@ public class AuthenticatorTests
         );
     }
 
-    private static Expression<Func<UserAuthenticator<Guid, Guid>, bool>> MatchUserId(Guid userId)
+    private static Expression<Func<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>, bool>> MatchUserId(Guid userId)
     {
         return authenticator => authenticator.UserId.Equals(userId);
     }
 
-    private void SetupGetAsync(Guid userId, UserAuthenticator<Guid, Guid>? returnValue)
+    private void SetupGetAsync(Guid userId, UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>? returnValue)
     {
-        Expression<Func<UserAuthenticator<Guid, Guid>, bool>> predicate = MatchUserId(userId);
-
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.Is<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(expr =>
-                        expr.Compile().Invoke(new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Email))
-                    ),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(returnValue);
     }
 
-    private void SetupRepositoryMocks(UserAuthenticator<Guid, Guid>? authenticator)
+    private void SetupRepositoryMocks(UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>? authenticator)
     {
         if (authenticator != null)
         {
             _ = _mockRepository
-                .Setup(r =>
-                    r.GetAsync(
-                        It.Is<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(expr => true),
-                        null,
-                        false,
-                        true,
-                        _cancellationToken
-                    )
-                )
+                .Setup(r => r.GetByIdAsync(authenticator.UserId, _cancellationToken))
                 .ReturnsAsync(authenticator);
 
             _ = _mockCodeGenerator
@@ -118,7 +98,7 @@ public class AuthenticatorTests
         _ = _mockOtpService.Setup(o => o.GenerateSecretKey(It.IsAny<byte[]>())).Returns(TestCodeSeed);
 
         // Act
-        UserAuthenticator<Guid, Guid> result = await _authenticator.CreateAsync(
+        UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid> result = await _authenticator.CreateAsync(
             userId: userId,
             type: type,
             destination: destination,
@@ -133,7 +113,10 @@ public class AuthenticatorTests
         if (type != AuthenticatorType.Otp)
             result.Code.ShouldBe(code);
 
-        _mockRepository.Verify(r => r.AddAsync(It.IsAny<UserAuthenticator<Guid, Guid>>(), _cancellationToken), Times.Once);
+        _mockRepository.Verify(
+            r => r.AddAsync(It.IsAny<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(), _cancellationToken),
+            Times.Once
+        );
     }
 
     [Theory(DisplayName = "Should send code to valid destination")]
@@ -144,7 +127,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeSeed = TestCodeSeed,
@@ -198,7 +181,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Email)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, AuthenticatorType.Email)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(-5),
@@ -226,7 +209,7 @@ public class AuthenticatorTests
         // Arrange
         var userId = Guid.NewGuid();
         string code = "123456";
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = type != AuthenticatorType.Otp ? code : null,
             CodeSeed = TestCodeSeed,
@@ -238,15 +221,7 @@ public class AuthenticatorTests
 
         // Setup repository mock
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.Is<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(expr => expr.Compile().Invoke(authenticator)),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         // Setup OTP service mock specifically for OTP type
@@ -263,7 +238,10 @@ public class AuthenticatorTests
         authenticator.IsVerified.ShouldBeTrue();
         _mockRepository.Verify(
             r =>
-                r.UpdateAsync(It.Is<UserAuthenticator<Guid, Guid>>(a => a.IsVerified && a.Id.Equals(userId)), _cancellationToken),
+                r.UpdateAsync(
+                    It.Is<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(a => a.IsVerified && a.Id.Equals(userId)),
+                    _cancellationToken
+                ),
             Times.Once
         );
     }
@@ -277,7 +255,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeSeed = TestCodeSeed,
@@ -304,7 +282,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Email);
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, AuthenticatorType.Email);
 
         SetupRepositoryMocks(authenticator);
 
@@ -312,7 +290,7 @@ public class AuthenticatorTests
         await _authenticator.DeleteAsync(userId: userId, cancellationToken: _cancellationToken);
 
         // Assert
-        _mockRepository.Verify(r => r.DeleteAsync(authenticator, It.IsAny<bool>(), _cancellationToken), Times.Once);
+        _mockRepository.Verify(r => r.DeleteAsync(authenticator, _cancellationToken), Times.Once);
     }
 
     [Fact(DisplayName = "Should handle missing authenticator delete")]
@@ -335,22 +313,14 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Email);
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, AuthenticatorType.Email);
 
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         _ = _mockRepository
-            .Setup(r => r.DeleteAsync(It.IsAny<UserAuthenticator<Guid, Guid>>(), It.IsAny<bool>(), _cancellationToken))
+            .Setup(r => r.DeleteAsync(authenticator, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         // Act
@@ -358,7 +328,7 @@ public class AuthenticatorTests
 
         // Assert
         _mockRepository.Verify(
-            r => r.DeleteAsync(It.Is<UserAuthenticator<Guid, Guid>>(a => a == authenticator), false, _cancellationToken),
+            r => r.DeleteAsync(It.Is<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(a => a == authenticator), _cancellationToken),
             Times.Once
         );
     }
@@ -370,7 +340,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new Authenticator<Guid, Guid>(
+        var authenticator = new Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRepository.Object,
             _mockCodeGenerator.Object,
             _mockConfiguration.Object,
@@ -393,7 +363,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new Authenticator<Guid, Guid>(
+        var authenticator = new Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRepository.Object,
             _mockCodeGenerator.Object,
             _mockConfiguration.Object,
@@ -416,7 +386,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new Authenticator<Guid, Guid>(
+        var authenticator = new Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRepository.Object,
             _mockCodeGenerator.Object,
             _mockConfiguration.Object,
@@ -465,7 +435,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -489,7 +459,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Email)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, AuthenticatorType.Email)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -513,7 +483,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             CodeSeed = TestCodeSeed,
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -562,7 +532,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -589,7 +559,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -632,7 +602,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeSeed = TestCodeSeed,
@@ -659,7 +629,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -688,7 +658,7 @@ public class AuthenticatorTests
         // Arrange
         var userId = Guid.NewGuid();
         string code = "123456";
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = type != AuthenticatorType.Otp ? code : null,
             CodeSeed = TestCodeSeed,
@@ -699,15 +669,7 @@ public class AuthenticatorTests
         };
 
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         if (type == AuthenticatorType.Otp)
@@ -732,7 +694,7 @@ public class AuthenticatorTests
         // Arrange
         var userId = Guid.NewGuid();
         string code = "123456";
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = type != AuthenticatorType.Otp ? code : null,
             CodeSeed = TestCodeSeed,
@@ -743,15 +705,7 @@ public class AuthenticatorTests
         };
 
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         if (type == AuthenticatorType.Otp)
@@ -761,7 +715,10 @@ public class AuthenticatorTests
         await _authenticator.VerifyAsync(userId, code, _cancellationToken);
 
         // Assert
-        _mockRepository.Verify(r => r.UpdateAsync(It.IsAny<UserAuthenticator<Guid, Guid>>(), _cancellationToken), Times.Never);
+        _mockRepository.Verify(
+            r => r.UpdateAsync(It.IsAny<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(), _cancellationToken),
+            Times.Never
+        );
     }
 
     [Theory(DisplayName = "Should handle unsupported type in verification")]
@@ -771,7 +728,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeSeed = TestCodeSeed,
@@ -784,15 +741,7 @@ public class AuthenticatorTests
         _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([type]);
 
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         // Act & Assert
@@ -809,7 +758,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(-5), // Expired
@@ -844,7 +793,7 @@ public class AuthenticatorTests
         DateTime parsedDate = expirationDate != null ? DateTime.Parse(expirationDate) : DateTime.MinValue;
         DateTime expiresAt = expirationDate == null || parsedDate < DateTime.UtcNow ? DateTime.UtcNow.AddMinutes(10) : parsedDate;
 
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, AuthenticatorType.Sms)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, AuthenticatorType.Sms)
         {
             Code = code,
             CodeSeed = TestCodeSeed,
@@ -855,15 +804,7 @@ public class AuthenticatorTests
 
         // Setup repository returning our authenticator
         _ = _mockRepository
-            .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         // Enable SMS authentication type
@@ -891,18 +832,18 @@ public class AuthenticatorTests
 
         // Assert
         _ = capturedSms.ShouldNotBeNull();
-        capturedSms.PhoneNumber.ShouldBe(phoneNumber);
-        capturedSms.Priority.ShouldBe(1);
-        capturedSms.CustomParameters!.ShouldContainKey("type");
-        capturedSms.CustomParameters!["type"].ShouldBe("authentication");
-        capturedSms.CustomParameters.ShouldContainKey("expiresAt");
-        capturedSms.CustomParameters["expiresAt"].ShouldBe(expiresAt.ToString("O"));
+        capturedSms!.Value.PhoneNumber.ShouldBe(phoneNumber);
+        capturedSms!.Value.Priority.ShouldBe(1);
+        capturedSms!.Value.CustomParameters!.ShouldContainKey("type");
+        capturedSms!.Value.CustomParameters!["type"].ShouldBe("authentication");
+        capturedSms!.Value.CustomParameters.ShouldContainKey("expiresAt");
+        capturedSms!.Value.CustomParameters["expiresAt"].ShouldBe(expiresAt.ToString("O"));
 
         // Verify repository update was called once
         _mockRepository.Verify(
             r =>
                 r.UpdateAsync(
-                    It.Is<UserAuthenticator<Guid, Guid>>(a =>
+                    It.Is<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(a =>
                         a.Id.Equals(userId) && a.Code == code && a.Type == AuthenticatorType.Sms
                     ),
                     _cancellationToken
@@ -918,7 +859,7 @@ public class AuthenticatorTests
         // Arrange
         var userId = Guid.NewGuid();
         var unsupportedType = (AuthenticatorType)byte.MaxValue;
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, unsupportedType)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, unsupportedType)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -949,7 +890,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -960,14 +901,7 @@ public class AuthenticatorTests
         // Setup repository mock
         _ = _mockRepository
             .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+                r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         // Clear enabled types
@@ -1002,7 +936,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeExpiresAt = DateTime.UtcNow.AddMinutes(5),
@@ -1013,14 +947,7 @@ public class AuthenticatorTests
         // Setup repository mock
         _ = _mockRepository
             .Setup(r =>
-                r.GetAsync(
-                    It.IsAny<Expression<Func<UserAuthenticator<Guid, Guid>, bool>>>(),
-                    null,
-                    false,
-                    true,
-                    _cancellationToken
-                )
-            )
+                r.GetByIdAsync(userId, _cancellationToken))
             .ReturnsAsync(authenticator);
 
         // Clear enabled types
@@ -1054,7 +981,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new UserAuthenticator<Guid, Guid>(userId, type)
+        var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, type)
         {
             Code = "123456",
             CodeSeed = TestCodeSeed,

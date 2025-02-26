@@ -20,12 +20,12 @@ public class SecurityServiceRegistrationTests
         SetupRequiredRepositories(services);
 
         // Act
-        _ = services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
+        _ = services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object);
 
         // Assert
         ServiceProvider provider = services.BuildServiceProvider();
-        _ = provider.GetService<IAuthenticator<Guid, int>>().ShouldNotBeNull();
-        _ = provider.GetService<IAuthenticationService<Guid, int>>().ShouldNotBeNull();
+        _ = provider.GetService<IAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().ShouldNotBeNull();
+        _ = provider.GetService<IAuthenticationService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().ShouldNotBeNull();
     }
 
     [Fact(DisplayName = "Should throw when required repositories are missing")]
@@ -37,7 +37,9 @@ public class SecurityServiceRegistrationTests
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
 
         // Act & Assert
-        _ = Should.Throw<InvalidOperationException>(() => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object));
+        _ = Should.Throw<InvalidOperationException>(
+            () => services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object)
+        );
     }
 
     [Theory(DisplayName = "Should validate email service when email authenticator is enabled")]
@@ -54,7 +56,7 @@ public class SecurityServiceRegistrationTests
 
         // Act & Assert
         _ = Should.Throw<InvalidOperationException>(
-            () => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object)
+            () => services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object)
         );
     }
 
@@ -72,7 +74,7 @@ public class SecurityServiceRegistrationTests
 
         // Act & Assert
         _ = Should.Throw<InvalidOperationException>(
-            () => services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object)
+            () => services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object)
         );
     }
 
@@ -89,7 +91,7 @@ public class SecurityServiceRegistrationTests
         _ = services.AddScoped(_ => new Mock<IMailService>().Object);
 
         // Act
-        _ = services.AddSecurityServices<Guid, int, int, int>(jwtConfig.Object, authConfig.Object);
+        _ = services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object);
 
         // Assert
         ServiceProvider provider = services.BuildServiceProvider();
@@ -98,10 +100,10 @@ public class SecurityServiceRegistrationTests
 
     private static void SetupRequiredRepositories(IServiceCollection services)
     {
-        _ = services.AddScoped(_ => new Mock<IUserRepository<Guid, int, int>>().Object);
+        _ = services.AddScoped(_ => new Mock<IUserRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().Object);
 
-        _ = services.AddScoped(_ => new Mock<IRefreshTokenRepository<int, Guid, int>>().Object);
+        _ = services.AddScoped(_ => new Mock<IRefreshTokenRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().Object);
 
-        _ = services.AddScoped(_ => new Mock<IUserAuthenticatorRepository<Guid, int>>().Object);
+        _ = services.AddScoped(_ => new Mock<IUserAuthenticatorRepository<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().Object);
     }
 }

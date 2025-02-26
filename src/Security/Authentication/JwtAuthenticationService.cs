@@ -13,21 +13,79 @@ using NArchitecture.Core.Security.Authorization.Extensions;
 
 namespace NArchitecture.Core.Security.Authentication;
 
-public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenId, TUserAuthenticatorId>(
-    IRefreshTokenRepository<TRefreshTokenId, TUserId, TUserAuthenticatorId> refreshTokenRepository,
-    IUserRepository<TUserId, TUserAuthenticatorId, TOperationClaimId> userRepository,
+public class JwtAuthenticationService<
+    TOperationClaimId,
+    TRefreshTokenId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserId,
+    TUserInGroupId,
+    TUserOperationClaimId
+>(
+    IRefreshTokenRepository<
+        TRefreshTokenId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > refreshTokenRepository,
+    IUserRepository<
+        TUserId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > userRepository,
     IAuthorizationService<TUserId, TOperationClaimId> authorizationService,
     IJwtAuthenticationConfiguration configuration
-) : IAuthenticationService<TUserId, TUserAuthenticatorId>
+)
+    : IAuthenticationService<
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >
 {
-    protected readonly IRefreshTokenRepository<TRefreshTokenId, TUserId, TUserAuthenticatorId> RefreshTokenRepository =
-        refreshTokenRepository;
-    protected readonly IUserRepository<TUserId, TUserAuthenticatorId, TOperationClaimId> UserRepository = userRepository;
+    protected readonly IRefreshTokenRepository<
+        TRefreshTokenId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > RefreshTokenRepository = refreshTokenRepository;
+    protected readonly IUserRepository<
+        TUserId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > UserRepository = userRepository;
     protected readonly IAuthorizationService<TUserId, TOperationClaimId> AuthorizationService = authorizationService;
     protected readonly IJwtAuthenticationConfiguration Configuration = configuration;
 
     protected virtual Token CreateAccessToken(
-        User<TUserId, TUserAuthenticatorId> user,
+        User<
+            TUserId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > user,
         ICollection<OperationClaim<TOperationClaimId>> operationClaims
     )
     {
@@ -59,8 +117,24 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         return new(securityKey, SecurityAlgorithms.HmacSha512Signature);
     }
 
-    protected virtual RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> CreateRefreshToken(
-        User<TUserId, TUserAuthenticatorId> user,
+    protected virtual RefreshToken<
+        TRefreshTokenId,
+        TOperationClaimId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > CreateRefreshToken(
+        User<
+            TUserId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > user,
         string ipAddress
     )
     {
@@ -73,7 +147,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
     }
 
     protected virtual IEnumerable<Claim> GetClaims(
-        User<TUserId, TUserAuthenticatorId> user,
+        User<
+            TUserId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > user,
         ICollection<OperationClaim<TOperationClaimId>> operationClaims
     )
     {
@@ -83,7 +165,18 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         return claims;
     }
 
-    protected virtual bool CheckPassword(User<TUserId, TUserAuthenticatorId> user, string password)
+    protected virtual bool CheckPassword(
+        User<
+            TUserId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > user,
+        string password
+    )
     {
         byte[] passwordHash = user.PasswordHash ?? [];
         byte[] passwordSalt = user.PasswordSalt ?? [];
@@ -94,7 +187,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
     }
 
     public virtual async Task<AuthenticationResponse> LoginAsync(
-        LoginRequest<TUserId, TUserAuthenticatorId> request,
+        LoginRequest<
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > request,
         CancellationToken cancellationToken = default
     )
     {
@@ -106,10 +207,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
             cancellationToken
         );
         Token accessToken = CreateAccessToken(request.User, operationClaims);
-        RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> refreshTokenEntity = CreateRefreshToken(
-            request.User,
-            request.IpAddress
-        );
+        RefreshToken<
+            TRefreshTokenId,
+            TOperationClaimId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > refreshTokenEntity = CreateRefreshToken(request.User, request.IpAddress);
 
         _ = await RefreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 
@@ -123,7 +229,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         CancellationToken cancellationToken = default
     )
     {
-        RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> token =
+        RefreshToken<
+            TRefreshTokenId,
+            TOperationClaimId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > token =
             await RefreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken)
             ?? throw new BusinessException(await Configuration.GetInvalidRefreshTokenMessageAsync(cancellationToken));
 
@@ -132,7 +246,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         if (token.ExpiresAt <= DateTime.UtcNow)
             throw new BusinessException(await Configuration.GetTokenExpiredMessageAsync(cancellationToken));
 
-        User<TUserId, TUserAuthenticatorId> user =
+        User<
+            TUserId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > user =
             await UserRepository.GetByIdAsync(token.UserId, cancellationToken: cancellationToken)
             ?? throw new BusinessException(await Configuration.GetUserNotFoundMessageAsync(cancellationToken));
 
@@ -141,7 +263,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
             cancellationToken
         );
         Token newAccessToken = CreateAccessToken(user, operationClaims);
-        RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> newRefreshTokenEntity = CreateRefreshToken(user, ipAddress);
+        RefreshToken<
+            TRefreshTokenId,
+            TOperationClaimId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > newRefreshTokenEntity = CreateRefreshToken(user, ipAddress);
 
         token.RevokedAt = DateTime.UtcNow;
         token.RevokedByIp = ipAddress;
@@ -161,7 +291,15 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         CancellationToken cancellationToken = default
     )
     {
-        RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> token =
+        RefreshToken<
+            TRefreshTokenId,
+            TOperationClaimId,
+            TUserAuthenticatorId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > token =
             await RefreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken)
             ?? throw new BusinessException(await Configuration.GetInvalidRefreshTokenMessageAsync(cancellationToken));
 
@@ -181,10 +319,29 @@ public class JwtAuthenticationService<TUserId, TOperationClaimId, TRefreshTokenI
         CancellationToken cancellationToken = default
     )
     {
-        ICollection<RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId>> activeTokens =
-            await RefreshTokenRepository.GetAllActiveByUserIdAsync(userId, cancellationToken);
+        ICollection<
+            RefreshToken<
+                TRefreshTokenId,
+                TOperationClaimId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            >
+        > activeTokens = await RefreshTokenRepository.GetAllActiveByUserIdAsync(userId, cancellationToken);
 
-        foreach (RefreshToken<TRefreshTokenId, TUserId, TUserAuthenticatorId> token in activeTokens)
+        foreach (
+            RefreshToken<
+                TRefreshTokenId,
+                TOperationClaimId,
+                TUserAuthenticatorId,
+                TUserGroupId,
+                TUserId,
+                TUserInGroupId,
+                TUserOperationClaimId
+            > token in activeTokens
+        )
         {
             token.RevokedAt = DateTime.UtcNow;
             token.ReasonRevoked = reason;

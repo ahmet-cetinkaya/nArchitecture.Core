@@ -10,25 +10,63 @@ using NArchitecture.Core.Sms.Abstractions;
 
 namespace NArchitecture.Core.Security.Authenticator;
 
-public class Authenticator<TUserId, TUserAuthenticatorId>(
-    IUserAuthenticatorRepository<TUserId, TUserAuthenticatorId> userAuthenticatorRepository,
+public class Authenticator<
+    TOperationClaimId,
+    TRefreshTokenId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserId,
+    TUserInGroupId,
+    TUserOperationClaimId
+>(
+    IUserAuthenticatorRepository<
+        TUserAuthenticatorId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > userAuthenticatorRepository,
     ICodeGenerator codeGenerator,
     IAuthenticatorConfiguration configuration,
     IMailService? mailService = null,
     ISmsService? smsService = null,
     IOtpService? otpAuthenticator = null
-) : IAuthenticator<TUserId, TUserAuthenticatorId>
+)
+    : IAuthenticator<
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    >
 {
-    public async Task<UserAuthenticator<TUserAuthenticatorId, TUserId>> CreateAsync(
-        TUserId userId,
-        AuthenticatorType type,
-        string? destination,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<
+        UserAuthenticator<
+            TUserAuthenticatorId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        >
+    > CreateAsync(TUserId userId, AuthenticatorType type, string? destination, CancellationToken cancellationToken = default)
     {
         await ValidateAuthenticatorType(type, cancellationToken);
 
-        UserAuthenticator<TUserAuthenticatorId, TUserId> authenticator = new(userId, type)
+        UserAuthenticator<
+            TUserAuthenticatorId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > authenticator = new(userId, type)
         {
             CodeExpiresAt = DateTime.UtcNow.Add(configuration.CodeExpiration),
             CodeSeed =
@@ -52,8 +90,16 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
 
     public async Task AttemptAsync(TUserId userId, string? destination, CancellationToken cancellationToken = default)
     {
-        UserAuthenticator<TUserAuthenticatorId, TUserId> authenticator =
-            await userAuthenticatorRepository.GetAsync(ua => ua.Id!.Equals(userId), cancellationToken: cancellationToken)
+        UserAuthenticator<
+            TUserAuthenticatorId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > authenticator =
+            await userAuthenticatorRepository.GetByIdAsync(userId, cancellationToken: cancellationToken)
             ?? throw new BusinessException(await configuration.GetAuthenticatorNotFoundMessageAsync(cancellationToken));
 
         await ValidateAuthenticatorType(authenticator.Type, cancellationToken);
@@ -147,8 +193,16 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
 
     public async Task VerifyAsync(TUserId userId, string code, CancellationToken cancellationToken = default)
     {
-        UserAuthenticator<TUserAuthenticatorId, TUserId> authenticator =
-            await userAuthenticatorRepository.GetAsync(ua => ua.Id!.Equals(userId), cancellationToken: cancellationToken)
+        UserAuthenticator<
+            TUserAuthenticatorId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        > authenticator =
+            await userAuthenticatorRepository.GetByIdAsync(userId, cancellationToken: cancellationToken)
             ?? throw new BusinessException(await configuration.GetAuthenticatorNotFoundMessageAsync(cancellationToken));
 
         await ValidateAuthenticatorType(authenticator.Type, cancellationToken);
@@ -175,10 +229,15 @@ public class Authenticator<TUserId, TUserAuthenticatorId>(
 
     public async Task DeleteAsync(TUserId userId, CancellationToken cancellationToken = default)
     {
-        UserAuthenticator<TUserAuthenticatorId, TUserId>? authenticator = await userAuthenticatorRepository.GetAsync(
-            ua => ua.Id!.Equals(userId),
-            cancellationToken: cancellationToken
-        );
+        UserAuthenticator<
+            TUserAuthenticatorId,
+            TOperationClaimId,
+            TRefreshTokenId,
+            TUserGroupId,
+            TUserId,
+            TUserInGroupId,
+            TUserOperationClaimId
+        >? authenticator = await userAuthenticatorRepository.GetByIdAsync(userId, cancellationToken: cancellationToken);
         if (authenticator is not null)
             _ = await userAuthenticatorRepository.DeleteAsync(authenticator, cancellationToken: cancellationToken);
     }

@@ -6,19 +6,33 @@ using NArchitecture.Core.Security.Authorization.Extensions;
 
 namespace NArchitecture.Core.Security.Authorization;
 
-public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationClaimId>(
-    IUserRepository<TUserId, TUserAuthenticatorId, TOperationClaimId> userRepository
+public class JwtAuthorizationService<
+    TOperationClaimId,
+    TRefreshTokenId,
+    TUserAuthenticatorId,
+    TUserGroupId,
+    TUserId,
+    TUserInGroupId,
+    TUserOperationClaimId
+>(
+    IUserRepository<
+        TUserId,
+        TOperationClaimId,
+        TRefreshTokenId,
+        TUserAuthenticatorId,
+        TUserGroupId,
+        TUserInGroupId,
+        TUserOperationClaimId
+    > userRepository
 ) : IAuthorizationService<TUserId, TOperationClaimId>
 {
-    private readonly IUserRepository<TUserId, TUserAuthenticatorId, TOperationClaimId> _userRepository = userRepository;
-
     public virtual Task<bool> HasPermissionAsync(
         TUserId userId,
         string permissionName,
         CancellationToken cancellationToken = default
     )
     {
-        return _userRepository.HasPermissionAsync(userId, permissionName, cancellationToken);
+        return userRepository.HasPermissionAsync(userId, permissionName, cancellationToken);
     }
 
     public virtual Task<bool> HasPermissionAsync(ClaimsPrincipal principal, string permissionName)
@@ -34,7 +48,7 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
         CancellationToken cancellationToken = default
     )
     {
-        return _userRepository.HasAnyPermissionAsync(userId, permissionNames, cancellationToken);
+        return userRepository.HasAnyPermissionAsync(userId, permissionNames, cancellationToken);
     }
 
     public virtual Task<bool> HasAnyPermissionAsync(ClaimsPrincipal principal, IEnumerable<string> permissionNames)
@@ -50,7 +64,7 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
         CancellationToken cancellationToken = default
     )
     {
-        return _userRepository.HasAllPermissionsAsync(userId, permissionNames, cancellationToken);
+        return userRepository.HasAllPermissionsAsync(userId, permissionNames, cancellationToken);
     }
 
     public virtual Task<bool> HasAllPermissionsAsync(ClaimsPrincipal principal, IEnumerable<string> permissionNames)
@@ -65,6 +79,6 @@ public class JwtAuthorizationService<TUserId, TUserAuthenticatorId, TOperationCl
         CancellationToken cancellationToken = default
     )
     {
-        return _userRepository.GetOperationClaimsAsync(userId, cancellationToken);
+        return userRepository.GetOperationClaimsAsync(userId, cancellationToken);
     }
 }

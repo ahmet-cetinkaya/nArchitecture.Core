@@ -5,13 +5,10 @@ namespace NArchitecture.Core.Security.Abstractions.Authorization;
 
 public interface IUserGroupOperationClaimRepository<
     TId,
-    TGroupId,
-    TUserId,
+    TOperationClaimId,
+    TRefreshTokenId,
     TUserAuthenticatorId,
-    TUserInGroupId,
-    TOperationClaimId
->
-    : IAsyncRepository<
-        UserGroupOperationClaim<TId, TGroupId, TUserId, TUserAuthenticatorId, TUserInGroupId, TOperationClaimId>,
-        TId
-    > { }
+    TUserGroupId,
+    TUserGroupOperationClaimId,
+    TUserId
+>;
