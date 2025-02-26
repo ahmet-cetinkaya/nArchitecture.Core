@@ -3,13 +3,9 @@ namespace NArchitecture.Core.SearchEngine.ElasticSearch.Models;
 /// <summary>
 /// Configuration settings for ElasticSearch operations.
 /// </summary>
-public record ElasticSearchConfig
+/// <param name="ConnectionString">The connection string for the ElasticSearch server.</param>
+public readonly record struct ElasticSearchConfig(string ConnectionString)
 {
-    /// <summary>
-    /// The connection string for the ElasticSearch server.
-    /// </summary>
-    public string ConnectionString { get; init; } = string.Empty;
-
     /// <summary>
     /// Number of replica shards for each index. Default is 1.
     /// </summary>

@@ -10,7 +10,7 @@ using Shouldly;
 namespace NArchitecture.Core.SearchEngine.ElasticSearch.Tests;
 
 [CollectionDefinition("ElasticSearch", DisableParallelization = true)]
-public class ElasticSearchCollection : ICollectionFixture<ElasticSearchFixture> { }
+public class ElasticSearchCollection : ICollectionFixture<ElasticSearchFixture>;
 
 public class TestDocument
 {
