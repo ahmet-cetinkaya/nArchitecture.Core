@@ -9,7 +9,7 @@ namespace NArchitecture.Core.Mailing.Abstractions.Models;
 /// <param name="TextBody">The plain text version of the email body for clients that don't support HTML</param>
 /// <param name="HtmlBody">The HTML version of the email body for rich formatting</param>
 /// <param name="ToList">List of primary recipients' email addresses</param>
-public record Mail(string Subject, string TextBody, string HtmlBody, List<MailboxAddress> ToList)
+public readonly record struct Mail(string Subject, string TextBody, string HtmlBody, List<MailboxAddress> ToList)
 {
     /// <summary>
     /// Gets the collection of file attachments to be included with the email.
