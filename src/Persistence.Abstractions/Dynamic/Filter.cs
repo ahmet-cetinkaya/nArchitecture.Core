@@ -3,35 +3,28 @@
 /// <summary>
 /// Represents filter criteria for dynamic queries.
 /// </summary>
-public record Filter(string Field, string Operator)
+/// <param name="Field">The field to filter by.</param>
+/// <param name="Operator">The operator used for filtering.
+/// <para>Available operator values:</para>
+/// <list type="bullet">
+///  <item><description>eq: Equal</description></item>
+///  <item><description>neq: Not equal</description></item>
+///  <item><description>lt: Less than</description></item>
+///  <item><description>lte: Less than or equal</description></item>
+///  <item><description>gt: Greater than</description></item>
+///  <item><description>gte: Greater than or equal</description></item>
+///  <item><description>isnull: Is null</description></item>
+///  <item><description>isnotnull: Is not null</description></item>
+///  <item><description>startswith: Starts with</description></item>
+///  <item><description>endswith: Ends with</description></item>
+///  <item><description>contains: Contains</description></item>
+///  <item><description>doesnotcontain: Does not contain</description></item>
+///  <item><description>in: In collection</description></item>
+///  <item><description>between: Between two values</description></item>
+///  </list>
+/// </param>
+public record struct Filter(string Field, string Operator)
 {
-    /// <summary>
-    /// Gets or sets the field to filter by.
-    /// </summary>
-    public string Field { get; set; } = Field;
-
-    /// <summary>
-    /// Gets or sets the operator used for filtering.
-    /// <para>Available operator values:</para>
-    /// <list type="bullet">
-    ///   <item><description>eq: Equal</description></item>
-    ///   <item><description>neq: Not equal</description></item>
-    ///   <item><description>lt: Less than</description></item>
-    ///   <item><description>lte: Less than or equal</description></item>
-    ///   <item><description>gt: Greater than</description></item>
-    ///   <item><description>gte: Greater than or equal</description></item>
-    ///   <item><description>isnull: Is null</description></item>
-    ///   <item><description>isnotnull: Is not null</description></item>
-    ///   <item><description>startswith: Starts with</description></item>
-    ///   <item><description>endswith: Ends with</description></item>
-    ///   <item><description>contains: Contains</description></item>
-    ///   <item><description>doesnotcontain: Does not contain</description></item>
-    ///   <item><description>in: In collection</description></item>
-    ///   <item><description>between: Between two values</description></item>
-    /// </list>
-    /// </summary>
-    public string Operator { get; set; } = Operator;
-
     /// <summary>
     /// Gets or sets the value for the filter operation.
     /// </summary>

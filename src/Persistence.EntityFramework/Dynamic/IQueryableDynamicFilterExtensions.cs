@@ -40,7 +40,7 @@ public static class IQueryableDynamicFilterExtensions
     public static IQueryable<T> ToDynamic<T>(this IQueryable<T> query, DynamicQuery dynamicQuery)
     {
         if (dynamicQuery.Filter is not null)
-            query = Filter(query, dynamicQuery.Filter);
+            query = Filter(query, (Filter)dynamicQuery.Filter);
         if (dynamicQuery.Sort is not null && dynamicQuery.Sort.Any())
             query = Sort(query, dynamicQuery.Sort);
         return query;
