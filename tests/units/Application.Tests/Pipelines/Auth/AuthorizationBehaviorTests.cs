@@ -16,8 +16,8 @@ public sealed class MockSecuredRequest : ISecuredRequest, IRequest<int>
 
     public MockSecuredRequest()
     {
-        _identityRoles = Array.Empty<string>();
-        _requiredRoles = Array.Empty<string>();
+        _identityRoles = [];
+        _requiredRoles = [];
     }
 
     public MockSecuredRequest SetRoles(string[]? identityRoles, string[]? requiredRoles)
@@ -44,7 +44,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenIdentityRolesIsNull_ShouldThrowAuthenticationException()
     {
         // Arrange: Create a request with null IdentityRoles.
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(null!, Array.Empty<string>());
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(null!, []);
 
         // Act & Assert: Verify the correct exception is thrown.
         _ = await Should.ThrowAsync<AuthenticationException>(
@@ -56,7 +56,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenNoRequiredRoles_ShouldSucceed()
     {
         // Arrange: Create a request with no required roles.
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], []);
 
         // Act: Execute authorization behavior.
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
@@ -115,7 +115,7 @@ public class AuthorizationBehaviorTests
     {
         // Arrange: Create a request with roles that include whitespace.
         await AssertRoleAccess([" editor "], [""], true);
-        await AssertRoleAccess(["editor"], Array.Empty<string>(), true);
+        await AssertRoleAccess(["editor"], [], true);
         await AssertRoleAccess([" editor "], [" "], true);
     }
 
@@ -132,7 +132,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenUserHasNoRoles_ShouldThrowAuthorizationException()
     {
         // Arrange: Create a request with an empty set of user roles.
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(Array.Empty<string>(), ["editor"]);
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles([], ["editor"]);
 
         // Act & Assert: Verify exception is thrown.
         _ = await Should.ThrowAsync<AuthorizationException>(
@@ -144,7 +144,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenRequiredRolesIsEmpty_ShouldSucceed()
     {
         // Arrange: Create a request with empty required roles.
-        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], Array.Empty<string>());
+        MockSecuredRequest request = new MockSecuredRequest().SetRoles(["user"], []);
 
         // Act: Execute behavior.
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _next, CancellationToken.None));
@@ -211,7 +211,7 @@ public class AuthorizationBehaviorTests
     {
         // Arrange: Create requests with boundary values.
         // Empty arrays
-        await AssertRoleAccess(Array.Empty<string>(), Array.Empty<string>(), true);
+        await AssertRoleAccess([], [], true);
 
         // Single empty string vs null
         await AssertRoleAccess([""], null!, true);
@@ -294,7 +294,7 @@ public class AuthorizationBehaviorTests
 
             // Assert
             exception.ShouldBeNull(
-                $"User with roles [{string.Join(", ", userRoles)}] should have access with required roles [{string.Join(", ", requiredRoles)}]"
+                $"User with roles [{string.Join(", ", (userRoles ?? []).Select(role => role ?? string.Empty))}] should have access with required roles [{string.Join(", ", (requiredRoles ?? []).Select(role => role ?? string.Empty))}]"
             );
         }
         else

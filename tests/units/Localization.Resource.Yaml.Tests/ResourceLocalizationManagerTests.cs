@@ -57,7 +57,7 @@ greeting: Merhaba, Dünya!
         var manager = new ResourceLocalizationManager(_testResources);
 
         // Assert
-        manager.ShouldNotBeNull();
+        _ = manager.ShouldNotBeNull();
     }
 
     [Theory(DisplayName = "GetLocalizedAsync should return localized string for valid key and locale")]
@@ -123,7 +123,7 @@ greeting: Merhaba, Dünya!
         var manager = new ResourceLocalizationManager(_testResources) { AcceptLocales = null };
 
         // Act & Assert
-        Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
+        _ = Should.Throw<NoNullAllowedException>(() => manager.GetLocalizedAsync("hello").GetAwaiter().GetResult());
     }
 
     [Fact(DisplayName = "GetLocalizedAsync should return localized string for custom section")]

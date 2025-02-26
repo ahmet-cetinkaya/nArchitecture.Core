@@ -14,7 +14,7 @@ namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;
 public class MockCacheRemoverRequest : IRequest<int>, ICacheRemoverRequest
 {
     public CacheRemoverOptions CacheOptions { get; set; } =
-        new CacheRemoverOptions(bypassCache: false, cacheKey: string.Empty, cacheGroupKey: System.Array.Empty<string>());
+        new CacheRemoverOptions(bypassCache: false, cacheKey: string.Empty, cacheGroupKey: []);
 }
 
 [Trait("Category", "CacheRemoving")]
@@ -156,7 +156,7 @@ public class CacheRemovingBehaviorTests
 
         // Assert: Verify existing keys are unaffected.
         byte[]? existingValue = await _cache.GetAsync(existingKey);
-        existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
+        _ = existingValue.ShouldNotBeNull("Existing cache entries should not be affected");
     }
 
     [Fact(DisplayName = "Handle should skip cache operations when bypass cache is true")]
@@ -178,10 +178,10 @@ public class CacheRemovingBehaviorTests
 
         // Assert: Verify cache remains unchanged.
         byte[]? value = await _cache.GetAsync(testKey);
-        value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
+        _ = value.ShouldNotBeNull("Cache should not be modified when bypassing cache");
 
         byte[]? groupValue = await _cache.GetAsync(groupKey);
-        groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
+        _ = groupValue.ShouldNotBeNull("Group cache should not be modified when bypassing cache");
     }
 
     [Fact(DisplayName = "Handle should always call next delegate")]
@@ -265,7 +265,7 @@ public class CacheRemovingBehaviorTests
         // Arrange: Create a request with empty group key.
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: Array.Empty<string>()),
+            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: []),
         };
 
         // Act: Execute cache removal behavior.
@@ -291,8 +291,8 @@ public class CacheRemovingBehaviorTests
         Exception exception = await Record.ExceptionAsync(() => _behavior.Handle(request, _nextDelegate, CancellationToken.None));
 
         // Assert: Verify that an appropriate exception is raised.
-        exception.ShouldNotBeNull();
-        exception.ShouldBeOfType<JsonException>();
+        _ = exception.ShouldNotBeNull();
+        _ = exception.ShouldBeOfType<JsonException>();
     }
 
     [Fact(DisplayName = "Handle should respect cancellation token when cancellation is requested")]
@@ -311,7 +311,7 @@ public class CacheRemovingBehaviorTests
         cts.Cancel();
 
         // Act & Assert: Verify OperationCanceledException is thrown.
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             _ = await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
@@ -343,13 +343,13 @@ public class CacheRemovingBehaviorTests
             return Task.FromResult(42);
         }
 
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             _ = await _behavior.Handle(request, next, cts.Token);
         });
 
         byte[]? lastGroupValue = await _cache.GetAsync("group3");
-        lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
+        _ = lastGroupValue.ShouldNotBeNull("Processing should have stopped before reaching the last group");
     }
 
     [Fact(DisplayName = "Handle should break and stop processing when cancellation is requested during loop")]
@@ -386,15 +386,15 @@ public class CacheRemovingBehaviorTests
             })
             .Returns(Task.CompletedTask);
 
-        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(async () =>
         {
             _ = await _behavior.Handle(request, _nextDelegate, cts.Token);
         });
 
         (await _cache.GetAsync("group1")).ShouldBeNull("First group should be processed");
-        (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
-        (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
-        (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
+        _ = (await _cache.GetAsync("group2")).ShouldNotBeNull("Second group should not be processed");
+        _ = (await _cache.GetAsync("group3")).ShouldNotBeNull("Third group should not be processed");
+        _ = (await _cache.GetAsync("group4")).ShouldNotBeNull("Fourth group should not be processed");
     }
 
     [Fact(DisplayName = "Handle should log information when processing groups")]

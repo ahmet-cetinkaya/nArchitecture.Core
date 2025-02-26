@@ -277,7 +277,10 @@ public class CachingBehaviorTests
         // Arrange: Create a request causing serialization failure.
         var request = new MockCacheableRequest();
         var failingData = new FailingData();
-        Task<string> failingDelegate() => Task.FromResult(JsonSerializer.Serialize(failingData));
+        Task<string> failingDelegate() =>
+            Task.FromResult(
+                JsonSerializer.Serialize(failingData, new JsonSerializerOptions { Converters = { new FailingConverter() } })
+            );
 
         // Act & Assert: Verify exception is thrown and cache remains unmodified.
         Exception exception = await Record.ExceptionAsync(
@@ -298,7 +301,10 @@ public class CachingBehaviorTests
         // Arrange: Create a request causing serialization failure.
         var request = new MockCacheableRequest();
         var failingData = new FailingData();
-        Task<string> failingDelegate() => Task.FromResult(JsonSerializer.Serialize(failingData));
+        Task<string> failingDelegate() =>
+            Task.FromResult(
+                JsonSerializer.Serialize(failingData, new JsonSerializerOptions { Converters = { new FailingConverter() } })
+            );
 
         // Act & Assert: Verify an exception is thrown and subsequent requests work.
         Exception exception = await Record.ExceptionAsync(

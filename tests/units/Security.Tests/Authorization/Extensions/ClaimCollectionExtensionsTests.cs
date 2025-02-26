@@ -72,7 +72,7 @@ public class ClaimCollectionExtensionsTests
     {
         // Arrange
         var claims = new List<Claim>();
-        string[] emptyOperationClaims = Array.Empty<string>();
+        string[] emptyOperationClaims = [];
 
         // Act
         claims.AddOperationClaim(emptyOperationClaims);

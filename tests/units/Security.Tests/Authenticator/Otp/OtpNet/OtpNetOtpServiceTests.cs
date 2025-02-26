@@ -17,7 +17,7 @@ public class OtpNetOtpServiceTests
     public void GenerateSecretKey_ShouldReturnValidKey()
     {
         // Act
-        byte[] result = _sut.GenerateSecretKey(Array.Empty<byte>());
+        byte[] result = _sut.GenerateSecretKey([]);
 
         // Assert
         _ = result.ShouldNotBeNull();
@@ -62,7 +62,7 @@ public class OtpNetOtpServiceTests
     public void ComputeOtp_ShouldReturnValidOtp()
     {
         // Arrange
-        byte[] secretKey = _sut.GenerateSecretKey(Array.Empty<byte>());
+        byte[] secretKey = _sut.GenerateSecretKey([]);
 
         // Act
         string result = _sut.ComputeOtp(secretKey);
@@ -86,7 +86,7 @@ public class OtpNetOtpServiceTests
     public void ComputeOtp_ShouldGenerateDifferentOtps_ForDifferentTimeWindows()
     {
         // Arrange
-        byte[] secretKey = _sut.GenerateSecretKey(Array.Empty<byte>());
+        byte[] secretKey = _sut.GenerateSecretKey([]);
         DateTime now = DateTime.UtcNow;
 
         // Act
@@ -102,8 +102,8 @@ public class OtpNetOtpServiceTests
     public void GenerateSecretKey_ShouldGenerateDifferentKeys_ForMultipleCalls()
     {
         // Act
-        byte[] firstKey = _sut.GenerateSecretKey(Array.Empty<byte>());
-        byte[] secondKey = _sut.GenerateSecretKey(Array.Empty<byte>());
+        byte[] firstKey = _sut.GenerateSecretKey([]);
+        byte[] secondKey = _sut.GenerateSecretKey([]);
 
         // Assert
         firstKey.ShouldNotBe(secondKey);
@@ -126,7 +126,7 @@ public class OtpNetOtpServiceTests
     public void ComputeOtp_ShouldGenerateSameOtp_ForSameTime()
     {
         // Arrange
-        byte[] secretKey = _sut.GenerateSecretKey(Array.Empty<byte>());
+        byte[] secretKey = _sut.GenerateSecretKey([]);
         DateTime specificTime = new(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
         // Act
@@ -142,7 +142,7 @@ public class OtpNetOtpServiceTests
     public void ComputeOtp_ShouldGenerateDifferentOtps_ForDifferentTimes()
     {
         // Arrange
-        byte[] secretKey = _sut.GenerateSecretKey(Array.Empty<byte>());
+        byte[] secretKey = _sut.GenerateSecretKey([]);
         DateTime firstTime = new(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc);
         DateTime secondTime = firstTime.AddSeconds(31); // Different 30-second window
 
