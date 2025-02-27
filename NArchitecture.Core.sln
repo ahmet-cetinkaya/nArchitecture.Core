@@ -124,6 +124,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Validati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mediator.Abstractions", "src\Mediator.Abstractions\NArchitecture.Core.Mediator.Abstractions.csproj", "{D9041459-A0A0-428A-8609-A92A52B84A94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mediator", "src\Mediator\NArchitecture.Core.Mediator.csproj", "{0DD71F00-CCCF-45EC-81C2-D94D7F80CC7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

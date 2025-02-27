@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Project Configuration -->
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <!-- Build Optimization -->
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest</AnalysisLevel>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <Deterministic>true</Deterministic>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
+
+    <!-- Package Configuration -->
+    <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>1.0.0</Version>
+        <Authors>Kodlama.io, Contributors</Authors>
+        <Company>Kodlama.io</Company>
+        <Product>NArchitecture</Product>
+        <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
+        <PackageId>NArchitecture.Core.Mediator</PackageId>
+        <Title>NArchitecture Core Mediator Implementation</Title>
+        <Description>Implementation of the mediator pattern for Clean/Union Architecture, providing
+            concrete implementations for commands, queries, and events.</Description>
+        <PackageTags>Clean Architecture; Mediator Pattern; CQRS; Implementation</PackageTags>
+        <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+        <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <!-- Package Files -->
+    <ItemGroup>
+        <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+        <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+        <None Include="./README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <!-- Package Dependencies -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+            Version="9.0.2" />
+    </ItemGroup>
+
+    <!-- Project References -->
+    <ItemGroup>
+        <ProjectReference
+            Include="..\Mediator.Abstractions\NArchitecture.Core.Mediator.Abstractions.csproj" />
+    </ItemGroup>
+
+</Project>
