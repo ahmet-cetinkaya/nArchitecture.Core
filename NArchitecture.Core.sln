@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
@@ -123,6 +123,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Validation.FluentValidation.Tests", "tests\units\Validation.FluentValidation.Tests\NArchitecture.Core.Validation.FluentValidation.Tests.csproj", "{8ABBE48E-E5EC-4F1B-9C81-CDEB7CCE91B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mediator.Abstractions", "src\Mediator.Abstractions\NArchitecture.Core.Mediator.Abstractions.csproj", "{D9041459-A0A0-428A-8609-A92A52B84A94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mediator.Tests", "tests\units\Mediator.Tests\NArchitecture.Core.Mediator.Tests.csproj", "{855DE25A-3940-40C1-AC64-89397156589E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mediator", "src\Mediator\NArchitecture.Core.Mediator.csproj", "{0DD71F00-CCCF-45EC-81C2-D94D7F80CC7D}"
 EndProject
