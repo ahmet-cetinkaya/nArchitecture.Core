@@ -3,14 +3,14 @@ using Spectre.Console;
 
 namespace NArchitecture.Core.Benchmarks;
 
-internal class BenchmarkProject(string Name, string Path)
+public class BenchmarkProject(string Name, string Path)
 {
     public string Name { get; } = Name;
     public string Path { get; } = Path;
     public string LastRunLog { get; set; } = string.Empty;
 }
 
-internal static class Program
+public static class Program
 {
     private const string LAST_RUN_FLAG = "--last-run";
     private const string LAST_BENCHMARK_FLAG = "--last-benchmark";
