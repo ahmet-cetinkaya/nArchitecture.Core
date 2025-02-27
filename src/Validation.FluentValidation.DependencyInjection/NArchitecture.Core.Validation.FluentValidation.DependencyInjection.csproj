@@ -33,10 +33,10 @@
 
     <!-- Package Metadata -->
     <PropertyGroup>
-        <PackageId>NArchitecture.Core.Validation.FluentValidation</PackageId>
-        <Title>NArchitecture FluentValidation Integration</Title>
-        <Description>FluentValidation integration for Clean Architecture applications with advanced validation features.</Description>
-        <PackageTags>fluentvalidation; validation; clean-architecture; domain-validation; narchitecture</PackageTags>
+        <PackageId>NArchitecture.Core.Validation.FluentValidation.DependencyInjection</PackageId>
+        <Title>NArchitecture FluentValidation Integration DI Extensions</Title>
+        <Description>Dependency Injection extensions for FluentValidation integration in Clean Architecture applications.</Description>
+        <PackageTags>fluentvalidation; validation; dependency-injection; clean-architecture; domain-validation; narchitecture</PackageTags>
         <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
         <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -57,13 +57,13 @@
 
     <!-- Dependencies -->
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.11.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     </ItemGroup>
 
     <!-- Project References -->
     <ItemGroup>
-        <ProjectReference Include="../CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
-        <ProjectReference Include="../Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
+        <ProjectReference Include="..\Validation.FluentValidation\NArchitecture.Core.Validation.FluentValidation.csproj" />
     </ItemGroup>
 
 </Project>
