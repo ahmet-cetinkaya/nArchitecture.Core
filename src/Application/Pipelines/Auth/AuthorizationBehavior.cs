@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
-using MediatR;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
+using NArchitecture.Core.Mediator.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Auth;
 

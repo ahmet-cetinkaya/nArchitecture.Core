@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-using MediatR;
 using NArchitecture.Core.Application.Pipelines.Auth;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
+using NArchitecture.Core.Mediator.Abstractions;
 
 namespace NArchitecture.Core.Application.BenchmarkTests.Pipelines.Auth;
 
@@ -10,7 +10,7 @@ namespace NArchitecture.Core.Application.BenchmarkTests.Pipelines.Auth;
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
-internal class AuthorizationBehaviorBenchmarks
+public class AuthorizationBehaviorBenchmarks
 {
     private AuthorizationBehavior<TestRequest, TestResponse>? _behavior;
     private TestRequest? _adminRequest;
@@ -79,7 +79,7 @@ internal class AuthorizationBehaviorBenchmarks
         public RoleClaims RoleClaims => new(IdentityRoles, RequiredRoles);
     }
 
-    internal sealed record TestResponse;
+    public sealed record TestResponse;
 
     private sealed class TestRequestHandler : IRequestHandler<TestRequest, TestResponse>
     {

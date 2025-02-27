@@ -1,6 +1,6 @@
 # 🚀 NArchitecture.Core.Application
 
-Essential application layer components for Clean Architecture with built-in MediatR pipeline behaviors.
+Essential application layer components for Clean Architecture with built-in Mediator pipeline behaviors.
 
 ## ✨ Features
 
@@ -22,7 +22,7 @@ dotnet add package NArchitecture.Core.Application
 1. Register the pipeline behaviors:
 
 ```csharp
-services.AddMediatR(cfg => {
+services.AddMediator(cfg => {
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(TransactionScopeBehavior<,>));

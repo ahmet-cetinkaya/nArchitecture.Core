@@ -1,13 +1,13 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Caching;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.Mediator.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;

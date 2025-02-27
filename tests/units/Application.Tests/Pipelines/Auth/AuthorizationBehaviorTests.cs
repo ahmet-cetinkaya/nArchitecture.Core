@@ -1,8 +1,8 @@
 using System.Security.Authentication;
-using MediatR;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Auth;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
+using NArchitecture.Core.Mediator.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Auth;

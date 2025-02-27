@@ -1,9 +1,9 @@
 using System.Text.Json;
-using MediatR;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
+using NArchitecture.Core.Mediator.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Logging;

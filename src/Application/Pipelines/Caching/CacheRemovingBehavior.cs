@@ -2,10 +2,10 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.ObjectPool;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.Mediator.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 

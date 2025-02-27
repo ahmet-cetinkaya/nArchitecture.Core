@@ -31,9 +31,9 @@
     <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
     <PackageId>NArchitecture.Core.Application</PackageId>
     <Title>NArchitecture Core Application Layer</Title>
-    <Description>High-performance application layer components with CQRS, MediatR, and pipeline
+    <Description>High-performance application layer components with CQRS, Mediator, and pipeline
       behaviors for Clean/Union Architecture.</Description>
-    <PackageTags>Clean Architecture; CQRS; MediatR; Pipeline; Application Layer</PackageTags>
+    <PackageTags>Clean Architecture; CQRS; Mediator; Pipeline; Application Layer</PackageTags>
     <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
     <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -50,16 +50,20 @@
 
   <!-- Dependencies -->
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.2" />
   </ItemGroup>
 
   <!-- Project References -->
   <ItemGroup>
-    <ProjectReference Include="../CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
-    <ProjectReference Include="../CrossCuttingConcerns.Logging.Abstractions/NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.csproj" />
-    <ProjectReference Include="../Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
+    <ProjectReference
+      Include="../CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
+    <ProjectReference
+      Include="../CrossCuttingConcerns.Logging.Abstractions/NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.csproj" />
+    <ProjectReference
+      Include="../Mediator.Abstractions/NArchitecture.Core.Mediator.Abstractions.csproj" />
+    <ProjectReference
+      Include="../Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

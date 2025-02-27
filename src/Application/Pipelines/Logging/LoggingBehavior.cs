@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using MediatR;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.Models;
+using NArchitecture.Core.Mediator.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Logging;
 

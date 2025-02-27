@@ -1,6 +1,6 @@
 using System.Transactions;
-using MediatR;
 using NArchitecture.Core.Application.Pipelines.Transaction;
+using NArchitecture.Core.Mediator.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Application.Tests.Pipelines.Transaction;

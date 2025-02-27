@@ -1,5 +1,5 @@
 ﻿using System.Transactions;
-using MediatR;
+using NArchitecture.Core.Mediator.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Transaction;
 

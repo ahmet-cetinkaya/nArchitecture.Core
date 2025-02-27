@@ -1,13 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
-using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.Mediator.Abstractions;
 
 namespace NArchitecture.Core.Application.Pipelines.Caching;
 
 /// <summary>
-/// Implements caching behavior for MediatR pipeline using IDistributedCache.
+/// Implements caching behavior for Mediator pipeline using IDistributedCache.
 /// Handles cache operations for requests implementing ICacheableRequest.
 /// </summary>
 /// <typeparam name="TRequest">The type of request implementing ICacheableRequest</typeparam>

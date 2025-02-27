@@ -1,11 +1,11 @@
 using System.Threading.Channels;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Logging;
 using NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions;
+using NArchitecture.Core.Mediator.Abstractions;
 
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
@@ -200,7 +200,7 @@ public class LoggingBehaviorBenchmarks
     }
 }
 
-internal class TestRequest : IRequest<TestResponse>, ILoggableRequest
+public class TestRequest : IRequest<TestResponse>, ILoggableRequest
 {
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;

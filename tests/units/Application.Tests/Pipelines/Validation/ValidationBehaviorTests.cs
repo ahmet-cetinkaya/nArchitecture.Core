@@ -1,7 +1,7 @@
-using MediatR;
 using Moq;
 using NArchitecture.Core.Application.Pipelines.Validation;
 using NArchitecture.Core.CrossCuttingConcerns.Exception.Types;
+using NArchitecture.Core.Mediator.Abstractions;
 using NArchitecture.Core.Validation.Abstractions;
 using Shouldly;
 
