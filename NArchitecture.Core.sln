@@ -132,6 +132,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Validati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Application.DependencyInjection", "src\Application.DependencyInjection\NArchitecture.Core.Application.DependencyInjection.csproj", "{6177602B-0771-480A-BAB8-569429A7153A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NArchitecture.Core.Mapper.AutoMapper.DependencyInjection", "src\Mapper.AutoMapper.DependencyInjection\NArchitecture.Core.Mapper.AutoMapper.DependencyInjection.csproj", "{E88F5358-40A0-4580-B2EF-F5EEAC938429}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -350,6 +352,10 @@ Global
 		{6177602B-0771-480A-BAB8-569429A7153A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6177602B-0771-480A-BAB8-569429A7153A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6177602B-0771-480A-BAB8-569429A7153A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E88F5358-40A0-4580-B2EF-F5EEAC938429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E88F5358-40A0-4580-B2EF-F5EEAC938429}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E88F5358-40A0-4580-B2EF-F5EEAC938429}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E88F5358-40A0-4580-B2EF-F5EEAC938429}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -412,6 +418,7 @@ Global
 		{0DD71F00-CCCF-45EC-81C2-D94D7F80CC7D} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
 		{4B7D3B6E-FE9F-456F-B299-39D52519B333} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
 		{6177602B-0771-480A-BAB8-569429A7153A} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
+		{E88F5358-40A0-4580-B2EF-F5EEAC938429} = {7C1F8BBD-7E3D-44BE-81E6-55EB807C14B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E988190-9FBF-4E2E-9B3A-35C418139397}
