@@ -12,9 +12,8 @@ namespace NArchitecture.Core.Mailing.MailKit;
 /// <summary>
 /// Implements email sending functionality using MailKit library.
 /// </summary>
-public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? smtpClientFactory = null) : IMailService
+public class MailKitMailService(MailConfigration configuration, ISmtpClientFactory? smtpClientFactory = null) : IMailService
 {
-    private readonly MailSettings _mailSettings = configuration;
     private readonly ISmtpClientFactory _smtpClientFactory = smtpClientFactory ?? new DefaultSmtpClientFactory();
 
     /// <summary>
@@ -53,9 +52,9 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
         try
         {
             smtp = _smtpClientFactory.Create();
-            await smtp.ConnectAsync(_mailSettings.Server, _mailSettings.Port, cancellationToken: cancellationToken);
-            if (_mailSettings.AuthenticationRequired)
-                await smtp.AuthenticateAsync(_mailSettings.UserName, _mailSettings.Password, cancellationToken);
+            await smtp.ConnectAsync(configuration.Server, configuration.Port, cancellationToken: cancellationToken);
+            if (configuration.AuthenticationRequired)
+                await smtp.AuthenticateAsync(configuration.UserName, configuration.Password, cancellationToken);
 
             foreach (Mail mail in mailList)
             {
@@ -84,7 +83,7 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
     {
         MimeMessage email = new();
 
-        email.From.Add(new MailboxAddress(_mailSettings.SenderFullName, _mailSettings.SenderEmail));
+        email.From.Add(new MailboxAddress(configuration.SenderFullName, configuration.SenderEmail));
         email.To.AddRange(mail.ToList);
 
         if (mail.CcList?.Count > 0)
@@ -126,9 +125,9 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
 
         try
         {
-            await smtp.ConnectAsync(_mailSettings.Server, _mailSettings.Port, cancellationToken: cancellationToken);
-            if (_mailSettings.AuthenticationRequired)
-                await smtp.AuthenticateAsync(_mailSettings.UserName, _mailSettings.Password, cancellationToken);
+            await smtp.ConnectAsync(configuration.Server, configuration.Port, cancellationToken: cancellationToken);
+            if (configuration.AuthenticationRequired)
+                await smtp.AuthenticateAsync(configuration.UserName, configuration.Password, cancellationToken);
 
             return (email, smtp);
         }
@@ -142,18 +141,18 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
 
     private bool hasValidDkimSettings()
     {
-        return !string.IsNullOrWhiteSpace(_mailSettings.DkimPrivateKey)
-            && !string.IsNullOrWhiteSpace(_mailSettings.DkimSelector)
-            && !string.IsNullOrWhiteSpace(_mailSettings.DomainName);
+        return !string.IsNullOrWhiteSpace(configuration.DkimPrivateKey)
+            && !string.IsNullOrWhiteSpace(configuration.DkimSelector)
+            && !string.IsNullOrWhiteSpace(configuration.DomainName);
     }
 
     private void applyDkimSignature(MimeMessage email)
     {
-        DkimSigner signer = new(key: readPrivateKeyFromPemEncodedString(), _mailSettings.DomainName, _mailSettings.DkimSelector)
+        DkimSigner signer = new(key: readPrivateKeyFromPemEncodedString(), configuration.DomainName, configuration.DkimSelector)
         {
             HeaderCanonicalizationAlgorithm = DkimCanonicalizationAlgorithm.Simple,
             BodyCanonicalizationAlgorithm = DkimCanonicalizationAlgorithm.Simple,
-            AgentOrUserIdentifier = $"@{_mailSettings.DomainName}",
+            AgentOrUserIdentifier = $"@{configuration.DomainName}",
             QueryMethod = "dns/txt",
         };
         HeaderId[] headers = [HeaderId.From, HeaderId.Subject, HeaderId.To];
@@ -162,7 +161,7 @@ public class MailKitMailService(MailSettings configuration, ISmtpClientFactory? 
 
     private AsymmetricKeyParameter readPrivateKeyFromPemEncodedString()
     {
-        string trimmedKey = (_mailSettings.DkimPrivateKey ?? string.Empty).Trim();
+        string trimmedKey = (configuration.DkimPrivateKey ?? string.Empty).Trim();
         string pemEncodedKey = trimmedKey.StartsWith("-----BEGIN", StringComparison.Ordinal)
             ? trimmedKey
             : "-----BEGIN RSA PRIVATE KEY-----\n" + trimmedKey + "\n-----END RSA PRIVATE KEY-----";

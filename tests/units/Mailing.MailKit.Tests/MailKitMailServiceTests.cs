@@ -13,7 +13,7 @@ public class MailKitMailServiceTests
 {
     private readonly Mock<ISmtpClient> _smtpClientMock;
     private readonly Mock<ISmtpClientFactory> _smtpClientFactoryMock;
-    private readonly MailSettings _mailSettings;
+    private readonly MailConfigration _mailConfiguration;
     private readonly MailKitMailService _sut; // System Under Test
 
     public MailKitMailServiceTests()
@@ -22,7 +22,7 @@ public class MailKitMailServiceTests
         _smtpClientFactoryMock = new Mock<ISmtpClientFactory>();
         _ = _smtpClientFactoryMock.Setup(x => x.Create()).Returns(_smtpClientMock.Object);
 
-        _mailSettings = new MailSettings
+        _mailConfiguration = new MailConfigration
         {
             Server = "smtp.example.com",
             Port = 587,
@@ -33,7 +33,7 @@ public class MailKitMailServiceTests
             AuthenticationRequired = true,
         };
 
-        _sut = new MailKitMailService(_mailSettings, _smtpClientFactoryMock.Object);
+        _sut = new MailKitMailService(_mailConfiguration, _smtpClientFactoryMock.Object);
     }
 
     [Fact(DisplayName = "Should successfully send email with valid parameters")]
@@ -91,8 +91,8 @@ public class MailKitMailServiceTests
         _ = _smtpClientMock
             .Setup(x =>
                 x.ConnectAsync(
-                    _mailSettings.Server,
-                    _mailSettings.Port,
+                    _mailConfiguration.Server,
+                    _mailConfiguration.Port,
                     It.IsAny<SecureSocketOptions>(),
                     It.IsAny<CancellationToken>()
                 )
