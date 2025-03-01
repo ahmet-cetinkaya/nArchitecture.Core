@@ -61,18 +61,14 @@ public class AuthenticatorTests
 
     private void SetupGetAsync(Guid userId, UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>? returnValue)
     {
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(returnValue);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(returnValue);
     }
 
     private void SetupRepositoryMocks(UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>? authenticator)
     {
         if (authenticator != null)
         {
-            _ = _mockRepository
-                .Setup(r => r.GetByIdAsync(authenticator.UserId, _cancellationToken))
-                .ReturnsAsync(authenticator);
+            _ = _mockRepository.Setup(r => r.GetByIdAsync(authenticator.UserId, _cancellationToken)).ReturnsAsync(authenticator);
 
             _ = _mockCodeGenerator
                 .Setup(g => g.GenerateNumeric(It.IsAny<int>(), It.IsAny<byte[]>()))
@@ -220,9 +216,7 @@ public class AuthenticatorTests
         };
 
         // Setup repository mock
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Setup OTP service mock specifically for OTP type
         if (type == AuthenticatorType.Otp)
@@ -315,20 +309,20 @@ public class AuthenticatorTests
         var userId = Guid.NewGuid();
         var authenticator = new UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(userId, AuthenticatorType.Email);
 
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
-        _ = _mockRepository
-            .Setup(r => r.DeleteAsync(authenticator, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.DeleteAsync(authenticator, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Act
         await _authenticator.DeleteAsync(userId, _cancellationToken);
 
         // Assert
         _mockRepository.Verify(
-            r => r.DeleteAsync(It.Is<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(a => a == authenticator), _cancellationToken),
+            r =>
+                r.DeleteAsync(
+                    It.Is<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>(a => a == authenticator),
+                    _cancellationToken
+                ),
             Times.Once
         );
     }
@@ -668,9 +662,7 @@ public class AuthenticatorTests
             Id = userId,
         };
 
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         if (type == AuthenticatorType.Otp)
             _ = _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
@@ -704,9 +696,7 @@ public class AuthenticatorTests
             Id = userId,
         };
 
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         if (type == AuthenticatorType.Otp)
             _ = _mockOtpService.Setup(o => o.ComputeOtp(TestCodeSeed, It.IsAny<DateTime?>())).Returns(code);
@@ -740,9 +730,7 @@ public class AuthenticatorTests
         // Add unsupported type to enabled types to bypass initial validation
         _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([type]);
 
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Act & Assert
         _ = await Should.ThrowAsync<NotSupportedException>(
@@ -803,9 +791,7 @@ public class AuthenticatorTests
         };
 
         // Setup repository returning our authenticator
-        _ = _mockRepository
-            .Setup(r => r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Enable SMS authentication type
         _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([AuthenticatorType.Sms]);
@@ -899,10 +885,7 @@ public class AuthenticatorTests
         };
 
         // Setup repository mock
-        _ = _mockRepository
-            .Setup(r =>
-                r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Clear enabled types
         _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([]); // Empty set means no types are enabled
@@ -945,10 +928,7 @@ public class AuthenticatorTests
         };
 
         // Setup repository mock
-        _ = _mockRepository
-            .Setup(r =>
-                r.GetByIdAsync(userId, _cancellationToken))
-            .ReturnsAsync(authenticator);
+        _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Clear enabled types
         _ = _mockConfiguration.Setup(c => c.EnabledAuthenticatorTypes).Returns([]); // Empty set means no types are enabled

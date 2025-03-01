@@ -6,18 +6,21 @@ namespace NArchitecture.Core.Mediator.Tests;
 
 // Keep test classes separate with clear names
 file record TestRequest : IRequest;
+
 file class TestRequestHandler : IRequestHandler<TestRequest>
 {
     public Task Handle(TestRequest request, CancellationToken cancellationToken) => Task.CompletedTask;
 }
 
 file record TestQuery : IQuery<string>;
+
 file class TestQueryHandler : IQueryHandler<TestQuery, string>
 {
     public Task<string> Handle(TestQuery request, CancellationToken cancellationToken) => Task.FromResult("Result");
 }
 
 file record TestCommand : ICommand;
+
 file class TestCommandHandler : ICommandHandler<TestCommand>
 {
     public Task Handle(TestCommand request, CancellationToken cancellationToken) => Task.CompletedTask;
@@ -25,6 +28,7 @@ file class TestCommandHandler : ICommandHandler<TestCommand>
 
 // Create separate event types for different test scenarios
 file record TestEvent : IEvent;
+
 file record MultipleHandlersEvent : IEvent;
 
 file class TestEventHandler : IEventHandler<TestEvent>
@@ -43,7 +47,7 @@ file class SecondMultipleHandlersEventHandler : IEventHandler<MultipleHandlersEv
 }
 
 // Add a test behavior class to be registered
-public class TestRequestBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> 
+public class TestRequestBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)

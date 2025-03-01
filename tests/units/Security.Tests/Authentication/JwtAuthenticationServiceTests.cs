@@ -120,9 +120,7 @@ public class JwtAuthenticationServiceTests
             .Setup(x => x.GetByTokenAsync(refreshToken.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(refreshToken);
 
-        _ = _mockUserRepository
-            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+        _ = _mockUserRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
 
         _ = _mockAuthorizationService
             .Setup(x => x.GetUserOperationClaimsAsync(userId, It.IsAny<CancellationToken>()))
@@ -435,9 +433,7 @@ public class JwtAuthenticationServiceTests
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(oldToken.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(oldToken);
-        _ = _mockUserRepository
-            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+        _ = _mockUserRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
         _ = _mockAuthorizationService
             .Setup(x => x.GetUserOperationClaimsAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(operationClaims);
@@ -518,9 +514,7 @@ public class JwtAuthenticationServiceTests
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(initialToken.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(initialToken);
-        _ = _mockUserRepository
-            .Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+        _ = _mockUserRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
         _ = _mockAuthorizationService
             .Setup(x => x.GetUserOperationClaimsAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(operationClaims);

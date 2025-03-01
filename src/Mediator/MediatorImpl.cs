@@ -59,7 +59,7 @@ public class MediatorImpl : IMediator
 
         // Get the closed behavior type for this specific request/response
         var closedBehaviorType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, responseType);
-        
+
         // Get behaviors directly registered for this specific request/response type
         var behaviors = serviceProvider.GetServices(closedBehaviorType).ToArray();
 
@@ -124,7 +124,7 @@ public class MediatorImpl : IMediator
 
         // Get the closed behavior type for this specific request
         var closedBehaviorType = typeof(IPipelineBehavior<>).MakeGenericType(requestType);
-        
+
         // Get behaviors directly registered for this specific request type
         var behaviors = serviceProvider.GetServices(closedBehaviorType).ToArray();
 

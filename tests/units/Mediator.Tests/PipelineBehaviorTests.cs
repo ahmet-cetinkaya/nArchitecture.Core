@@ -1,10 +1,10 @@
-using Microsoft.Extensions.DependencyInjection;
-using NArchitecture.Core.Mediator.Abstractions;
-using NArchitecture.Core.Mediator.Abstractions.CQRS;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using NArchitecture.Core.Mediator.Abstractions;
+using NArchitecture.Core.Mediator.Abstractions.CQRS;
 
 namespace NArchitecture.Core.Mediator.Tests;
 
@@ -51,7 +51,8 @@ public class FirstBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TR
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         _tracker.AddExecution("FirstBehavior-Pre");
         var result = await next();
@@ -70,7 +71,8 @@ public class SecondBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, T
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         _tracker.AddExecution("SecondBehavior-Pre");
         var result = await next();
@@ -86,10 +88,7 @@ public class FirstBehaviorWithoutResponse<TRequest> : IPipelineBehavior<TRequest
 
     public FirstBehaviorWithoutResponse(ExecutionTracker tracker) => _tracker = tracker;
 
-    public async Task Handle(
-        TRequest request,
-        RequestHandlerDelegate next,
-        CancellationToken cancellationToken)
+    public async Task Handle(TRequest request, RequestHandlerDelegate next, CancellationToken cancellationToken)
     {
         _tracker.AddExecution("FirstBehavior-Pre");
         await next();
@@ -104,10 +103,7 @@ public class SecondBehaviorWithoutResponse<TRequest> : IPipelineBehavior<TReques
 
     public SecondBehaviorWithoutResponse(ExecutionTracker tracker) => _tracker = tracker;
 
-    public async Task Handle(
-        TRequest request,
-        RequestHandlerDelegate next,
-        CancellationToken cancellationToken)
+    public async Task Handle(TRequest request, RequestHandlerDelegate next, CancellationToken cancellationToken)
     {
         _tracker.AddExecution("SecondBehavior-Pre");
         await next();
@@ -119,10 +115,7 @@ public class SecondBehaviorWithoutResponse<TRequest> : IPipelineBehavior<TReques
 public class AutoRegistrableBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
-    public Task<TResponse> Handle(
-        TRequest request, 
-        RequestHandlerDelegate<TResponse> next, 
-        CancellationToken cancellationToken)
+    public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         return next();
     }
@@ -132,7 +125,7 @@ public class AutoRegistrableBehavior<TRequest, TResponse> : IPipelineBehavior<TR
 public class ExecutionTracker
 {
     public List<string> ExecutionOrder { get; } = new();
-    
+
     public void AddExecution(string step) => ExecutionOrder.Add(step);
 }
 
@@ -145,22 +138,22 @@ public class PipelineBehaviorTests
         // Arrange
         var executionTracker = new ExecutionTracker();
         var services = new ServiceCollection();
-        
+
         // Register mediator and handlers
         services.AddSingleton(executionTracker);
         services.AddSingleton<IMediator, MediatorImpl>();
         services.AddTransient<IRequestHandler<TrackingRequest, string>, TrackingRequestHandler>();
-        
+
         // Register behaviors in order
         services.AddTransient<IPipelineBehavior<TrackingRequest, string>, FirstBehavior<TrackingRequest, string>>();
         services.AddTransient<IPipelineBehavior<TrackingRequest, string>, SecondBehavior<TrackingRequest, string>>();
-        
+
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();
-        
+
         // Act
         var result = await mediator.SendAsync(new TrackingRequest(), CancellationToken.None);
-        
+
         // Assert
         result.ShouldBe("Handler Result");
         executionTracker.ExecutionOrder.Count.ShouldBe(5);
@@ -170,7 +163,7 @@ public class PipelineBehaviorTests
         executionTracker.ExecutionOrder[3].ShouldBe("SecondBehavior-Post");
         executionTracker.ExecutionOrder[4].ShouldBe("FirstBehavior-Post");
     }
-    
+
     [Fact(DisplayName = "Pipeline behaviors should execute in expected order for requests without response")]
     [Trait("Category", "Unit")]
     public async Task SendAsync_WithoutResponse_WithPipelineBehaviors_ShouldExecuteInExpectedOrder()
@@ -178,22 +171,28 @@ public class PipelineBehaviorTests
         // Arrange
         var executionTracker = new ExecutionTracker();
         var services = new ServiceCollection();
-        
+
         // Register mediator and handlers
         services.AddSingleton(executionTracker);
         services.AddSingleton<IMediator, MediatorImpl>();
         services.AddTransient<IRequestHandler<TrackingRequestWithoutResponse>, TrackingRequestWithoutResponseHandler>();
-        
+
         // Register behaviors in order
-        services.AddTransient<IPipelineBehavior<TrackingRequestWithoutResponse>, FirstBehaviorWithoutResponse<TrackingRequestWithoutResponse>>();
-        services.AddTransient<IPipelineBehavior<TrackingRequestWithoutResponse>, SecondBehaviorWithoutResponse<TrackingRequestWithoutResponse>>();
-        
+        services.AddTransient<
+            IPipelineBehavior<TrackingRequestWithoutResponse>,
+            FirstBehaviorWithoutResponse<TrackingRequestWithoutResponse>
+        >();
+        services.AddTransient<
+            IPipelineBehavior<TrackingRequestWithoutResponse>,
+            SecondBehaviorWithoutResponse<TrackingRequestWithoutResponse>
+        >();
+
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();
-        
+
         // Act
         await mediator.SendAsync(new TrackingRequestWithoutResponse(), CancellationToken.None);
-        
+
         // Assert
         executionTracker.ExecutionOrder.Count.ShouldBe(5);
         executionTracker.ExecutionOrder[0].ShouldBe("FirstBehavior-Pre");
@@ -210,55 +209,55 @@ public class PipelineBehaviorTests
         // Arrange
         var executionTracker = new ExecutionTracker();
         var services = new ServiceCollection();
-        
+
         // Register mediator and handlers without behaviors
         services.AddSingleton(executionTracker);
         services.AddSingleton<IMediator, MediatorImpl>();
         services.AddTransient<IRequestHandler<TrackingRequest, string>, TrackingRequestHandler>();
-        
+
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();
-        
+
         // Act
         var result = await mediator.SendAsync(new TrackingRequest(), CancellationToken.None);
-        
+
         // Assert
         result.ShouldBe("Handler Result");
         executionTracker.ExecutionOrder.Count.ShouldBe(1);
         executionTracker.ExecutionOrder[0].ShouldBe("Handler");
     }
-    
+
     [Fact(DisplayName = "Pipeline behaviors should be correctly registered from assemblies")]
     [Trait("Category", "Unit")]
     public async Task AddMediator_ShouldRegisterPipelineBehaviorsFromAssemblies()
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Add mediator with the current assembly (which contains our behaviors)
         services.AddMediator(typeof(PipelineBehaviorTests).Assembly);
-        
+
         // Register handlers and required services manually
         services.AddTransient<ExecutionTracker>();
         services.AddTransient<IRequestHandler<TrackingRequest, string>, TrackingRequestHandler>();
-        
+
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();
-        
+
         // Act - Get the auto-registered behavior
         var behavior = provider.GetService<IPipelineBehavior<TrackingRequest, string>>();
-        
+
         // Assert
         behavior.ShouldNotBeNull();
-        // TestRequestBehavior is being registered from ServiceRegistrationTests.cs 
+        // TestRequestBehavior is being registered from ServiceRegistrationTests.cs
         // and detected during assembly scanning
         behavior.ShouldBeOfType<TestRequestBehavior<TrackingRequest, string>>();
-        
+
         // Test it works
         var result = await mediator.SendAsync(new TrackingRequest(), CancellationToken.None);
         result.ShouldBe("Handler Result");
     }
-    
+
     [Fact(DisplayName = "Request handling should fail correctly with no handler registered")]
     [Trait("Category", "Unit")]
     public async Task SendAsync_WithNoHandlerRegistered_ShouldThrowException()
@@ -268,11 +267,12 @@ public class PipelineBehaviorTests
         services.AddSingleton<IMediator, MediatorImpl>();
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();
-        
+
         // Act & Assert
         var exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await mediator.SendAsync(new TrackingRequest()));
-            
+            async () => await mediator.SendAsync(new TrackingRequest())
+        );
+
         exception.Message.ShouldContain("No handler registered");
     }
 }
