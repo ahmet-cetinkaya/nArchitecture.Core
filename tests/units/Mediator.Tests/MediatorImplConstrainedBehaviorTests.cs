@@ -99,7 +99,8 @@ public class MediatorImplConstrainedBehaviorTests
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstrainedBehavior<,>));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         
         // Act - Send standard request
         var standardRequest = new StandardRequest("Test1");
@@ -139,7 +140,8 @@ public class MediatorImplConstrainedBehaviorTests
         services.AddTransient(typeof(IPipelineBehavior<>), typeof(ConstrainedVoidBehavior<>));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         
         // Act - Send standard request
         var standardRequest = new StandardVoidRequest("Test1");
@@ -177,7 +179,8 @@ public class MediatorImplConstrainedBehaviorTests
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstrainedBehavior<,>));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         
         // Act
         var constrainedRequest = new ConstrainedRequest("Test");

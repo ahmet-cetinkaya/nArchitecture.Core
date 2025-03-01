@@ -176,7 +176,8 @@ public class MediatorImplTests
             sp => new LoggingBehavior<TestRequestWithResponse, string>(executionLog, "Behavior2"));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Test");
         
         // Act
@@ -209,7 +210,8 @@ public class MediatorImplTests
             sp => new LoggingBehavior<TestRequest>(executionLog, "Behavior2"));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequest("Test");
         
         // Act
@@ -237,7 +239,8 @@ public class MediatorImplTests
         services.AddTransient<IPipelineBehavior<TestRequestWithResponse, string>, RequestModifierBehavior<TestRequestWithResponse, string>>();
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Original");
         
         // Act
@@ -260,7 +263,8 @@ public class MediatorImplTests
         services.AddTransient<IPipelineBehavior<TestRequestWithResponse, string>, ResponseModifierBehavior<TestRequestWithResponse, string>>();
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Test");
         
         // Act
@@ -290,7 +294,8 @@ public class MediatorImplTests
             sp => new LoggingBehavior<TestRequestWithResponse, string>(executionLog, "ShouldNotExecute"));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Test");
         
         // Act
@@ -323,7 +328,8 @@ public class MediatorImplTests
             sp => new LoggingBehavior<TestRequest>(executionLog, "ShouldNotExecute"));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequest("Test");
         
         // Act
@@ -343,7 +349,8 @@ public class MediatorImplTests
         // Arrange
         var services = new ServiceCollection();
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         
         // Act & Assert
         if (withResponse)
@@ -370,7 +377,8 @@ public class MediatorImplTests
         services.AddTransient<IRequestHandler<TestRequestWithResponse, string>, TestRequestWithResponseHandler>();
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Test");
         
         // Act
@@ -401,7 +409,8 @@ public class MediatorImplTests
             sp => new LoggingBehavior<TestRequestWithResponse, string>(executionLog, "ExceptionBehavior"));
         
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Test");
         
         // Act & Assert
@@ -440,7 +449,8 @@ public class MediatorImplTests
         }
 
         var provider = services.BuildServiceProvider();
-        var mediator = new MediatorImpl(provider);
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var mediator = new MediatorImpl(provider, scopeFactory);
         var request = new TestRequestWithResponse("Test");
 
         // Act
