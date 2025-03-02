@@ -273,6 +273,6 @@ public class PipelineBehaviorTests
             async () => await mediator.SendAsync(new TrackingRequest())
         );
 
-        exception.Message.ShouldContain("No handler registered");
+        exception.Message.ShouldContain("Handler not found for");
     }
 }
