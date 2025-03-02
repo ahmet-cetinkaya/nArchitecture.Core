@@ -38,13 +38,4 @@ public class UserAuthenticator<
         Type = type;
     }
 
-    public virtual User<
-        TUserId,
-        TOperationClaimId,
-        TRefreshTokenId,
-        TId,
-        TUserGroupId,
-        TUserInGroupId,
-        TUserOperationClaimId
-    >? User { get; set; }
 }

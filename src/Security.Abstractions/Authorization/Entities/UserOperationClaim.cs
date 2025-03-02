@@ -30,14 +30,5 @@ public class UserOperationClaim<
         OperationClaimId = operationClaimId;
     }
 
-    public virtual User<
-        TUserId,
-        TOperationClaimId,
-        TRefreshTokenId,
-        TUserAuthenticatorId,
-        TUserGroupId,
-        TUserInGroupId,
-        TUserOperationClaimId
-    >? User { get; set; }
-    public virtual OperationClaim<TOperationClaimId>? OperationClaim { get; set; }
+
 }

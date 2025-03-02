@@ -25,27 +25,5 @@ public class UserGroup<
         Name = name;
     }
 
-    public virtual ICollection<
-        UserGroupOperationClaim<
-            TUserGroupOperationClaimId,
-            TOperationClaimId,
-            TRefreshTokenId,
-            TUserAuthenticatorId,
-            TUserGroupId,
-            TUserGroupOperationClaimId,
-            TUserId
-        >
-    >? UserGroupOperationClaims { get; set; }
-    public virtual ICollection<
-        UserInGroup<
-            TId,
-            TOperationClaimId,
-            TRefreshTokenId,
-            TUserAuthenticatorId,
-            TId,
-            TUserId,
-            TUserGroupId,
-            TUserGroupOperationClaimId
-        >
-    >? UserInGroups { get; set; }
+
 }

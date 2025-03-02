@@ -37,14 +37,4 @@ public class RefreshToken<
         ExpiresAt = expiresAt;
         CreatedByIp = createdByIp;
     }
-
-    public virtual User<
-        TUserId,
-        TOperationClaimId,
-        TId,
-        TUserAuthenticatorId,
-        TUserGroupId,
-        TUserInGroupId,
-        TUserOperationClaimId
-    >? User { get; set; }
 }

@@ -30,22 +30,5 @@ public class UserInGroup<
         UserGroupId = userGroupId;
     }
 
-    public virtual User<
-        TUserId,
-        TOperationClaimId,
-        TRefreshTokenId,
-        TUserAuthenticatorId,
-        TUserGroupId,
-        TUserInGroupId,
-        TUserOperationClaimId
-    >? User { get; set; }
-    public virtual UserGroup<
-        TUserGroupId,
-        TOperationClaimId,
-        TRefreshTokenId,
-        TUserAuthenticatorId,
-        TUserGroupId,
-        TUserOperationClaimId,
-        TUserId
-    >? UserGroup { get; set; }
+
 }
