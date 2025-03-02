@@ -29,6 +29,4 @@ public class UserInGroup<
         UserId = userId;
         UserGroupId = userGroupId;
     }
-
-
 }

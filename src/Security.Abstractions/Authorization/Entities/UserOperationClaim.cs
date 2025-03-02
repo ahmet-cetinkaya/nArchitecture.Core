@@ -29,6 +29,4 @@ public class UserOperationClaim<
         UserId = userId;
         OperationClaimId = operationClaimId;
     }
-
-
 }

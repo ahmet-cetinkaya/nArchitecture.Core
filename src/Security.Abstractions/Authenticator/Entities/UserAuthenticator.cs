@@ -37,5 +37,4 @@ public class UserAuthenticator<
         UserId = userId;
         Type = type;
     }
-
 }

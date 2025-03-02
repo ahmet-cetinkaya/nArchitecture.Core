@@ -27,6 +27,4 @@ public class UserGroupOperationClaim<
         UserGroupId = userGroupId;
         OperationClaimId = operationClaimId;
     }
-
-
 }
