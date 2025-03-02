@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NArchitecture.Core.Persistence.Abstractions.Repositories;
@@ -139,5 +140,50 @@ public static class ModelBuilderExtensions
         ConstantExpression nullConstant = Expression.Constant(null, typeof(DateTime?));
         BinaryExpression compareExpression = Expression.Equal(deletedAtProperty, nullConstant);
         return Expression.Lambda(compareExpression, parameter);
+    }
+
+    /// <summary>Applies all entity type configurations from the specified assembly.</summary>
+    /// <param name="modelBuilder">The model builder instance.</param>
+    /// <param name="assembly">The assembly containing the entity type configurations.</param>
+    public static ModelBuilder ApplyConfigurationsFromAssemblyWithDefaultConstructorsOnly(
+        this ModelBuilder modelBuilder,
+        Assembly assembly
+    )
+    {
+        // Get all types that implement IEntityTypeConfiguration<>
+        IEnumerable<Type> configurationTypes = assembly
+            .GetTypes()
+            .Where(type =>
+                !type.IsAbstract
+                && !type.IsInterface
+                && type.GetInterfaces()
+                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>))
+            )
+            .Where(type =>
+                type.GetConstructors().Length == 0 || type.GetConstructors().Any(ctor => ctor.GetParameters().Length == 0)
+            );
+
+        // Apply each configuration
+        foreach (Type? configurationType in configurationTypes)
+        {
+            object? configuration = Activator.CreateInstance(configurationType);
+            MethodInfo? applyConfigurationMethod = typeof(ModelBuilder).GetMethod(
+                "ApplyConfiguration",
+                [typeof(IEntityTypeConfiguration<>).MakeGenericType(GetEntityType(configurationType))]
+            );
+
+            _ = (applyConfigurationMethod?.Invoke(modelBuilder, [configuration]));
+        }
+
+        return modelBuilder;
+    }
+
+    private static Type GetEntityType(Type configurationType)
+    {
+        Type configurationInterface = configurationType
+            .GetInterfaces()
+            .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>));
+
+        return configurationInterface.GetGenericArguments()[0];
     }
 }
