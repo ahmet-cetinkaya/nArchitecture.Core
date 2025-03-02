@@ -91,7 +91,7 @@ public static class SecurityServiceRegistration
             services.TryAddScoped<IOtpService, OtpNetOtpService>();
 
         services.TryAddScoped<
-            IAuthenticator<
+            IAuthenticatorService<
                 TOperationClaimId,
                 TRefreshTokenId,
                 TUserAuthenticatorId,
@@ -100,7 +100,7 @@ public static class SecurityServiceRegistration
                 TUserInGroupId,
                 TUserOperationClaimId
             >,
-            Authenticator<
+            AuthenticatorService<
                 TOperationClaimId,
                 TRefreshTokenId,
                 TUserAuthenticatorId,

@@ -24,7 +24,7 @@ public class SecurityServiceRegistrationTests
 
         // Assert
         ServiceProvider provider = services.BuildServiceProvider();
-        _ = provider.GetService<IAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().ShouldNotBeNull();
+        _ = provider.GetService<IAuthenticatorService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().ShouldNotBeNull();
         _ = provider.GetService<IAuthenticationService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>>().ShouldNotBeNull();
     }
 

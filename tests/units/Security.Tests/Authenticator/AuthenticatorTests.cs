@@ -22,7 +22,7 @@ public class AuthenticatorTests
     private readonly Mock<IMailService> _mockMailService;
     private readonly Mock<ISmsService> _mockSmsService;
     private readonly Mock<IOtpService> _mockOtpService;
-    private readonly Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid> _authenticator;
+    private readonly AuthenticatorService<Guid, Guid, Guid, Guid, Guid, Guid, Guid> _authenticator;
     private readonly CancellationToken _cancellationToken;
 
     private static readonly byte[] TestCodeSeed = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -334,7 +334,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
+        var authenticator = new AuthenticatorService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRepository.Object,
             _mockCodeGenerator.Object,
             _mockConfiguration.Object,
@@ -357,7 +357,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
+        var authenticator = new AuthenticatorService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRepository.Object,
             _mockCodeGenerator.Object,
             _mockConfiguration.Object,
@@ -380,7 +380,7 @@ public class AuthenticatorTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var authenticator = new Authenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
+        var authenticator = new AuthenticatorService<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(
             _mockRepository.Object,
             _mockCodeGenerator.Object,
             _mockConfiguration.Object,

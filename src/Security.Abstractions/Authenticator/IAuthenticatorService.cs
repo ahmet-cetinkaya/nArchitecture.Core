@@ -3,7 +3,7 @@ using NArchitecture.Core.Security.Abstractions.Authenticator.Enums;
 
 namespace NArchitecture.Core.Security.Abstractions.Authenticator;
 
-public interface IAuthenticator<
+public interface IAuthenticatorService<
     TOperationClaimId,
     TRefreshTokenId,
     TUserAuthenticatorId,

@@ -10,7 +10,7 @@ using NArchitecture.Core.Sms.Abstractions;
 
 namespace NArchitecture.Core.Security.Authenticator;
 
-public class Authenticator<
+public class AuthenticatorService<
     TOperationClaimId,
     TRefreshTokenId,
     TUserAuthenticatorId,
@@ -34,7 +34,7 @@ public class Authenticator<
     ISmsService? smsService = null,
     IOtpService? otpAuthenticator = null
 )
-    : IAuthenticator<
+    : IAuthenticatorService<
         TOperationClaimId,
         TRefreshTokenId,
         TUserAuthenticatorId,
