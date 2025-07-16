@@ -72,8 +72,8 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
             .ThrowsAsync(new InvalidRequestException("Invalid language code"));
 
         // Act & Assert
-        _ = await Should.ThrowAsync<InvalidRequestException>(
-            async () => await _manager.TranslateAsync(sourceText, targetLang, sourceLang)
+        _ = await Should.ThrowAsync<InvalidRequestException>(async () =>
+            await _manager.TranslateAsync(sourceText, targetLang, sourceLang)
         );
     }
 
@@ -113,8 +113,8 @@ public class AmazonTranslateLocalizationManagerTests : IDisposable
     )
     {
         // Act & Assert
-        ArgumentException exception = await Should.ThrowAsync<ArgumentException>(
-            async () => await _manager.TranslateAsync(text, targetLang, sourceLang)
+        ArgumentException exception = await Should.ThrowAsync<ArgumentException>(async () =>
+            await _manager.TranslateAsync(text, targetLang, sourceLang)
         );
         exception.Message.ShouldContain(expectedErrorMessage);
         _mockTranslateClient.Verify(

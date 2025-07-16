@@ -37,8 +37,8 @@ public class SecurityServiceRegistrationTests
         var jwtConfig = new Mock<IJwtAuthenticationConfiguration>();
 
         // Act & Assert
-        _ = Should.Throw<InvalidOperationException>(
-            () => services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object)
+        _ = Should.Throw<InvalidOperationException>(() =>
+            services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object)
         );
     }
 
@@ -55,8 +55,8 @@ public class SecurityServiceRegistrationTests
         SetupRequiredRepositories(services);
 
         // Act & Assert
-        _ = Should.Throw<InvalidOperationException>(
-            () => services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object)
+        _ = Should.Throw<InvalidOperationException>(() =>
+            services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object)
         );
     }
 
@@ -73,8 +73,8 @@ public class SecurityServiceRegistrationTests
         SetupRequiredRepositories(services);
 
         // Act & Assert
-        _ = Should.Throw<InvalidOperationException>(
-            () => services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object)
+        _ = Should.Throw<InvalidOperationException>(() =>
+            services.AddSecurityServices<Guid, Guid, Guid, Guid, Guid, Guid, Guid>(jwtConfig.Object, authConfig.Object)
         );
     }
 

@@ -122,29 +122,28 @@ public static class Program
 
     private static Task BuildProjectAsync(BenchmarkProject project)
     {
-        return Task.Run(
-            () =>
-                AnsiConsole
-                    .Status()
-                    .Start(
-                        $"[blue]:hammer_and_wrench: Building {project.Name}...[/]",
-                        ctx =>
+        return Task.Run(() =>
+            AnsiConsole
+                .Status()
+                .Start(
+                    $"[blue]:hammer_and_wrench: Building {project.Name}...[/]",
+                    ctx =>
+                    {
+                        _ = ctx.Spinner(Spinner.Known.Star);
+                        using var process = new Process
                         {
-                            _ = ctx.Spinner(Spinner.Known.Star);
-                            using var process = new Process
+                            StartInfo = new()
                             {
-                                StartInfo = new()
-                                {
-                                    FileName = "dotnet",
-                                    Arguments = $"build {project.Path} -c Release",
-                                    RedirectStandardOutput = true,
-                                    UseShellExecute = false,
-                                },
-                            };
-                            _ = process.Start();
-                            process.WaitForExit();
-                        }
-                    )
+                                FileName = "dotnet",
+                                Arguments = $"build {project.Path} -c Release",
+                                RedirectStandardOutput = true,
+                                UseShellExecute = false,
+                            },
+                        };
+                        _ = process.Start();
+                        process.WaitForExit();
+                    }
+                )
         );
     }
 }

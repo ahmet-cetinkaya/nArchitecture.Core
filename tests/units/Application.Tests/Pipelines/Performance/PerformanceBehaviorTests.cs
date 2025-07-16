@@ -79,8 +79,8 @@ public class PerformanceBehaviorTests
         Task<TestResponse> next() => throw expectedException;
 
         // Act & Assert
-        _ = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _behavior.Handle(request, next, CancellationToken.None)
+        _ = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await _behavior.Handle(request, next, CancellationToken.None)
         );
 
         _stopwatch.IsRunning.ShouldBeFalse("Stopwatch should be reset even after exception");

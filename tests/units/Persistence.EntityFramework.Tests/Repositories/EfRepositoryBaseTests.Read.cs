@@ -423,8 +423,8 @@ public partial class EfRepositoryBaseTests
 
         // Act & Assert
         System.Linq.Dynamic.Core.Exceptions.ParseException exception = isAsync
-            ? await Should.ThrowAsync<System.Linq.Dynamic.Core.Exceptions.ParseException>(
-                async () => await Repository.GetListByDynamicAsync(dynamicQuery)
+            ? await Should.ThrowAsync<System.Linq.Dynamic.Core.Exceptions.ParseException>(async () =>
+                await Repository.GetListByDynamicAsync(dynamicQuery)
             )
             : Should.Throw<System.Linq.Dynamic.Core.Exceptions.ParseException>(() => Repository.GetListByDynamic(dynamicQuery));
 

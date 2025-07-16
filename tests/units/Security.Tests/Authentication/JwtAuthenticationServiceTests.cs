@@ -158,8 +158,8 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("Token has expired");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _sut.RefreshTokenAsync(expiredToken.Token, "127.0.0.1")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _sut.RefreshTokenAsync(expiredToken.Token, "127.0.0.1")
         );
         exception.Message.ShouldBe("Token has expired");
     }
@@ -191,8 +191,8 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("Token has been revoked");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _sut.RefreshTokenAsync(revokedToken.Token, "127.0.0.1")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _sut.RefreshTokenAsync(revokedToken.Token, "127.0.0.1")
         );
         exception.Message.ShouldBe("Token has been revoked");
     }
@@ -218,8 +218,8 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("User not found");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _sut.RefreshTokenAsync(refreshToken.Token, "127.0.0.1")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _sut.RefreshTokenAsync(refreshToken.Token, "127.0.0.1")
         );
         exception.Message.ShouldBe("User not found");
     }
@@ -318,8 +318,8 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("Token is already revoked");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _sut.RevokeRefreshTokenAsync(alreadyRevokedToken.Token, "127.0.0.1", "New revocation attempt")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _sut.RevokeRefreshTokenAsync(alreadyRevokedToken.Token, "127.0.0.1", "New revocation attempt")
         );
         exception.Message.ShouldBe("Token is already revoked");
 

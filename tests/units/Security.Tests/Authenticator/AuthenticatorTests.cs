@@ -190,8 +190,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Code expired");
 
         // Act & Assert
-        _ = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.VerifyAsync(userId, "123456", _cancellationToken)
+        _ = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.VerifyAsync(userId, "123456", _cancellationToken)
         );
     }
 
@@ -265,8 +265,8 @@ public class AuthenticatorTests
             _ = _mockOtpService.Setup(o => o.ComputeOtp(It.IsAny<byte[]>(), null)).Returns("654321");
 
         // Act & Assert
-        _ = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.VerifyAsync(userId, "wrong-code", _cancellationToken)
+        _ = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.VerifyAsync(userId, "wrong-code", _cancellationToken)
         );
     }
 
@@ -296,8 +296,8 @@ public class AuthenticatorTests
         SetupRepositoryMocks(null);
 
         // Act & Assert
-        await Should.NotThrowAsync(
-            async () => await _authenticator.DeleteAsync(userId: userId, cancellationToken: _cancellationToken)
+        await Should.NotThrowAsync(async () =>
+            await _authenticator.DeleteAsync(userId: userId, cancellationToken: _cancellationToken)
         );
     }
 
@@ -344,8 +344,8 @@ public class AuthenticatorTests
         );
 
         // Act & Assert
-        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await authenticator.CreateAsync(userId, type, "test@example.com", _cancellationToken)
+        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await authenticator.CreateAsync(userId, type, "test@example.com", _cancellationToken)
         );
         exception.Message.ShouldContain("Email authentication is enabled but no implementation of IMailService");
     }
@@ -367,8 +367,8 @@ public class AuthenticatorTests
         );
 
         // Act & Assert
-        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await authenticator.CreateAsync(userId, type, "+1234567890", _cancellationToken)
+        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await authenticator.CreateAsync(userId, type, "+1234567890", _cancellationToken)
         );
         exception.Message.ShouldContain("SMS authentication is enabled but no implementation of ISmsService");
     }
@@ -390,8 +390,8 @@ public class AuthenticatorTests
         );
 
         // Act & Assert
-        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await authenticator.CreateAsync(userId, type, null, _cancellationToken)
+        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await authenticator.CreateAsync(userId, type, null, _cancellationToken)
         );
         exception.Message.ShouldContain("OTP authentication is enabled but no implementation of IOtpService");
     }
@@ -417,8 +417,8 @@ public class AuthenticatorTests
             .Returns(Convert.ToBase64String(TestCodeSeed));
 
         // Act & Assert
-        _ = await Should.ThrowAsync<NotSupportedException>(
-            async () => await _authenticator.CreateAsync(userId, type, null, _cancellationToken)
+        _ = await Should.ThrowAsync<NotSupportedException>(async () =>
+            await _authenticator.CreateAsync(userId, type, null, _cancellationToken)
         );
     }
 
@@ -442,8 +442,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Destination is required");
 
         // Act & Assert
-        _ = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, null, _cancellationToken)
+        _ = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, null, _cancellationToken)
         );
     }
 
@@ -465,8 +465,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Destination is required");
 
         // Act & Assert
-        _ = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, string.Empty, _cancellationToken)
+        _ = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, string.Empty, _cancellationToken)
         );
     }
 
@@ -514,8 +514,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Authenticator not found");
 
         // Act & Assert
-        _ = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, destination, _cancellationToken)
+        _ = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, destination, _cancellationToken)
         );
     }
 
@@ -540,8 +540,8 @@ public class AuthenticatorTests
             .ThrowsAsync(new InvalidOperationException("Template not found"));
 
         // Act & Assert
-        _ = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
+        _ = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
     }
 
@@ -582,8 +582,8 @@ public class AuthenticatorTests
         }
 
         // Act & Assert
-        _ = await Should.ThrowAsync<Exception>(
-            async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
+        _ = await Should.ThrowAsync<Exception>(async () =>
+            await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
     }
 
@@ -610,8 +610,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Code expired");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, destination, _cancellationToken)
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, destination, _cancellationToken)
         );
         exception.Message.ShouldBe("Code expired");
     }
@@ -637,8 +637,8 @@ public class AuthenticatorTests
             .ThrowsAsync(new InvalidOperationException("SMS template not found"));
 
         // Act & Assert
-        _ = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _authenticator.AttemptAsync(userId, "+1234567890", _cancellationToken)
+        _ = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await _authenticator.AttemptAsync(userId, "+1234567890", _cancellationToken)
         );
     }
 
@@ -733,8 +733,8 @@ public class AuthenticatorTests
         _ = _mockRepository.Setup(r => r.GetByIdAsync(userId, _cancellationToken)).ReturnsAsync(authenticator);
 
         // Act & Assert
-        _ = await Should.ThrowAsync<NotSupportedException>(
-            async () => await _authenticator.VerifyAsync(userId, "123456", _cancellationToken)
+        _ = await Should.ThrowAsync<NotSupportedException>(async () =>
+            await _authenticator.VerifyAsync(userId, "123456", _cancellationToken)
         );
     }
 
@@ -760,8 +760,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Code has expired");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
         exception.Message.ShouldBe("Code has expired");
     }
@@ -861,8 +861,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Unsupported authenticator type");
 
         // Act & Assert
-        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
+        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
         exception.Message.ShouldBe("Unsupported authenticator type");
     }
@@ -896,8 +896,8 @@ public class AuthenticatorTests
             .ReturnsAsync($"Authenticator type {type} is not enabled");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
 
         exception.Message.ShouldBe($"Authenticator type {type} is not enabled");
@@ -939,8 +939,8 @@ public class AuthenticatorTests
             .ReturnsAsync($"Authenticator type {type} is not enabled");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.AttemptAsync(userId, "test@example.com", _cancellationToken)
         );
 
         exception.Message.ShouldBe($"Authenticator type {type} is not enabled");
@@ -979,8 +979,8 @@ public class AuthenticatorTests
             .ReturnsAsync("Invalid verification code");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _authenticator.VerifyAsync(userId, "wrong-code", _cancellationToken)
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
+            await _authenticator.VerifyAsync(userId, "wrong-code", _cancellationToken)
         );
         exception.Message.ShouldBe("Invalid verification code");
     }

@@ -115,8 +115,8 @@ public class LoggingBehaviorTests
         static Task<TestResponse> next() => throw new InvalidOperationException("Test exception");
 
         // Act & Assert: Verify exception is thrown and logging occurs.
-        _ = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await loggingBehavior.Handle(request, next, CancellationToken.None)
+        _ = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await loggingBehavior.Handle(request, next, CancellationToken.None)
         );
 
         _loggerMock.Verify(x => x.InformationAsync(It.IsAny<string>()), Times.Once);

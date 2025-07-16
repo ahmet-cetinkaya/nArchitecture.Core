@@ -40,8 +40,8 @@ public class TransactionScopeBehaviorTests
         Task<TestResponse> next() => throw expectedException;
 
         // Act & Assert
-        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _behavior.Handle(request, next, CancellationToken.None)
+        InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await _behavior.Handle(request, next, CancellationToken.None)
         );
 
         exception.ShouldBe(expectedException);

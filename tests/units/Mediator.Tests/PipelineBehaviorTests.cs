@@ -269,8 +269,8 @@ public class PipelineBehaviorTests
         var mediator = provider.GetRequiredService<IMediator>();
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await mediator.SendAsync(new TrackingRequest())
+        var exception = await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await mediator.SendAsync(new TrackingRequest())
         );
 
         exception.Message.ShouldContain("Handler not found for");

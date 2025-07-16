@@ -47,8 +47,8 @@ public class AuthorizationBehaviorTests
         MockSecuredRequest request = new MockSecuredRequest().SetRoles(null!, []);
 
         // Act & Assert: Verify the correct exception is thrown.
-        _ = await Should.ThrowAsync<AuthenticationException>(
-            async () => await _behavior.Handle(request, _next, CancellationToken.None)
+        _ = await Should.ThrowAsync<AuthenticationException>(async () =>
+            await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
 
@@ -135,8 +135,8 @@ public class AuthorizationBehaviorTests
         MockSecuredRequest request = new MockSecuredRequest().SetRoles([], ["editor"]);
 
         // Act & Assert: Verify exception is thrown.
-        _ = await Should.ThrowAsync<AuthorizationException>(
-            async () => await _behavior.Handle(request, _next, CancellationToken.None)
+        _ = await Should.ThrowAsync<AuthorizationException>(async () =>
+            await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
 
@@ -300,8 +300,8 @@ public class AuthorizationBehaviorTests
         else
         {
             // Act & Assert
-            _ = await Should.ThrowAsync<AuthorizationException>(
-                async () => await _behavior.Handle(request, _next, CancellationToken.None)
+            _ = await Should.ThrowAsync<AuthorizationException>(async () =>
+                await _behavior.Handle(request, _next, CancellationToken.None)
             );
         }
     }

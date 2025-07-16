@@ -42,8 +42,8 @@ public class DefaultJwtAuthenticationConfigurationTests
     public void Should_Throw_ArgumentException_For_Invalid_Parameters(string? securityKey, string? issuer, string? audience)
     {
         // Arrange & Act & Assert
-        _ = Should.Throw<ArgumentException>(
-            () => new DefaultJwtAuthenticationConfiguration(securityKey!, issuer!, audience!, ValidExpiration)
+        _ = Should.Throw<ArgumentException>(() =>
+            new DefaultJwtAuthenticationConfiguration(securityKey!, issuer!, audience!, ValidExpiration)
         );
     }
 
@@ -51,8 +51,8 @@ public class DefaultJwtAuthenticationConfigurationTests
     public void Should_Throw_ArgumentException_For_Invalid_Expiration()
     {
         // Arrange & Act & Assert
-        _ = Should.Throw<ArgumentException>(
-            () => new DefaultJwtAuthenticationConfiguration(ValidSecurityKey, ValidIssuer, ValidAudience, TimeSpan.Zero)
+        _ = Should.Throw<ArgumentException>(() =>
+            new DefaultJwtAuthenticationConfiguration(ValidSecurityKey, ValidIssuer, ValidAudience, TimeSpan.Zero)
         );
     }
 
