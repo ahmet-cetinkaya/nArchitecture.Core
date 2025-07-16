@@ -63,8 +63,8 @@ public class ValidationBehaviorTests
         static Task<DummyResponse> Next() => Task.FromResult(new DummyResponse());
 
         // Act & Assert
-        ValidationException exception = await Should.ThrowAsync<ValidationException>(
-            () => behavior.Handle(dummyRequest, Next, CancellationToken.None)
+        ValidationException exception = await Should.ThrowAsync<ValidationException>(() =>
+            behavior.Handle(dummyRequest, Next, CancellationToken.None)
         );
 
         // Assert
@@ -130,8 +130,8 @@ public class ValidationBehaviorTests
         var request = new DummyRequest();
 
         // Act & Assert
-        ValidationException exception = await Should.ThrowAsync<ValidationException>(
-            () => behavior.Handle(request, () => Task.FromResult(new DummyResponse()), CancellationToken.None)
+        ValidationException exception = await Should.ThrowAsync<ValidationException>(() =>
+            behavior.Handle(request, () => Task.FromResult(new DummyResponse()), CancellationToken.None)
         );
 
         // Assert

@@ -176,8 +176,8 @@ public class CachingBehaviorTests
         cts.Cancel();
 
         // Act & Assert: Verify OperationCanceledException is thrown.
-        OperationCanceledException exception = await Should.ThrowAsync<OperationCanceledException>(
-            async () => await _behavior.Handle(request, _nextDelegate, cts.Token)
+        OperationCanceledException exception = await Should.ThrowAsync<OperationCanceledException>(async () =>
+            await _behavior.Handle(request, _nextDelegate, cts.Token)
         );
     }
 
@@ -198,8 +198,8 @@ public class CachingBehaviorTests
         };
 
         // Act & Assert: Expect ArgumentOutOfRangeException.
-        _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(
-            async () => await _behavior.Handle(request, _nextDelegate, CancellationToken.None)
+        _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(async () =>
+            await _behavior.Handle(request, _nextDelegate, CancellationToken.None)
         );
     }
 
@@ -283,8 +283,8 @@ public class CachingBehaviorTests
             );
 
         // Act & Assert: Verify exception is thrown and cache remains unmodified.
-        Exception exception = await Record.ExceptionAsync(
-            () => _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        Exception exception = await Record.ExceptionAsync(() =>
+            _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
         _ = exception.ShouldNotBeNull();
@@ -307,8 +307,8 @@ public class CachingBehaviorTests
             );
 
         // Act & Assert: Verify an exception is thrown and subsequent requests work.
-        Exception exception = await Record.ExceptionAsync(
-            () => _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        Exception exception = await Record.ExceptionAsync(() =>
+            _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
         _ = exception.ShouldNotBeNull();
@@ -350,8 +350,8 @@ public class CachingBehaviorTests
         }
 
         // Act & Assert: Verify exception is thrown and pool remains usable.
-        _ = await Should.ThrowAsync<JsonException>(
-            async () => await _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        _ = await Should.ThrowAsync<JsonException>(async () =>
+            await _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
         // Verify we can still use the cache system after failure
@@ -488,13 +488,12 @@ public class CachingBehaviorTests
     public void Constructor_WithInvalidCacheSettings_ShouldThrowException(int seconds)
     {
         // Act & Assert: Verify constructor throws for invalid sliding expiration.
-        ArgumentOutOfRangeException exception = Should.Throw<ArgumentOutOfRangeException>(
-            () =>
-                new CachingBehavior<MockCacheableRequest, string>(
-                    _cache,
-                    _loggerMock.Object,
-                    new CacheSettings(TimeSpan.FromSeconds(seconds))
-                )
+        ArgumentOutOfRangeException exception = Should.Throw<ArgumentOutOfRangeException>(() =>
+            new CachingBehavior<MockCacheableRequest, string>(
+                _cache,
+                _loggerMock.Object,
+                new CacheSettings(TimeSpan.FromSeconds(seconds))
+            )
         );
 
         exception.Message.ShouldContain("Sliding expiration must be positive");
