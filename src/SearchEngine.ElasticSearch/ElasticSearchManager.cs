@@ -100,7 +100,7 @@ public class ElasticSearchManager : ISearchEngine
         where T : class
     {
         SearchResponse<T> response = await _client.SearchAsync<T>(s =>
-            s.Index(parameters.IndexName).From(parameters.From).Size(parameters.Size)
+            s.Indices(parameters.IndexName).From(parameters.From).Size(parameters.Size)
         );
 
         return response.Hits.Select(x => new SearchGetModel<T>(x.Id!, x.Source!, x.Score ?? 0.0)).ToList();
@@ -111,7 +111,7 @@ public class ElasticSearchManager : ISearchEngine
         where T : class
     {
         SearchResponse<T> response = await _client.SearchAsync<T>(s =>
-            s.Index(parameters.IndexName)
+            s.Indices(parameters.IndexName)
                 .From(parameters.From)
                 .Size(parameters.Size)
                 .Query(q =>
@@ -138,7 +138,7 @@ public class ElasticSearchManager : ISearchEngine
         where T : class
     {
         SearchResponse<T> response = await _client.SearchAsync<T>(s =>
-            s.Index(parameters.IndexName)
+            s.Indices(parameters.IndexName)
                 .From(parameters.From)
                 .Size(parameters.Size)
                 .Query(q =>

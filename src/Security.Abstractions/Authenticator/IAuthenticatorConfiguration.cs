@@ -71,6 +71,6 @@ public interface IAuthenticatorConfiguration
     );
 }
 
-public readonly record struct EmailTemplateConfiguration(string Subject, string TextBodyTemplate, string HtmlBodyTemplate);
+public record struct EmailTemplateConfiguration(string Subject, string TextBodyTemplate, string HtmlBodyTemplate);
 
-public readonly record struct SmsTemplateConfiguration(string MessageTemplate);
+public record struct SmsTemplateConfiguration(string MessageTemplate);

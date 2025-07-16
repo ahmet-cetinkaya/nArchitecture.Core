@@ -22,14 +22,15 @@ public class MailKitMailServiceTests
         _smtpClientFactoryMock = new Mock<ISmtpClientFactory>();
         _ = _smtpClientFactoryMock.Setup(x => x.Create()).Returns(_smtpClientMock.Object);
 
-        _mailConfiguration = new MailConfigration
+        _mailConfiguration = new MailConfigration(
+            Server: "smtp.example.com",
+            Port: 587,
+            UserName: "test@example.com",
+            Password: "password123",
+            SenderEmail: "sender@example.com",
+            SenderFullName: "Test Sender"
+        )
         {
-            Server = "smtp.example.com",
-            Port = 587,
-            UserName = "test@example.com",
-            Password = "password123",
-            SenderEmail = "sender@example.com",
-            SenderFullName = "Test Sender",
             AuthenticationRequired = true,
         };
 

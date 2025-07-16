@@ -5,4 +5,4 @@ namespace NArchitecture.Core.Validation.Abstractions;
 /// </summary>
 /// <param name="PropertyName">The name of the property that failed validation.</param>
 /// <param name="Errors">Collection of error messages for the property.</param>
-public readonly record struct ValidationError(string PropertyName, IEnumerable<string> Errors);
+public record ValidationError(string PropertyName, IEnumerable<string> Errors);

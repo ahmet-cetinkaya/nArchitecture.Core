@@ -2,7 +2,7 @@ using NArchitecture.Core.Security.Abstractions.Authentication.Entities;
 
 namespace NArchitecture.Core.Security.Abstractions.Authentication.Models;
 
-public readonly record struct LoginRequest<
+public record struct LoginRequest<
     TOperationClaimId,
     TRefreshTokenId,
     TUserAuthenticatorId,

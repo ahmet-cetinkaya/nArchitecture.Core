@@ -23,7 +23,7 @@ public class ValidationBehaviorTests
     public async Task Handle_GivenValidRequest_ShouldProceed()
     {
         // Arrange
-        var validResult = new ValidationResult { IsValid = true, Errors = Array.Empty<ValidationError>() };
+        var validResult = new ValidationResult(IsValid: true, Errors: Array.Empty<ValidationError>());
         var validatorMock = new Mock<IValidator<DummyRequest>>();
         _ = validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(validResult);
 
@@ -50,11 +50,10 @@ public class ValidationBehaviorTests
     public async Task Handle_GivenInvalidRequest_ShouldThrowValidationException(string propertyName, string errorMessage)
     {
         // Arrange
-        var invalidResult = new ValidationResult
-        {
-            IsValid = false,
-            Errors = new[] { new ValidationError(propertyName, new[] { errorMessage }) },
-        };
+        var invalidResult = new ValidationResult(
+            IsValid: false,
+            Errors: new[] { new ValidationError(propertyName, new[] { errorMessage }) }
+        );
         var validatorMock = new Mock<IValidator<DummyRequest>>();
         _ = validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(invalidResult);
 
@@ -64,15 +63,15 @@ public class ValidationBehaviorTests
         static Task<DummyResponse> Next() => Task.FromResult(new DummyResponse());
 
         // Act & Assert
-        ValidationException exception = await Should.ThrowAsync<ValidationException>(() =>
-            behavior.Handle(dummyRequest, Next, CancellationToken.None)
+        ValidationException exception = await Should.ThrowAsync<ValidationException>(
+            () => behavior.Handle(dummyRequest, Next, CancellationToken.None)
         );
 
         // Assert
         exception.Errors.ShouldNotBeEmpty();
-        ValidationError validationError = exception.Errors.FirstOrDefault();
-        validationError.ShouldNotBe(default);
-        validationError.PropertyName.ShouldBe(propertyName);
+        ValidationError? validationError = exception.Errors?.FirstOrDefault();
+        validationError.ShouldNotBeNull();
+        validationError!.PropertyName.ShouldBe(propertyName);
         validationError.Errors!.ShouldContain(errorMessage);
 
         validatorMock.Verify(v => v.Validate(It.IsAny<DummyRequest>()), Times.Once);
@@ -101,7 +100,7 @@ public class ValidationBehaviorTests
         var validatorMock = new Mock<IValidator<DummyRequest>>();
         _ = validatorMock
             .Setup(v => v.Validate(It.IsAny<DummyRequest>()))
-            .Returns(new ValidationResult { IsValid = true, Errors = null });
+            .Returns(new ValidationResult(IsValid: true, Errors: null));
 
         var behavior = new ValidationBehavior<DummyRequest, DummyResponse>(validatorMock.Object);
         var request = new DummyRequest();
@@ -122,7 +121,7 @@ public class ValidationBehaviorTests
         var error1 = new ValidationError("Property1", new[] { "Error1" });
         var error2 = new ValidationError("Property2", new[] { "Error2" });
 
-        var validationResult = new ValidationResult { IsValid = false, Errors = new[] { error1, error2 } };
+        var validationResult = new ValidationResult(IsValid: false, Errors: new[] { error1, error2 });
 
         var validatorMock = new Mock<IValidator<DummyRequest>>();
         _ = validatorMock.Setup(v => v.Validate(It.IsAny<DummyRequest>())).Returns(validationResult);
@@ -131,8 +130,8 @@ public class ValidationBehaviorTests
         var request = new DummyRequest();
 
         // Act & Assert
-        ValidationException exception = await Should.ThrowAsync<ValidationException>(() =>
-            behavior.Handle(request, () => Task.FromResult(new DummyResponse()), CancellationToken.None)
+        ValidationException exception = await Should.ThrowAsync<ValidationException>(
+            () => behavior.Handle(request, () => Task.FromResult(new DummyResponse()), CancellationToken.None)
         );
 
         // Assert

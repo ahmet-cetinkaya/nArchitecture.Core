@@ -1,6 +1,6 @@
 ﻿namespace NArchitecture.Core.Application.Pipelines.Caching;
 
-public readonly record struct CacheSettings
+public record struct CacheSettings
 {
     public TimeSpan SlidingExpiration { get; }
 

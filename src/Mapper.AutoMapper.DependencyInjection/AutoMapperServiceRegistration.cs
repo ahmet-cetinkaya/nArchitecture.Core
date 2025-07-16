@@ -1,6 +1,7 @@
 using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NArchitecture.Core.Mapper.Abstractions;
 
 namespace NArchitecture.Core.Mapper.AutoMapper.DependencyInjection;
@@ -16,9 +17,9 @@ public static class AutoMapperServiceRegistration
     /// <param name="services">The service collection.</param>
     /// <param name="assemblies">The assemblies containing mapping profiles.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
+    public static IServiceCollection AddNArchitectureAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
     {
-        return AddAutoMapper(services, null, ServiceLifetime.Singleton, true, assemblies);
+        return AddNArchitectureAutoMapper(services, null, ServiceLifetime.Singleton, true, assemblies);
     }
 
     /// <summary>
@@ -28,13 +29,13 @@ public static class AutoMapperServiceRegistration
     /// <param name="lifetime">The service lifetime.</param>
     /// <param name="assemblies">The assemblies containing mapping profiles.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddAutoMapper(
+    public static IServiceCollection AddNArchitectureAutoMapper(
         this IServiceCollection services,
         ServiceLifetime lifetime,
         params Assembly[] assemblies
     )
     {
-        return AddAutoMapper(services, null, lifetime, true, assemblies);
+        return AddNArchitectureAutoMapper(services, null, lifetime, true, assemblies);
     }
 
     /// <summary>
@@ -44,13 +45,13 @@ public static class AutoMapperServiceRegistration
     /// <param name="configAction">Action to configure AutoMapper.</param>
     /// <param name="assemblies">The assemblies containing mapping profiles.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddAutoMapper(
+    public static IServiceCollection AddNArchitectureAutoMapper(
         this IServiceCollection services,
         Action<IMapperConfigurationExpression>? configAction,
         params Assembly[] assemblies
     )
     {
-        return AddAutoMapper(services, configAction, ServiceLifetime.Singleton, true, assemblies);
+        return AddNArchitectureAutoMapper(services, configAction, ServiceLifetime.Singleton, true, assemblies);
     }
 
     /// <summary>
@@ -62,7 +63,7 @@ public static class AutoMapperServiceRegistration
     /// <param name="filterByInterface">When true, only profiles implementing IMappingProfile will be used. When false, all profiles will be used.</param>
     /// <param name="assemblies">The assemblies containing mapping profiles.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddAutoMapper(
+    public static IServiceCollection AddNArchitectureAutoMapper(
         this IServiceCollection services,
         Action<IMapperConfigurationExpression>? configAction,
         ServiceLifetime lifetime,
@@ -101,8 +102,15 @@ public static class AutoMapperServiceRegistration
             }
         };
 
-        // Register AutoMapper
-        _ = services.AddAutoMapper(configurationAction);
+        // Register AutoMapper configuration and mapper
+        _ = services.AddSingleton<global::AutoMapper.IMapper>(provider =>
+        {
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            var configExpression = new MapperConfigurationExpression();
+            configurationAction(configExpression);
+            var configuration = new MapperConfiguration(configExpression, loggerFactory);
+            return configuration.CreateMapper();
+        });
 
         // Register our adapter with the specified lifetime
         services.Add(

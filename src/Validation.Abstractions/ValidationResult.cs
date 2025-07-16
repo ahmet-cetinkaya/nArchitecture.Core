@@ -5,4 +5,4 @@ namespace NArchitecture.Core.Validation.Abstractions;
 /// </summary>
 /// <param name="IsValid">Indicates whether the validation was successful.</param>
 /// <param name="Errors">Collection of validation errors if validation failed, null otherwise.</param>
-public readonly record struct ValidationResult(bool IsValid, IEnumerable<ValidationError>? Errors);
+public record ValidationResult(bool IsValid, IEnumerable<ValidationError>? Errors);

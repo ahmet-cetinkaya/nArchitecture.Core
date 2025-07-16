@@ -5,7 +5,7 @@ namespace NArchitecture.Core.Sms.Abstractions;
 /// </summary>
 /// <param name="PhoneNumber">The recipient's phone number in international format (e.g., +901234567890).</param>
 /// <param name="Content">The text content of the SMS message.</param>
-public readonly record struct Sms(string PhoneNumber, string Content)
+public record struct Sms(string PhoneNumber, string Content)
 {
     /// <summary>
     /// Gets or sets custom parameters to include in the SMS.

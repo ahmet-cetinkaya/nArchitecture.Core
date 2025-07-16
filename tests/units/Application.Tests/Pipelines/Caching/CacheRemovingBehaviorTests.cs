@@ -14,7 +14,7 @@ namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;
 public class MockCacheRemoverRequest : IRequest<int>, ICacheRemoverRequest
 {
     public CacheRemoverOptions CacheOptions { get; set; } =
-        new CacheRemoverOptions(bypassCache: false, cacheKey: string.Empty, cacheGroupKey: []);
+        new CacheRemoverOptions(BypassCache: false, CacheKey: string.Empty, CacheGroupKey: []);
 }
 
 [Trait("Category", "CacheRemoving")]
@@ -40,7 +40,7 @@ public class CacheRemovingBehaviorTests
         // Arrange: Create a request with a specific cache key.
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: "test-key", cacheGroupKey: null),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: "test-key", CacheGroupKey: null),
         };
         await _cache.SetAsync("test-key", Encoding.UTF8.GetBytes("test-value"));
 
@@ -70,7 +70,7 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: [groupKey]),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: null, CacheGroupKey: [groupKey]),
         };
 
         // Act: Execute cache removal behavior.
@@ -116,7 +116,7 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: groupKeys),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: null, CacheGroupKey: groupKeys),
         };
 
         // Act: Execute cache removal behavior.
@@ -148,7 +148,7 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: ["non-existent-group"]),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: null, CacheGroupKey: ["non-existent-group"]),
         };
 
         // Act: Execute cache removal behavior.
@@ -170,7 +170,7 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: true, cacheKey: testKey, cacheGroupKey: [groupKey]),
+            CacheOptions = new CacheRemoverOptions(BypassCache: true, CacheKey: testKey, CacheGroupKey: [groupKey]),
         };
 
         // Act: Execute cache removal behavior.
@@ -218,7 +218,7 @@ public class CacheRemovingBehaviorTests
         // Arrange: Create request with provided configurations.
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: bypassCache, cacheKey: cacheKey, cacheGroupKey: groupKeys),
+            CacheOptions = new CacheRemoverOptions(BypassCache: bypassCache, CacheKey: cacheKey, CacheGroupKey: groupKeys),
         };
 
         if (cacheKey != null)
@@ -265,7 +265,7 @@ public class CacheRemovingBehaviorTests
         // Arrange: Create a request with empty group key.
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: []),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: null, CacheGroupKey: []),
         };
 
         // Act: Execute cache removal behavior.
@@ -284,7 +284,7 @@ public class CacheRemovingBehaviorTests
 
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: [groupKey]),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: null, CacheGroupKey: [groupKey]),
         };
 
         // Act: Execute cache removal behavior.
@@ -302,7 +302,7 @@ public class CacheRemovingBehaviorTests
         var cts = new CancellationTokenSource();
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: "test-key", cacheGroupKey: ["test-group"]),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: "test-key", CacheGroupKey: ["test-group"]),
         };
 
         await _cache.SetAsync("test-group", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new HashSet<string> { "test-key" })));
@@ -325,9 +325,9 @@ public class CacheRemovingBehaviorTests
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(
-                bypassCache: false,
-                cacheKey: null,
-                cacheGroupKey: ["group1", "group2", "group3"]
+                BypassCache: false,
+                CacheKey: null,
+                CacheGroupKey: ["group1", "group2", "group3"]
             ),
         };
 
@@ -360,9 +360,9 @@ public class CacheRemovingBehaviorTests
         var request = new MockCacheRemoverRequest
         {
             CacheOptions = new CacheRemoverOptions(
-                bypassCache: false,
-                cacheKey: null,
-                cacheGroupKey: ["group1", "group2", "group3", "group4"]
+                BypassCache: false,
+                CacheKey: null,
+                CacheGroupKey: ["group1", "group2", "group3", "group4"]
             ),
         };
 
@@ -403,7 +403,7 @@ public class CacheRemovingBehaviorTests
         // Arrange: Setup cache groups and mock logger.
         var request = new MockCacheRemoverRequest
         {
-            CacheOptions = new CacheRemoverOptions(bypassCache: false, cacheKey: null, cacheGroupKey: ["group1", "group2"]),
+            CacheOptions = new CacheRemoverOptions(BypassCache: false, CacheKey: null, CacheGroupKey: ["group1", "group2"]),
         };
 
         var group1Keys = new HashSet<string> { "key1", "key2" };

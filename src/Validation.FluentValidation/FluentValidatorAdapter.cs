@@ -20,10 +20,9 @@ public class FluentValidatorAdapter<T>(global::FluentValidation.IValidator<T> fl
         global::FluentValidation.Results.ValidationResult result = _fluentValidator.Validate(context);
 
         // Map FluentValidation result to application's ValidationResult
-        return new ValidationResult
-        {
-            IsValid = result.IsValid,
-            Errors = result.Errors.Select(e => new ValidationError(e.PropertyName, [e.ErrorMessage])),
-        };
+        return new ValidationResult(
+            result.IsValid,
+            result.Errors.Select(e => new ValidationError(e.PropertyName, [e.ErrorMessage]))
+        );
     }
 }

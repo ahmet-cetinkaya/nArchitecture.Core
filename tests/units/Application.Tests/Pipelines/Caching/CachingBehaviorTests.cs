@@ -15,7 +15,7 @@ namespace NArchitecture.Core.Application.Tests.Pipelines.Caching;
 public class MockCacheableRequest : IRequest<string>, ICacheableRequest
 {
     public CacheableOptions CacheOptions { get; set; } =
-        new CacheableOptions(bypassCache: false, cacheKey: "test-key", cacheGroupKey: null, slidingExpiration: null);
+        new CacheableOptions(BypassCache: false, CacheKey: "test-key", CacheGroupKey: null, SlidingExpiration: null);
 }
 
 [Trait("Category", "Caching")]
@@ -47,10 +47,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: true,
-                cacheKey: "test-key",
-                cacheGroupKey: null,
-                slidingExpiration: null
+                BypassCache: true,
+                CacheKey: "test-key",
+                CacheGroupKey: null,
+                SlidingExpiration: null
             ),
         };
 
@@ -105,10 +105,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: null,
-                slidingExpiration: TimeSpan.FromMinutes(minutes)
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: null,
+                SlidingExpiration: TimeSpan.FromMinutes(minutes)
             ),
         };
 
@@ -133,10 +133,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: "test-group",
-                slidingExpiration: null
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: "test-group",
+                SlidingExpiration: null
             ),
         };
 
@@ -176,8 +176,8 @@ public class CachingBehaviorTests
         cts.Cancel();
 
         // Act & Assert: Verify OperationCanceledException is thrown.
-        OperationCanceledException exception = await Should.ThrowAsync<OperationCanceledException>(async () =>
-            await _behavior.Handle(request, _nextDelegate, cts.Token)
+        OperationCanceledException exception = await Should.ThrowAsync<OperationCanceledException>(
+            async () => await _behavior.Handle(request, _nextDelegate, cts.Token)
         );
     }
 
@@ -190,16 +190,16 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: null,
-                slidingExpiration: TimeSpan.FromMinutes(minutes)
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: null,
+                SlidingExpiration: TimeSpan.FromMinutes(minutes)
             ),
         };
 
         // Act & Assert: Expect ArgumentOutOfRangeException.
-        _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(async () =>
-            await _behavior.Handle(request, _nextDelegate, CancellationToken.None)
+        _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(
+            async () => await _behavior.Handle(request, _nextDelegate, CancellationToken.None)
         );
     }
 
@@ -283,8 +283,8 @@ public class CachingBehaviorTests
             );
 
         // Act & Assert: Verify exception is thrown and cache remains unmodified.
-        Exception exception = await Record.ExceptionAsync(() =>
-            _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        Exception exception = await Record.ExceptionAsync(
+            () => _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
         _ = exception.ShouldNotBeNull();
@@ -307,8 +307,8 @@ public class CachingBehaviorTests
             );
 
         // Act & Assert: Verify an exception is thrown and subsequent requests work.
-        Exception exception = await Record.ExceptionAsync(() =>
-            _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        Exception exception = await Record.ExceptionAsync(
+            () => _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
         _ = exception.ShouldNotBeNull();
@@ -318,10 +318,10 @@ public class CachingBehaviorTests
         var validRequest = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "valid-key",
-                cacheGroupKey: null,
-                slidingExpiration: null
+                BypassCache: false,
+                CacheKey: "valid-key",
+                CacheGroupKey: null,
+                SlidingExpiration: null
             ),
         };
         string result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
@@ -350,18 +350,18 @@ public class CachingBehaviorTests
         }
 
         // Act & Assert: Verify exception is thrown and pool remains usable.
-        _ = await Should.ThrowAsync<JsonException>(async () =>
-            await _behavior.Handle(request, failingDelegate, CancellationToken.None)
+        _ = await Should.ThrowAsync<JsonException>(
+            async () => await _behavior.Handle(request, failingDelegate, CancellationToken.None)
         );
 
         // Verify we can still use the cache system after failure
         var validRequest = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-after-failure",
-                cacheGroupKey: null,
-                slidingExpiration: null
+                BypassCache: false,
+                CacheKey: "test-after-failure",
+                CacheGroupKey: null,
+                SlidingExpiration: null
             ),
         };
         string result = await _behavior.Handle(validRequest, _nextDelegate, CancellationToken.None);
@@ -375,10 +375,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: "test-group",
-                slidingExpiration: null
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: "test-group",
+                SlidingExpiration: null
             ),
         };
 
@@ -405,10 +405,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: "test-group",
-                slidingExpiration: null
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: "test-group",
+                SlidingExpiration: null
             ),
         };
         var existingKeys = new HashSet<string> { "existing-key" };
@@ -434,10 +434,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: "test-group",
-                slidingExpiration: TimeSpan.FromSeconds(30)
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: "test-group",
+                SlidingExpiration: TimeSpan.FromSeconds(30)
             ),
         };
 
@@ -465,10 +465,10 @@ public class CachingBehaviorTests
         var request = new MockCacheableRequest
         {
             CacheOptions = new CacheableOptions(
-                bypassCache: false,
-                cacheKey: "test-key",
-                cacheGroupKey: "test-group",
-                slidingExpiration: TimeSpan.FromSeconds(expirationSeconds)
+                BypassCache: false,
+                CacheKey: "test-key",
+                CacheGroupKey: "test-group",
+                SlidingExpiration: TimeSpan.FromSeconds(expirationSeconds)
             ),
         };
 
@@ -488,12 +488,13 @@ public class CachingBehaviorTests
     public void Constructor_WithInvalidCacheSettings_ShouldThrowException(int seconds)
     {
         // Act & Assert: Verify constructor throws for invalid sliding expiration.
-        ArgumentOutOfRangeException exception = Should.Throw<ArgumentOutOfRangeException>(() =>
-            new CachingBehavior<MockCacheableRequest, string>(
-                _cache,
-                _loggerMock.Object,
-                new CacheSettings(TimeSpan.FromSeconds(seconds))
-            )
+        ArgumentOutOfRangeException exception = Should.Throw<ArgumentOutOfRangeException>(
+            () =>
+                new CachingBehavior<MockCacheableRequest, string>(
+                    _cache,
+                    _loggerMock.Object,
+                    new CacheSettings(TimeSpan.FromSeconds(seconds))
+                )
         );
 
         exception.Message.ShouldContain("Sliding expiration must be positive");

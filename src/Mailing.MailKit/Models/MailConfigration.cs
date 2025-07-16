@@ -9,7 +9,7 @@
 /// <param name="SenderEmail">Email address of the sender (e.g., "john@example.com")</param>
 /// <param name="UserName">Username for SMTP authentication (typically the email address)</param>
 /// <param name="Password">Password or app-specific password for SMTP authentication</param>
-public readonly record struct MailConfigration(
+public record MailConfigration(
     string Server,
     int Port,
     string SenderFullName,

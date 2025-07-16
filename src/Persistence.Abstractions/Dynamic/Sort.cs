@@ -5,4 +5,4 @@
 /// </summary>
 /// <param name="Field">The field to sort by.</param>
 /// <param name="Dir">The sorting direction (e.g., "asc" or "desc").</param>
-public readonly record struct Sort(string Field, string Dir);
+public record struct Sort(string Field, string Dir);

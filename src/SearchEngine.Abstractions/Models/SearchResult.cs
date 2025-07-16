@@ -5,4 +5,4 @@ namespace NArchitecture.Core.SearchEngine.Abstractions.Models;
 /// </summary>
 /// <param name="Success">Indicates whether the operation was successful.</param>
 /// <param name="Message">Provides details about the operation result.</param>
-public readonly record struct SearchResult(bool Success, string Message);
+public record SearchResult(bool Success, string Message);

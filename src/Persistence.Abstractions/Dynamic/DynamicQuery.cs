@@ -5,4 +5,4 @@
 /// </summary>
 /// <param name="Sort">The collection of sort criteria.</param>
 /// <param name="Filter">The filter criteria.</param>
-public readonly record struct DynamicQuery(Filter? Filter = null, IEnumerable<Sort>? Sort = null);
+public record struct DynamicQuery(Filter? Filter = null, IEnumerable<Sort>? Sort = null);

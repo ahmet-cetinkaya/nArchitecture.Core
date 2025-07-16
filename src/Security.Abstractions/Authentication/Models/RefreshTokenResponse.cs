@@ -1,3 +1,3 @@
 namespace NArchitecture.Core.Security.Abstractions.Authentication.Models;
 
-public readonly record struct RefreshTokenResponse(Token AccessToken, Token RefreshToken);
+public record RefreshTokenResponse(Token AccessToken, Token RefreshToken);
