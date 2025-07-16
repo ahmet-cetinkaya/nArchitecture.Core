@@ -1,69 +1,61 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <!-- Project Configuration -->
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <!-- Build Configuration -->
-    <PropertyGroup>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <NoWarn>$(NoWarn);CS1591</NoWarn>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <EnableNETAnalyzers>true</EnableNETAnalyzers>
-        <AnalysisLevel>latest</AnalysisLevel>
-        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <Deterministic>true</Deterministic>
-        <Optimize>true</Optimize>
-    </PropertyGroup>
-
-    <!-- Package Configuration -->
-    <PropertyGroup>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.0</Version>
-        <Authors>Kodlama.io, Contributors</Authors>
-        <Company>Kodlama.io</Company>
-        <Product>NArchitecture</Product>
-        <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
-    </PropertyGroup>
-
-    <!-- Package Metadata -->
-    <PropertyGroup>
-        <PackageId>NArchitecture.Core.Validation.FluentValidation</PackageId>
-        <Title>NArchitecture FluentValidation Integration</Title>
-        <Description>FluentValidation integration for Clean Architecture applications with advanced validation features.</Description>
-        <PackageTags>fluentvalidation; validation; clean-architecture; domain-validation; narchitecture</PackageTags>
-        <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
-        <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <IncludeSymbols>true</IncludeSymbols>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    </PropertyGroup>
-
-    <!-- Package Files -->
-    <ItemGroup>
-        <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
-        <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
-        <None Include="./README.md" Pack="true" PackagePath="" />
-    </ItemGroup>
-
-    <!-- Dependencies -->
-    <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.11.0" />
-    </ItemGroup>
-
-    <!-- Project References -->
-    <ItemGroup>
-        <ProjectReference Include="../CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
-        <ProjectReference Include="../Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
-    </ItemGroup>
-
+  <!-- Project Configuration -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <!-- Build Configuration -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <!-- Package Configuration -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <Authors>Kodlama.io, Contributors</Authors>
+    <Company>Kodlama.io</Company>
+    <Product>NArchitecture</Product>
+    <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
+  </PropertyGroup>
+  <!-- Package Metadata -->
+  <PropertyGroup>
+    <PackageId>NArchitecture.Core.Validation.FluentValidation</PackageId>
+    <Title>NArchitecture FluentValidation Integration</Title>
+    <Description>FluentValidation integration for Clean Architecture applications with advanced validation features.</Description>
+    <PackageTags>fluentvalidation; validation; clean-architecture; domain-validation; narchitecture</PackageTags>
+    <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+    <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  <!-- Package Files -->
+  <ItemGroup>
+    <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+    <None Include="./README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+  </ItemGroup>
+  <!-- Project References -->
+  <ItemGroup>
+    <ProjectReference Include="../CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
+    <ProjectReference Include="../Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

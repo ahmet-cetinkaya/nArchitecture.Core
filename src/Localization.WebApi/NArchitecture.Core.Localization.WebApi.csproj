@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
   <!-- Build Configuration -->
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -19,7 +18,6 @@
     <Deterministic>true</Deterministic>
     <Optimize>true</Optimize>
   </PropertyGroup>
-
   <!-- Package Configuration -->
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -29,7 +27,6 @@
     <Product>NArchitecture</Product>
     <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
   </PropertyGroup>
-
   <!-- Package Metadata -->
   <PropertyGroup>
     <PackageId>NArchitecture.Core.Localization.WebApi</PackageId>
@@ -46,21 +43,18 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
   <!-- Package Files -->
   <ItemGroup>
     <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
     <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
     <None Include="./README.md" Pack="true" PackagePath="" />
   </ItemGroup>
-
   <!-- Dependencies -->
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.2" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.7" />
   </ItemGroup>
-
   <!-- Project References -->
   <ItemGroup>
     <ProjectReference Include="../Localization.Abstractions/NArchitecture.Core.Localization.Abstractions.csproj" />
