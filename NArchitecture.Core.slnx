@@ -25,7 +25,11 @@
     <Project Path="src/Localization.WebApi/NArchitecture.Core.Localization.WebApi.csproj" />
     <Project Path="src/Mailing.Abstractions/NArchitecture.Core.Mailing.Abstractions.csproj" />
     <Project Path="src/Mailing.MailKit/NArchitecture.Core.Mailing.MailKit.csproj" />
+    <Project Path="src/Mapper.Abstractions/NArchitecture.Core.Mapper.Abstractions.csproj" />
     <Project Path="src/Mapper.AutoMapper.DependencyInjection/NArchitecture.Core.Mapper.AutoMapper.DependencyInjection.csproj" />
+    <Project Path="src/Mapper.AutoMapper/NArchitecture.Core.Mapper.AutoMapper.csproj" />
+    <Project Path="src/Mapper.Mapster.DependencyInjection/NArchitecture.Core.Mapper.Mapster.DependencyInjection.csproj" />
+    <Project Path="src/Mapper.Mapster/NArchitecture.Core.Mapper.Mapster.csproj" />
     <Project Path="src/Mediator.Abstractions/NArchitecture.Core.Mediator.Abstractions.csproj" />
     <Project Path="src/Mediator/NArchitecture.Core.Mediator.csproj" />
     <Project Path="src/Persistence.Abstractions/NArchitecture.Core.Persistence.Abstractions.csproj" />
@@ -69,5 +73,7 @@
     <Project Path="tests/units/Security.WebApi.Tests/NArchitecture.Core.Security.WebApi.Tests.csproj" />
     <Project Path="tests/units/Translation.AmazonTranslate.Tests/NArchitecture.Core.Translation.AmazonTranslate.Tests.csproj" />
     <Project Path="tests/units/Validation.FluentValidation.Tests/NArchitecture.Core.Validation.FluentValidation.Tests.csproj" />
+    <Project Path="tests/units/Mapper.Mapster.Tests/NArchitecture.Core.Mapper.Mapster.Tests.csproj" />
+    <Project Path="tests/units/Mapper.Mapster.DependencyInjection.Tests/NArchitecture.Core.Mapper.Mapster.DependencyInjection.Tests.csproj" />
   </Folder>
 </Solution>
