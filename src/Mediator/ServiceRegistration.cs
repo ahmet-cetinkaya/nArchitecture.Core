@@ -32,6 +32,9 @@ public static class ServiceRegistration
         RegisterHandlersOfType(services, typeof(IRequestHandler<,>), assemblies);
         RegisterHandlersOfType(services, typeof(IRequestHandler<>), assemblies);
 
+        // Register streaming request handlers
+        RegisterHandlersOfType(services, typeof(IStreamRequestHandler<,>), assemblies);
+
         // Register CQRS handlers
         RegisterHandlersOfType(services, typeof(IQueryHandler<,>), assemblies);
         RegisterHandlersOfType(services, typeof(ICommandHandler<,>), assemblies);
@@ -51,6 +54,9 @@ public static class ServiceRegistration
 
         // Register behaviors for requests without response
         RegisterBehaviorsOfType(services, typeof(IPipelineBehavior<>), assemblies);
+
+        // Register behaviors for streaming requests
+        RegisterBehaviorsOfType(services, typeof(IStreamPipelineBehavior<,>), assemblies);
     }
 
     private static void RegisterBehaviorsOfType(IServiceCollection services, Type behaviorType, Assembly[] assemblies)

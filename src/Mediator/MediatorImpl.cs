@@ -159,6 +159,92 @@ public class MediatorImpl : IMediator
         await pipeline();
     }
 
+    public IAsyncEnumerable<TResponse> SendStreamAsync<TResponse>(
+        IStreamRequest<TResponse> request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        Type requestType = request.GetType();
+        Type responseType = typeof(TResponse);
+
+        return CreateStreamRequestPipeline<TResponse>(request, requestType, responseType, cancellationToken);
+    }
+
+    private async IAsyncEnumerable<TResponse> CreateStreamRequestPipeline<TResponse>(
+        IStreamRequest<TResponse> request,
+        Type requestType,
+        Type responseType,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken
+    )
+    {
+        // Create a scope to resolve handlers with scoped dependencies
+        using var scope = _serviceScopeFactory.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
+
+        Type handlerType = typeof(IStreamRequestHandler<,>).MakeGenericType(requestType, responseType);
+        object? handler = serviceProvider.GetService(handlerType);
+
+        if (handler == null)
+        {
+            throw new InvalidOperationException($"Stream handler not found for {requestType.Name}");
+        }
+
+        // Get the handle method
+        var handleMethod = handlerType.GetMethod("Handle")!;
+
+        // Create the core stream request handler delegate
+        RequestStreamHandlerDelegate<TResponse> coreHandlerDelegate = () =>
+        {
+            var result = (IAsyncEnumerable<TResponse>)handleMethod.Invoke(handler, new object[] { request, cancellationToken })!;
+            return result;
+        };
+
+        // Get the closed behavior type for this specific request/response
+        var closedBehaviorType = typeof(IStreamPipelineBehavior<,>).MakeGenericType(requestType, responseType);
+
+        // Get behaviors directly registered for this specific request/response type
+        var behaviors = serviceProvider.GetServices(closedBehaviorType).ToArray();
+
+        // If no behaviors, just execute the handler directly
+        if (behaviors.Length == 0)
+        {
+            await foreach (var item in coreHandlerDelegate().WithCancellation(cancellationToken))
+            {
+                yield return item;
+            }
+            yield break;
+        }
+
+        // Build the pipeline by wrapping behaviors around the core handler
+        var behaviorHandleMethod = closedBehaviorType.GetMethod("Handle")!;
+
+        // Start with the core handler
+        RequestStreamHandlerDelegate<TResponse> pipeline = coreHandlerDelegate;
+
+        // Wrap each behavior around the pipeline in reverse order of registration
+        // This ensures first registered behavior executes first
+        for (int i = behaviors.Length - 1; i >= 0; i--)
+        {
+            var behavior = behaviors[i];
+            var currentPipeline = pipeline; // Capture the current pipeline
+
+            // Create a new pipeline that wraps the current one with this behavior
+            pipeline = () =>
+            {
+                var result =
+                    (IAsyncEnumerable<TResponse>)
+                        behaviorHandleMethod.Invoke(behavior, new object[] { request, currentPipeline, cancellationToken })!;
+                return result;
+            };
+        }
+
+        // Execute the pipeline and yield results
+        await foreach (var item in pipeline().WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
+    }
+
     /// <inheritdoc/>
     public async Task PublishAsync(IEvent @event, CancellationToken cancellationToken = default)
     {

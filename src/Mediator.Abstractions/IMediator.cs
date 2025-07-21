@@ -22,6 +22,18 @@ public interface IMediator
     Task SendAsync(IRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Sends a streaming request to a single handler and returns a stream of responses.
+    /// </summary>
+    /// <typeparam name="TResponse">Response type for each item in the stream</typeparam>
+    /// <param name="request">Streaming request object</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An async enumerable of responses from the request handler</returns>
+    IAsyncEnumerable<TResponse> SendStreamAsync<TResponse>(
+        IStreamRequest<TResponse> request,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Publishes a evemt to all registered handlers.
     /// </summary>
     /// <param name="event">Event instance</param>
