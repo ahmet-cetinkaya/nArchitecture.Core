@@ -55,6 +55,6 @@
   </ItemGroup>
   <!-- Project References -->
   <ItemGroup>
-    <ProjectReference Include="..\Mapper.Abstractions\NArchitecture.Core.Mapper.Abstractions.csproj" />
+    <ProjectReference Include="../Mapper.Abstractions/NArchitecture.Core.Mapper.Abstractions.csproj" />
   </ItemGroup>
 </Project>

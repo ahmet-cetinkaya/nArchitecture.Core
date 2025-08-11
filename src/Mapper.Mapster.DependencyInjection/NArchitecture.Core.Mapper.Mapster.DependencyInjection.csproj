@@ -55,6 +55,6 @@
   </ItemGroup>
   <!-- Project References -->
   <ItemGroup>
-    <ProjectReference Include="..\Mapper.Mapster\NArchitecture.Core.Mapper.Mapster.csproj" />
+    <ProjectReference Include="../Mapper.Mapster/NArchitecture.Core.Mapper.Mapster.csproj" />
   </ItemGroup>
 </Project>

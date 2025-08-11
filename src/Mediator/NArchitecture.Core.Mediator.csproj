@@ -49,6 +49,6 @@
   </ItemGroup>
   <!-- Project References -->
   <ItemGroup>
-    <ProjectReference Include="..\Mediator.Abstractions\NArchitecture.Core.Mediator.Abstractions.csproj" />
+    <ProjectReference Include="../Mediator.Abstractions/NArchitecture.Core.Mediator.Abstractions.csproj" />
   </ItemGroup>
 </Project>

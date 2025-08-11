@@ -55,6 +55,6 @@
   </ItemGroup>
   <!-- Project References -->
   <ItemGroup>
-    <ProjectReference Include="..\Mapper.AutoMapper\NArchitecture.Core.Mapper.AutoMapper.csproj" />
+    <ProjectReference Include="../Mapper.AutoMapper/NArchitecture.Core.Mapper.AutoMapper.csproj" />
   </ItemGroup>
 </Project>
