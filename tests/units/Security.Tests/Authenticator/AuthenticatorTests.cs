@@ -38,11 +38,11 @@ public class AuthenticatorTests
         _cancellationToken = CancellationToken.None;
 
         _ = _mockConfiguration
-            .Setup(c => c.EnabledAuthenticatorTypes)
+            .Setup(static c => c.EnabledAuthenticatorTypes)
             .Returns([AuthenticatorType.Email, AuthenticatorType.Sms, AuthenticatorType.Otp]);
-        _ = _mockConfiguration.Setup(c => c.CodeExpiration).Returns(TimeSpan.FromMinutes(5));
-        _ = _mockConfiguration.Setup(c => c.CodeLength).Returns(6);
-        _ = _mockConfiguration.Setup(c => c.CodeSeedLength).Returns(32);
+        _ = _mockConfiguration.Setup(static c => c.CodeExpiration).Returns(TimeSpan.FromMinutes(5));
+        _ = _mockConfiguration.Setup(static c => c.CodeLength).Returns(6);
+        _ = _mockConfiguration.Setup(static c => c.CodeSeedLength).Returns(32);
 
         _authenticator = new(
             _mockRepository.Object,
@@ -52,11 +52,6 @@ public class AuthenticatorTests
             _mockSmsService.Object,
             _mockOtpService.Object
         );
-    }
-
-    private static Expression<Func<UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>, bool>> MatchUserId(Guid userId)
-    {
-        return authenticator => authenticator.UserId.Equals(userId);
     }
 
     private void SetupGetAsync(Guid userId, UserAuthenticator<Guid, Guid, Guid, Guid, Guid, Guid, Guid>? returnValue)
@@ -146,29 +141,33 @@ public class AuthenticatorTests
 
         // Assert
         if (type == AuthenticatorType.Email)
+        {
             _mockMailService.Verify(
-                m =>
-                    m.SendAsync(
-                        It.Is<Mail>(mail => mail.ToList[0].Address == destination && mail.Priority == 1),
-                        _cancellationToken
-                    ),
-                Times.Once
-            );
+                        m =>
+                            m.SendAsync(
+                                It.Is<Mail>(mail => mail.ToList[0].Address == destination && mail.Priority == 1),
+                                _cancellationToken
+                            ),
+                        Times.Once
+                    );
+        }
         else if (type == AuthenticatorType.Sms)
+        {
             _mockSmsService.Verify(
-                s =>
-                    s.SendAsync(
-                        It.Is<Sms.Abstractions.Sms>(sms =>
-                            sms.PhoneNumber == destination
-                            && sms.Priority == 1
-                            && sms.CustomParameters != null
-                            && sms.CustomParameters.ContainsKey("type")
-                            && sms.CustomParameters["type"] == "authentication"
-                        ),
-                        _cancellationToken
-                    ),
-                Times.Once
-            );
+                        s =>
+                            s.SendAsync(
+                                It.Is<Sms.Abstractions.Sms>(sms =>
+                                    sms.PhoneNumber == destination
+                                    && sms.Priority == 1
+                                    && sms.CustomParameters != null
+                                    && sms.CustomParameters.ContainsKey("type")
+                                    && sms.CustomParameters["type"] == "authentication"
+                                ),
+                                _cancellationToken
+                            ),
+                        Times.Once
+                    );
+        }
     }
 
     [Fact(DisplayName = "Should reject expired code")]
@@ -820,10 +819,11 @@ public class AuthenticatorTests
         _ = capturedSms.ShouldNotBeNull();
         capturedSms!.Value.PhoneNumber.ShouldBe(phoneNumber);
         capturedSms!.Value.Priority.ShouldBe(1);
-        capturedSms!.Value.CustomParameters!.ShouldContainKey("type");
-        capturedSms!.Value.CustomParameters!["type"].ShouldBe("authentication");
-        capturedSms!.Value.CustomParameters.ShouldContainKey("expiresAt");
-        capturedSms!.Value.CustomParameters["expiresAt"].ShouldBe(expiresAt.ToString("O"));
+        IDictionary<string, string> customParameters = capturedSms!.Value.CustomParameters!;
+        customParameters.ShouldContainKey("type");
+        customParameters["type"].ShouldBe("authentication");
+        customParameters.ShouldContainKey("expiresAt");
+        customParameters["expiresAt"].ShouldBe(expiresAt.ToString("O"));
 
         // Verify repository update was called once
         _mockRepository.Verify(
@@ -909,7 +909,11 @@ public class AuthenticatorTests
         );
     }
 
-    // Rename this method to be more specific about the validation step
+    /// <summary>
+    /// Rename this method to be more specific about the validation step
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
     [Theory(DisplayName = "Should validate enabled types during attempt")]
     [InlineData(AuthenticatorType.Email)]
     [InlineData(AuthenticatorType.Sms)]

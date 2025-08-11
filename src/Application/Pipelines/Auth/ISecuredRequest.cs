@@ -8,5 +8,5 @@ public interface ISecuredRequest
     /// <summary>
     /// Gets the role claims for authorization.
     /// </summary>
-    RoleClaims RoleClaims { get; }
+    AuthOptions AuthOptions { get; }
 }

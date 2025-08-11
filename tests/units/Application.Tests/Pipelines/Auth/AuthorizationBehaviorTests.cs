@@ -12,7 +12,7 @@ public sealed class MockSecuredRequest : ISecuredRequest, IRequest<int>
     private string[]? _identityRoles;
     private string[]? _requiredRoles;
 
-    public RoleClaims RoleClaims => new(_identityRoles, _requiredRoles);
+    public AuthOptions AuthOptions => new(_identityRoles, _requiredRoles);
 
     public MockSecuredRequest()
     {
@@ -47,8 +47,8 @@ public class AuthorizationBehaviorTests
         MockSecuredRequest request = new MockSecuredRequest().SetRoles(null!, []);
 
         // Act & Assert: Verify the correct exception is thrown.
-        _ = await Should.ThrowAsync<AuthenticationException>(async () =>
-            await _behavior.Handle(request, _next, CancellationToken.None)
+        _ = await Should.ThrowAsync<AuthenticationException>(
+            async () => await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
 
@@ -135,8 +135,8 @@ public class AuthorizationBehaviorTests
         MockSecuredRequest request = new MockSecuredRequest().SetRoles([], ["editor"]);
 
         // Act & Assert: Verify exception is thrown.
-        _ = await Should.ThrowAsync<AuthorizationException>(async () =>
-            await _behavior.Handle(request, _next, CancellationToken.None)
+        _ = await Should.ThrowAsync<AuthorizationException>(
+            async () => await _behavior.Handle(request, _next, CancellationToken.None)
         );
     }
 
@@ -273,7 +273,7 @@ public class AuthorizationBehaviorTests
     public void RoleClaims_WhenIdentityRolesIsNull_IsAuthenticatedShouldBeFalse()
     {
         // Arrange: Create a RoleClaims instance with null IdentityRoles.
-        var roleClaims = new RoleClaims(null, ["editor"]);
+        var roleClaims = new AuthOptions(null, ["editor"]);
 
         // Assert: Verify IsAuthenticated is false.
         roleClaims.IsAuthenticated.ShouldBeFalse();
@@ -300,8 +300,8 @@ public class AuthorizationBehaviorTests
         else
         {
             // Act & Assert
-            _ = await Should.ThrowAsync<AuthorizationException>(async () =>
-                await _behavior.Handle(request, _next, CancellationToken.None)
+            _ = await Should.ThrowAsync<AuthorizationException>(
+                async () => await _behavior.Handle(request, _next, CancellationToken.None)
             );
         }
     }

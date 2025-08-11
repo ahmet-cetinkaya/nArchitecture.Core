@@ -76,7 +76,7 @@ public class AuthorizationBehaviorBenchmarks
 
     private sealed record TestRequest(string[] IdentityRoles, string[] RequiredRoles) : IRequest<TestResponse>, ISecuredRequest
     {
-        public RoleClaims RoleClaims => new(IdentityRoles, RequiredRoles);
+        public AuthOptions AuthOptions => new(IdentityRoles, RequiredRoles);
     }
 
     public sealed record TestResponse;

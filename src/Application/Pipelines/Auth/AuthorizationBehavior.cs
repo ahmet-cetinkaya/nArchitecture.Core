@@ -22,11 +22,11 @@ public sealed class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavi
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         // Check authentication
-        if (!request.RoleClaims.IsAuthenticated)
+        if (!request.AuthOptions.IsAuthenticated)
             return Task.FromException<TResponse>(new AuthenticationException(AUTHENTICATION_ERROR_MESSAGE));
 
         // Check authorization
-        if (!request.RoleClaims.HasAnyRequiredRole())
+        if (!request.AuthOptions.HasAnyRequiredRole())
             return Task.FromException<TResponse>(new AuthorizationException(AUTHORIZATION_ERROR_MESSAGE));
 
         return next();

@@ -1,6 +1,4 @@
 using Mapster;
-using Moq;
-using NArchitecture.Core.Mapper.Abstractions;
 using Shouldly;
 
 namespace NArchitecture.Core.Mapper.Mapster.Tests;
@@ -18,7 +16,7 @@ public class MapsterAdapterTests
     }
 
     [Fact(DisplayName = "Map should return mapped destination object when source is valid")]
-    public void Map_ShouldReturnMappedDestinationObject_WhenSourceIsValid()
+    public void MapShouldReturnMappedDestinationObjectWhenSourceIsValid()
     {
         // Arrange: Create a source object with test data.
         var source = new TestSourceClass { Name = "Test Name", Age = 25 };
@@ -27,13 +25,13 @@ public class MapsterAdapterTests
         TestDestinationClass result = _adapter.Map<TestDestinationClass>(source);
 
         // Assert: Verify the mapping was successful.
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Name.ShouldBe("Test Name");
         result.Age.ShouldBe(25);
     }
 
     [Fact(DisplayName = "Map should return mapped destination object with source and destination types")]
-    public void Map_ShouldReturnMappedDestinationObject_WithSourceAndDestinationTypes()
+    public void MapShouldReturnMappedDestinationObjectWithSourceAndDestinationTypes()
     {
         // Arrange: Create a source object with test data.
         var source = new TestSourceClass { Name = "Test Name", Age = 30 };
@@ -42,13 +40,13 @@ public class MapsterAdapterTests
         TestDestinationClass result = _adapter.Map<TestSourceClass, TestDestinationClass>(source);
 
         // Assert: Verify the mapping was successful.
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Name.ShouldBe("Test Name");
         result.Age.ShouldBe(30);
     }
 
     [Fact(DisplayName = "Map should map to existing destination object")]
-    public void Map_ShouldMapToExistingDestinationObject()
+    public void MapShouldMapToExistingDestinationObject()
     {
         // Arrange: Create source and existing destination objects.
         var source = new TestSourceClass { Name = "Updated Name", Age = 35 };
@@ -64,14 +62,14 @@ public class MapsterAdapterTests
     }
 
     [Fact(DisplayName = "Map should map to existing destination object with generic types")]
-    public void Map_ShouldMapToExistingDestinationObject_WithGenericTypes()
+    public void MapShouldMapToExistingDestinationObjectWithGenericTypes()
     {
         // Arrange: Create source and existing destination objects.
         var source = new TestSourceClass { Name = "Generic Update", Age = 40 };
         var destination = new TestDestinationClass { Name = "Original", Age = 10 };
 
         // Act: Map source to existing destination using generic overload.
-        TestDestinationClass result = _adapter.Map<TestSourceClass, TestDestinationClass>(source, destination);
+        TestDestinationClass result = _adapter.Map(source, destination);
 
         // Assert: Verify the existing object was updated.
         result.ShouldBeSameAs(destination);
@@ -80,7 +78,7 @@ public class MapsterAdapterTests
     }
 
     [Fact(DisplayName = "Map should handle null source gracefully")]
-    public void Map_ShouldHandleNullSource_Gracefully()
+    public void MapShouldHandleNullSourceGracefully()
     {
         // Act & Assert: Verify null source returns null.
         TestDestinationClass result = _adapter.Map<TestDestinationClass>(null!);
@@ -88,7 +86,7 @@ public class MapsterAdapterTests
     }
 
     [Fact(DisplayName = "Map should handle null source with generic types gracefully")]
-    public void Map_ShouldHandleNullSourceWithGenericTypes_Gracefully()
+    public void MapShouldHandleNullSourceWithGenericTypesGracefully()
     {
         // Act & Assert: Verify null source returns null.
         TestDestinationClass result = _adapter.Map<TestSourceClass, TestDestinationClass>(null!);
@@ -96,26 +94,28 @@ public class MapsterAdapterTests
     }
 
     [Fact(DisplayName = "Map should handle null destination when mapping to existing object")]
-    public void Map_ShouldHandleNullDestination_WhenMappingToExistingObject()
+    public void MapShouldHandleNullDestinationWhenMappingToExistingObject()
     {
         // Arrange: Create source object.
         var source = new TestSourceClass { Name = "Test", Age = 25 };
 
         // Act: Map to null destination.
-        TestDestinationClass result = _adapter.Map(source, (TestDestinationClass?)null);
+        TestDestinationClass? result = _adapter.Map(source, (TestDestinationClass?)null);
 
         // Assert: Verify new object is created.
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Name.ShouldBe("Test");
         result.Age.ShouldBe(25);
     }
 
     [Fact(DisplayName = "Map should use custom configuration when provided")]
-    public void Map_ShouldUseCustomConfiguration_WhenProvided()
+    public void MapShouldUseCustomConfigurationWhenProvided()
     {
         // Arrange: Configure custom mapping rule.
         var customConfig = new TypeAdapterConfig();
-        customConfig.NewConfig<TestSourceClass, TestDestinationClass>().Map(dest => dest.Name, src => $"Prefix_{src.Name}");
+        _ = customConfig
+            .NewConfig<TestSourceClass, TestDestinationClass>()
+            .Map(static dest => dest.Name, static src => $"Prefix_{src.Name}");
 
         var customAdapter = new MapsterAdapter(customConfig);
         var source = new TestSourceClass { Name = "Test", Age = 25 };
@@ -124,13 +124,13 @@ public class MapsterAdapterTests
         TestDestinationClass result = customAdapter.Map<TestDestinationClass>(source);
 
         // Assert: Verify custom mapping was applied.
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Name.ShouldBe("Prefix_Test");
         result.Age.ShouldBe(25);
     }
 
     [Fact(DisplayName = "Map should handle complex object mapping")]
-    public void Map_ShouldHandleComplexObjectMapping()
+    public void MapShouldHandleComplexObjectMapping()
     {
         // Arrange: Create complex source object.
         var source = new ComplexSourceClass
@@ -138,33 +138,35 @@ public class MapsterAdapterTests
             Id = 1,
             Name = "Complex Test",
             NestedObject = new NestedClass { Value = "Nested Value" },
-            Items = new List<string> { "Item1", "Item2" },
+            Items = ["Item1", "Item2"],
         };
 
         // Act: Map complex object.
         ComplexDestinationClass result = _adapter.Map<ComplexDestinationClass>(source);
 
         // Assert: Verify complex mapping was successful.
-        result.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
         result.Id.ShouldBe(1);
         result.Name.ShouldBe("Complex Test");
-        result.NestedObject.ShouldNotBeNull();
+        _ = result.NestedObject.ShouldNotBeNull();
         result.NestedObject.Value.ShouldBe("Nested Value");
-        result.Items.ShouldNotBeNull();
+        _ = result.Items.ShouldNotBeNull();
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain("Item1");
         result.Items.ShouldContain("Item2");
     }
 
     [Fact(DisplayName = "Constructor should throw when config is null")]
-    public void Constructor_ShouldThrow_WhenConfigIsNull()
+    public void ConstructorShouldThrowWhenConfigIsNull()
     {
         // Act & Assert: Verify constructor throws when passed null config.
-        Should.Throw<ArgumentNullException>(() => new MapsterAdapter(null!));
+        _ = Should.Throw<ArgumentNullException>(static () => new MapsterAdapter(null!));
     }
 }
 
-// Test classes for mapping
+/// <summary>
+/// Test classes for mapping
+/// </summary>
 public class TestSourceClass
 {
     public string? Name { get; set; }

@@ -44,16 +44,16 @@ public class JwtAuthenticationServiceTests
             rng.GetBytes(keyBytes);
         string securityKey = Convert.ToBase64String(keyBytes);
 
-        _ = _mockConfiguration.Setup(c => c.SecurityKey).Returns(securityKey);
-        _ = _mockConfiguration.Setup(c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(10));
-        _ = _mockConfiguration.Setup(c => c.RefreshTokenTTL).Returns(TimeSpan.FromDays(7));
-        _ = _mockConfiguration.Setup(c => c.Issuer).Returns("test-issuer");
-        _ = _mockConfiguration.Setup(c => c.Audience).Returns("test-audience");
+        _ = _mockConfiguration.Setup(static c => c.SecurityKey).Returns(securityKey);
+        _ = _mockConfiguration.Setup(static c => c.AccessTokenExpiration).Returns(TimeSpan.FromMinutes(10));
+        _ = _mockConfiguration.Setup(static c => c.RefreshTokenTTL).Returns(TimeSpan.FromDays(7));
+        _ = _mockConfiguration.Setup(static c => c.Issuer).Returns("test-issuer");
+        _ = _mockConfiguration.Setup(static c => c.Audience).Returns("test-audience");
     }
 
     [Fact(DisplayName = "LoginAsync should create access and refresh tokens for valid credentials")]
     [Trait("Category", "Authentication")]
-    public async Task LoginAsync_WithValidCredentials_ShouldCreateTokens()
+    public async Task LoginAsyncWithValidCredentialsShouldCreateTokens()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class JwtAuthenticationServiceTests
 
     [Fact(DisplayName = "LoginAsync should throw for invalid password")]
     [Trait("Category", "Authentication")]
-    public async Task LoginAsync_WithInvalidPassword_ShouldThrowException()
+    public async Task LoginAsyncWithInvalidPasswordShouldThrowException()
     {
         // Arrange
         User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(Guid.NewGuid(), "different-password");
@@ -104,7 +104,7 @@ public class JwtAuthenticationServiceTests
 
     [Fact(DisplayName = "RefreshTokenAsync should create new tokens for valid refresh token")]
     [Trait("Category", "Authentication")]
-    public async Task RefreshTokenAsync_WithValidToken_ShouldCreateNewTokens()
+    public async Task RefreshTokenAsyncWithValidTokenShouldCreateNewTokens()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -138,7 +138,7 @@ public class JwtAuthenticationServiceTests
 
     [Fact(DisplayName = "RefreshTokenAsync should throw when refresh token is expired")]
     [Trait("Category", "Authentication")]
-    public async Task RefreshTokenAsync_WithExpiredToken_ShouldThrowException()
+    public async Task RefreshTokenAsyncWithExpiredTokenShouldThrowException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -158,15 +158,15 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("Token has expired");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
-            await _sut.RefreshTokenAsync(expiredToken.Token, "127.0.0.1")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(
+            async () => await _sut.RefreshTokenAsync(expiredToken.Token, "127.0.0.1")
         );
         exception.Message.ShouldBe("Token has expired");
     }
 
     [Fact(DisplayName = "RefreshTokenAsync should throw when refresh token is revoked")]
     [Trait("Category", "Authentication")]
-    public async Task RefreshTokenAsync_WithRevokedToken_ShouldThrowException()
+    public async Task RefreshTokenAsyncWithRevokedTokenShouldThrowException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -191,15 +191,15 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("Token has been revoked");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
-            await _sut.RefreshTokenAsync(revokedToken.Token, "127.0.0.1")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(
+            async () => await _sut.RefreshTokenAsync(revokedToken.Token, "127.0.0.1")
         );
         exception.Message.ShouldBe("Token has been revoked");
     }
 
     [Fact(DisplayName = "RefreshTokenAsync should throw when user is not found")]
     [Trait("Category", "Authentication")]
-    public async Task RefreshTokenAsync_WithNonExistentUser_ShouldThrowException()
+    public async Task RefreshTokenAsyncWithNonExistentUserShouldThrowException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -218,21 +218,21 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("User not found");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
-            await _sut.RefreshTokenAsync(refreshToken.Token, "127.0.0.1")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(
+            async () => await _sut.RefreshTokenAsync(refreshToken.Token, "127.0.0.1")
         );
         exception.Message.ShouldBe("User not found");
     }
 
     [Fact(DisplayName = "RevokeRefreshTokenAsync should revoke valid token")]
     [Trait("Category", "Authentication")]
-    public async Task RevokeRefreshTokenAsync_WithValidToken_ShouldRevokeToken()
+    public async Task RevokeRefreshTokenAsyncWithValidTokenShouldRevokeToken()
     {
         // Arrange
         var userId = Guid.NewGuid();
         RefreshToken<Guid, Guid, Guid, Guid, Guid, Guid, Guid> refreshToken = CreateTestRefreshToken(userId);
-        string ipAddress = "127.0.0.1";
-        string reason = "Test revocation";
+        const string ipAddress = "127.0.0.1";
+        const string reason = "Test revocation";
 
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetByTokenAsync(refreshToken.Token, It.IsAny<CancellationToken>()))
@@ -259,7 +259,7 @@ public class JwtAuthenticationServiceTests
 
     [Fact(DisplayName = "RevokeAllRefreshTokensAsync should revoke all active tokens for user")]
     [Trait("Category", "Authentication")]
-    public async Task RevokeAllRefreshTokensAsync_WithActiveTokens_ShouldRevokeAllTokens()
+    public async Task RevokeAllRefreshTokensAsyncWithActiveTokensShouldRevokeAllTokens()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -269,7 +269,7 @@ public class JwtAuthenticationServiceTests
             CreateTestRefreshToken(userId),
             CreateTestRefreshToken(userId),
         };
-        string reason = "Bulk revocation test";
+        const string reason = "Bulk revocation test";
 
         _ = _mockRefreshTokenRepository
             .Setup(x => x.GetAllActiveByUserIdAsync(userId, It.IsAny<CancellationToken>()))
@@ -293,7 +293,7 @@ public class JwtAuthenticationServiceTests
 
     [Fact(DisplayName = "RevokeRefreshTokenAsync should throw when token is already revoked")]
     [Trait("Category", "Authentication")]
-    public async Task RevokeRefreshTokenAsync_WithAlreadyRevokedToken_ShouldThrowException()
+    public async Task RevokeRefreshTokenAsyncWithAlreadyRevokedTokenShouldThrowException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -318,8 +318,8 @@ public class JwtAuthenticationServiceTests
             .ReturnsAsync("Token is already revoked");
 
         // Act & Assert
-        BusinessException exception = await Should.ThrowAsync<BusinessException>(async () =>
-            await _sut.RevokeRefreshTokenAsync(alreadyRevokedToken.Token, "127.0.0.1", "New revocation attempt")
+        BusinessException exception = await Should.ThrowAsync<BusinessException>(
+            async () => await _sut.RevokeRefreshTokenAsync(alreadyRevokedToken.Token, "127.0.0.1", "New revocation attempt")
         );
         exception.Message.ShouldBe("Token is already revoked");
 
@@ -335,7 +335,7 @@ public class JwtAuthenticationServiceTests
     [InlineData("", "Empty password")]
     [InlineData("   ", "Whitespace password")]
     [InlineData("short", "Short password")]
-    public async Task LoginAsync_WithVariousPasswords_ShouldHandleAppropriately(string password, string scenario)
+    public async Task LoginAsyncWithVariousPasswordsShouldHandleAppropriately(string password, string scenario)
     {
         // Arrange
         User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(Guid.NewGuid());
@@ -353,7 +353,7 @@ public class JwtAuthenticationServiceTests
     [Fact(DisplayName = "AccessToken should contain correct JWT properties")]
     [Trait("Category", "Authentication")]
     [Trait("Category", "JWT Validation")]
-    public async Task LoginAsync_ShouldCreateValidJwtToken()
+    public async Task LoginAsyncShouldCreateValidJwtToken()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -408,7 +408,7 @@ public class JwtAuthenticationServiceTests
         );
 
         // Claims validation
-        var claims = jwtToken.Claims.ToDictionary(c => c.Type, c => c.Value);
+        IDictionary<string, string> claims = jwtToken.Claims.ToDictionary(c => c.Type, c => c.Value);
         claims.ShouldContainKey(ClaimTypes.NameIdentifier);
         claims[ClaimTypes.NameIdentifier].ShouldBe(userId.ToString());
         claims.ShouldContainKey(ClaimTypes.Role);
@@ -422,7 +422,7 @@ public class JwtAuthenticationServiceTests
     [Fact(DisplayName = "RefreshToken should be revoked with correct replacement token")]
     [Trait("Category", "Authentication")]
     [Trait("Category", "Token Replacement")]
-    public async Task RefreshTokenAsync_ShouldRevokeOldTokenWithCorrectReplacement()
+    public async Task RefreshTokenAsyncShouldRevokeOldTokenWithCorrectReplacement()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -457,7 +457,7 @@ public class JwtAuthenticationServiceTests
     [Fact(DisplayName = "RevokeAllRefreshTokensAsync should handle empty token list")]
     [Trait("Category", "Authentication")]
     [Trait("Category", "Bulk Operations")]
-    public async Task RevokeAllRefreshTokensAsync_WithNoActiveTokens_ShouldNotUpdateRepository()
+    public async Task RevokeAllRefreshTokensAsyncWithNoActiveTokensShouldNotUpdateRepository()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -485,7 +485,7 @@ public class JwtAuthenticationServiceTests
     [InlineData("short", "Short password")]
     [InlineData("verylongpasswordthatexceedsmaximumlength", "Long password")]
     [InlineData("password123", "Common password")]
-    public async Task LoginAsync_WithInvalidPasswordCharacteristics_ShouldThrowBusinessException(string password, string scenario)
+    public async Task LoginAsyncWithInvalidPasswordCharacteristicsShouldThrowBusinessException(string password, string scenario)
     {
         // Arrange
         User<Guid, Guid, Guid, Guid, Guid, Guid, Guid> user = CreateTestUser(Guid.NewGuid());
@@ -503,7 +503,7 @@ public class JwtAuthenticationServiceTests
     [Fact(DisplayName = "RefreshToken should maintain correct token chain")]
     [Trait("Category", "Authentication")]
     [Trait("Category", "Token Chain")]
-    public async Task RefreshTokenAsync_ShouldMaintainTokenChain()
+    public async Task RefreshTokenAsyncShouldMaintainTokenChain()
     {
         // Arrange
         var userId = Guid.NewGuid();

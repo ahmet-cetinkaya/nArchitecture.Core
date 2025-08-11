@@ -13,7 +13,7 @@ namespace NArchitecture.Core.Application.Pipelines.Auth;
 /// <param name="requiredRoles">The roles required for authorization.</param>
 [StructLayout(LayoutKind.Auto)]
 [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
-public readonly ref struct RoleClaims(string[]? identityRoles, string[]? requiredRoles)
+public readonly ref struct AuthOptions(string[]? identityRoles, string[]? requiredRoles)
 {
     private readonly string[]? _identityRoles = identityRoles;
     private readonly string[]? _requiredRoles = requiredRoles;
@@ -22,6 +22,7 @@ public readonly ref struct RoleClaims(string[]? identityRoles, string[]? require
     /// <summary>
     /// Checks if the roles array contains the admin role.
     /// </summary>
+    /// <param name="roles"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool ContainsAdmin(string[] roles)
     {
