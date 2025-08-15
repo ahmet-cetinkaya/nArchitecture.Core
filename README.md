@@ -1,4 +1,4 @@
-# ![NArchitecture Logo](https://github.com/user-attachments/assets/8a61adb0-f0b8-48e4-82b3-db38e10bb052) NArchitecture Core Packages 
+# ![NArchitecture Logo](docs/images/n-architecture-logo.png) NArchitecture Core Packages 
 ![GitHub contributors](https://img.shields.io/github/contributors/kodlamaio-projects/nArchitecture.Core?style=for-the-badge) ![GitHub forks](https://img.shields.io/github/forks/kodlamaio-projects/nArchitecture.Core?style=for-the-badge) ![GitHub stars](https://img.shields.io/github/stars/kodlamaio-projects/nArchitecture.Core?style=for-the-badge) ![GitHub issues](https://img.shields.io/github/issues/kodlamaio-projects/nArchitecture.Core?style=for-the-badge)
 
 ## 💻 About The Project
