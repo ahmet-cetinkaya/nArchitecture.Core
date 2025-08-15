@@ -47,30 +47,44 @@ public readonly ref struct AuthOptions(string[]? identityRoles, string[]? requir
     {
         if (!IsAuthenticated)
             return false;
+
         if (_hasAdminRole)
             return true;
-        if (_requiredRoles == null || _requiredRoles.Length == 0)
+
+        if (_requiredRoles is null || _requiredRoles.Length == 0)
             return true;
 
-        bool hasAnyValidRequiredRole = false;
+        // If there are no valid roles to check against, access is granted.
+        bool hasValidRequiredRoles = false;
+        foreach (string required in _requiredRoles)
+        {
+            if (!string.IsNullOrWhiteSpace(required))
+            {
+                hasValidRequiredRoles = true;
+                break;
+            }
+        }
+
+        if (!hasValidRequiredRoles)
+            return true;
+
         foreach (string required in _requiredRoles)
         {
             if (string.IsNullOrWhiteSpace(required))
-                return true;
+                continue;
 
-            hasAnyValidRequiredRole = true;
             ReadOnlySpan<char> requiredSpan = required.AsSpan().Trim();
-
             foreach (string identity in _identityRoles!)
             {
                 if (string.IsNullOrWhiteSpace(identity))
                     continue;
+
                 if (identity.AsSpan().Trim().Equals(requiredSpan, StringComparison.OrdinalIgnoreCase))
                     return true;
             }
         }
 
-        return !hasAnyValidRequiredRole;
+        return false;
     }
 
     /// <summary>
