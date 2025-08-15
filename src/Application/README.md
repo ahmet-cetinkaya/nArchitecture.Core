@@ -48,7 +48,7 @@ public class GetUserQuery : IRequest<UserDto>, ICacheableRequest
 public class DeleteUserCommand : IRequest<bool>, ISecuredRequest
 {
     public string UserId { get; set; }
-    public RoleClaims RoleClaims => new(CurrentUser.Roles, ["Admin"]);
+    public AuthOptions AuthOptions => new(CurrentUser.Roles, ["Admin"]);
 }
 ```
 
