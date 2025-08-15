@@ -75,16 +75,6 @@ public static class ServiceRegistration
 
         foreach (var implementation in behaviorImplementations)
         {
-            // Skip types that have constructor parameters which would prevent auto-registration
-            if (
-                implementation
-                    .GetConstructors()
-                    .All(ctor => ctor.GetParameters().Length > 0 && !ctor.GetParameters().All(p => p.HasDefaultValue))
-            )
-            {
-                continue;
-            }
-
             var implementedInterfaces = implementation
                 .GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == behaviorType);
