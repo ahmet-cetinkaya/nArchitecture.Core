@@ -27,8 +27,6 @@ public class TransactionScopeBehavior<TRequest, TResponse> : IPipelineBehavior<T
         }
         catch (Exception)
         {
-            // Ensure transaction is disposed on exception
-            transactionScope.Dispose();
             throw;
         }
     }
