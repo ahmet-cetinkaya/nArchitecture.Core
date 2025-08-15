@@ -17,46 +17,53 @@ public static class ServiceCollectionResourceLocalizationManagerExtension
     /// Adds <see cref="ResourceLocalizationManager"/> as <see cref="ILocalizationService"/> to <see cref="IServiceCollection"/>.
     /// <list type="bullet">
     ///    <item>
-    ///        <description>Reads all yaml files in the "<see cref="Assembly.GetExecutingAssembly()"/>/Features/{featureName}/Resources/Locales/". Yaml file names must be like {uniqueKeySectionName}.{culture}.yaml.</description>
+    ///        <description>Reads all yaml files in the "{assembly}/Features/{featureName}/Resources/Locales/". Yaml file names must be like {uniqueKeySectionName}.{culture}.yaml.</description>
     ///    </item>
     ///    <item>
-    ///        <description>If you don't want separate locale files with sections, create "<see cref="Assembly.GetExecutingAssembly()"/>/Features/Index/Resources/Locales/index.{culture}.yaml".</description>
+    ///        <description>If you don't want separate locale files with sections, create "{assembly}/Features/Index/Resources/Locales/index.{culture}.yaml".</description>
     ///    </item>
     /// </list>
     /// </summary>
-    public static IServiceCollection AddYamlResourceLocalization(this IServiceCollection services)
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="assembliesToScan">The assemblies to scan for localization resources.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddYamlResourceLocalization(this IServiceCollection services, params Assembly[] assembliesToScan)
     {
         _ = services.AddScoped<ILocalizationService, ResourceLocalizationManager>(_ =>
         {
-            Dictionary<string, Dictionary<string, string>> resources = GetLocalizationResources();
+            Dictionary<string, Dictionary<string, string>> resources = GetLocalizationResources(assembliesToScan);
             return new ResourceLocalizationManager(resources);
         });
 
         return services;
     }
 
-    private static Dictionary<string, Dictionary<string, string>> GetLocalizationResources()
+    private static Dictionary<string, Dictionary<string, string>> GetLocalizationResources(Assembly[] assembliesToScan)
     {
         var resources = new Dictionary<string, Dictionary<string, string>>();
-        string? assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        if (assemblyLocation is null)
-            return resources;
-
-        string featuresPath = Path.Combine(assemblyLocation, FeaturesFolder);
-        if (!Directory.Exists(featuresPath))
-            return resources;
-
-        string[] featureDirectories = Directory.GetDirectories(featuresPath);
-
-        foreach (string featureDir in featureDirectories)
+        
+        foreach (var assembly in assembliesToScan)
         {
-            IEnumerable<(string culture, string filePath)> localeFiles = GetLocaleFiles(featureDir);
-            foreach ((string culture, string filePath) in localeFiles)
-            {
-                if (!resources.ContainsKey(culture))
-                    resources[culture] = [];
+            string? assemblyLocation = Path.GetDirectoryName(assembly.Location);
+            if (assemblyLocation is null)
+                continue;
 
-                resources[culture][Path.GetFileName(featureDir)] = filePath;
+            string featuresPath = Path.Combine(assemblyLocation, FeaturesFolder);
+            if (!Directory.Exists(featuresPath))
+                continue;
+
+            string[] featureDirectories = Directory.GetDirectories(featuresPath);
+
+            foreach (string featureDir in featureDirectories)
+            {
+                IEnumerable<(string culture, string filePath)> localeFiles = GetLocaleFiles(featureDir);
+                foreach ((string culture, string filePath) in localeFiles)
+                {
+                    if (!resources.ContainsKey(culture))
+                        resources[culture] = [];
+
+                    resources[culture][Path.GetFileName(featureDir)] = filePath;
+                }
             }
         }
 
