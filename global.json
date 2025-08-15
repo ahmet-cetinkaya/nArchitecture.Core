@@ -1,8 +1,8 @@
 {
     "sdk": {
-        "allowPrerelease": false,
+        "allowPrerelease": true,
         "rollForward": "latestMinor",
-        "version": "9.0.0"
+        "version": "10.0.100-preview.7.25380.108"
     },
     "scripts": {
         "analyze": "dotnet roslynator analyze --exclude tests/**/**/*",
