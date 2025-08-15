@@ -22,10 +22,8 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>2.0.0</Version>
-    <Authors>Kodlama.io, Contributors</Authors>
-    <Company>Kodlama.io</Company>
+    <Authors>NArchitecture, Contributors</Authors>
     <Product>NArchitecture</Product>
-    <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
   </PropertyGroup>
   <!-- Package Metadata -->
   <PropertyGroup>
@@ -36,7 +34,7 @@
     <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
     <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+    <RepositoryUrl>https://github.com/NArchitecture/narchitecture-core</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>

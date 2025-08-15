@@ -22,10 +22,8 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>2.0.0</Version>
-    <Authors>Kodlama.io, Contributors</Authors>
-    <Company>Kodlama.io</Company>
+    <Authors>NArchitecture, Contributors</Authors>
     <Product>NArchitecture</Product>
-    <Copyright>Copyright © 2024 Kodlama.io. All rights reserved.</Copyright>
     <PackageId>NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection</PackageId>
     <Title>NArchitecture Core Logging DI Extensions</Title>
     <Description>Dependency injection extensions for logging services in Clean/Union Architecture applications.</Description>
@@ -33,7 +31,7 @@
     <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
     <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/kodlamaio-projects/nArchitecture.Core</RepositoryUrl>
+    <RepositoryUrl>https://github.com/NArchitecture/narchitecture-core</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <!-- Package Files -->
