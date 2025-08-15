@@ -3,34 +3,39 @@
   "isRoot": true,
   "tools": {
     "csharpier": {
-      "version": "0.30.6",
+      "version": "1.1.1",
       "commands": [
-        "dotnet-csharpier"
-      ]
+        "csharpier"
+      ],
+      "rollForward": false
     },
     "roslynator.dotnet.cli": {
-      "version": "0.10.0",
+      "version": "0.10.2",
       "commands": [
         "roslynator"
-      ]
+      ],
+      "rollForward": false
     },
     "run-script": {
       "version": "0.6.0",
       "commands": [
         "r"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-outdated-tool": {
-      "version": "4.6.7",
+      "version": "4.6.8",
       "commands": [
         "dotnet-outdated"
-      ]
+      ],
+      "rollForward": false
     },
     "security-scan": {
       "version": "5.6.7",
       "commands": [
         "security-scan"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }
