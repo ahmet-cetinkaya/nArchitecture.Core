@@ -17,10 +17,13 @@ public static class ServiceCollectionResourceLocalizationManagerExtension
     /// Adds <see cref="ResourceLocalizationManager"/> as <see cref="ILocalizationService"/> to <see cref="IServiceCollection"/>.
     /// <list type="bullet">
     ///    <item>
-    ///        <description>Reads all yaml files in the "{assembly}/Features/{featureName}/Resources/Locales/". Yaml file names must be like {uniqueKeySectionName}.{culture}.yaml.</description>
+    ///        <description>First tries to load embedded resources with pattern "Features.{featureName}.Resources.Locales.{uniqueKeySectionName}.{culture}.yaml"</description>
     ///    </item>
     ///    <item>
-    ///        <description>If you don't want separate locale files with sections, create "{assembly}/Features/Index/Resources/Locales/index.{culture}.yaml".</description>
+    ///        <description>Falls back to file system resources in "{assembly}/Features/{featureName}/Resources/Locales/"</description>
+    ///    </item>
+    ///    <item>
+    ///        <description>YAML file names must be like {uniqueKeySectionName}.{culture}.yaml</description>
     ///    </item>
     /// </list>
     /// </summary>
@@ -44,30 +47,77 @@ public static class ServiceCollectionResourceLocalizationManagerExtension
         
         foreach (var assembly in assembliesToScan)
         {
-            string? assemblyLocation = Path.GetDirectoryName(assembly.Location);
-            if (assemblyLocation is null)
-                continue;
-
-            string featuresPath = Path.Combine(assemblyLocation, FeaturesFolder);
-            if (!Directory.Exists(featuresPath))
-                continue;
-
-            string[] featureDirectories = Directory.GetDirectories(featuresPath);
-
-            foreach (string featureDir in featureDirectories)
-            {
-                IEnumerable<(string culture, string filePath)> localeFiles = GetLocaleFiles(featureDir);
-                foreach ((string culture, string filePath) in localeFiles)
-                {
-                    if (!resources.ContainsKey(culture))
-                        resources[culture] = [];
-
-                    resources[culture][Path.GetFileName(featureDir)] = filePath;
-                }
-            }
+            // First try embedded resources
+            GetEmbeddedResources(assembly, resources);
+            
+            // Then try file system resources as fallback
+            GetFileSystemResources(assembly, resources);
         }
 
         return resources;
+    }
+
+    private static void GetEmbeddedResources(Assembly assembly, Dictionary<string, Dictionary<string, string>> resources)
+    {
+        var resourceNames = assembly.GetManifestResourceNames()
+            .Where(name => name.Contains($"{FeaturesFolder}.") && 
+                          name.Contains($"{ResourcesFolder}.{LocalesFolder}.") && 
+                          name.EndsWith(YamlExtension))
+            .ToArray();
+
+        foreach (var resourceName in resourceNames)
+        {
+            // Parse: AssemblyName.Features.FeatureName.Resources.Locales.filename.culture.yaml
+            var parts = resourceName.Split('.');
+            if (parts.Length < 6) continue;
+
+            var featureIndex = Array.FindIndex(parts, p => p == FeaturesFolder);
+            if (featureIndex == -1 || featureIndex + 4 >= parts.Length) continue;
+
+            var featureName = parts[featureIndex + 1];
+            var fileName = string.Join('.', parts[(featureIndex + 4)..^2]); // Remove .yaml
+            var lastDotIndex = fileName.LastIndexOf('.');
+            if (lastDotIndex == -1) continue;
+
+            var culture = fileName[(lastDotIndex + 1)..];
+
+            if (!resources.ContainsKey(culture))
+                resources[culture] = [];
+
+            // Store the embedded resource name instead of file path
+            resources[culture][featureName] = $"embedded:{resourceName}";
+        }
+    }
+
+    private static void GetFileSystemResources(Assembly assembly, Dictionary<string, Dictionary<string, string>> resources)
+    {
+        string? assemblyLocation = Path.GetDirectoryName(assembly.Location);
+        if (assemblyLocation is null)
+            return;
+
+        string featuresPath = Path.Combine(assemblyLocation, FeaturesFolder);
+        if (!Directory.Exists(featuresPath))
+            return;
+
+        string[] featureDirectories = Directory.GetDirectories(featuresPath);
+
+        foreach (string featureDir in featureDirectories)
+        {
+            var featureName = Path.GetFileName(featureDir);
+            IEnumerable<(string culture, string filePath)> localeFiles = GetLocaleFiles(featureDir);
+            
+            foreach ((string culture, string filePath) in localeFiles)
+            {
+                if (!resources.ContainsKey(culture))
+                    resources[culture] = [];
+
+                // Only add if not already present from embedded resources
+                if (!resources[culture].ContainsKey(featureName))
+                {
+                    resources[culture][featureName] = filePath;
+                }
+            }
+        }
     }
 
     private static IEnumerable<(string culture, string filePath)> GetLocaleFiles(string featureDir)
@@ -79,7 +129,7 @@ public static class ServiceCollectionResourceLocalizationManagerExtension
         foreach (string file in Directory.EnumerateFiles(localeDir, FileSearchPattern))
         {
             string fileName = Path.GetFileNameWithoutExtension(file);
-            int separatorIndex = fileName.IndexOf('.');
+            int separatorIndex = fileName.LastIndexOf('.'); // Use LastIndexOf for better parsing
             if (separatorIndex == -1)
                 continue;
 

@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Reflection;
 using NArchitecture.Core.Localization.Abstractions;
 using YamlDotNet.RepresentationModel;
 
@@ -76,7 +77,12 @@ public class ResourceLocalizationManager : ILocalizationService
         {
             // Lazy-load YAML content if not loaded yet
             if (sectionNode.content is null)
-                LazyLoadResource(sectionNode.path, out sectionNode.content);
+            {
+                if (sectionNode.path.StartsWith("embedded:"))
+                    LazyLoadEmbeddedResource(sectionNode.path, out sectionNode.content);
+                else
+                    LazyLoadFileResource(sectionNode.path, out sectionNode.content);
+            }
 
             if (sectionNode.content!.Children.TryGetValue(new YamlScalarNode(key), out YamlNode? cultureValueNode))
                 return cultureValueNode.ToString();
@@ -90,12 +96,44 @@ public class ResourceLocalizationManager : ILocalizationService
     /// </summary>
     /// <param name="path">The file path to the YAML resource.</param>
     /// <param name="content">The loaded YAML mapping node.</param>
-    private static void LazyLoadResource(string path, out YamlMappingNode? content)
+    private static void LazyLoadFileResource(string path, out YamlMappingNode? content)
     {
         // Open and parse the YAML file
         using StreamReader reader = new(path);
         YamlStream yamlStream = [];
         yamlStream.Load(reader);
         content = (YamlMappingNode)yamlStream.Documents[0].RootNode;
+    }
+
+    /// <summary>
+    /// Loads YAML resource from embedded resource and outputs its root mapping node.
+    /// </summary>
+    /// <param name="embeddedPath">The embedded resource path (prefixed with "embedded:").</param>
+    /// <param name="content">The loaded YAML mapping node.</param>
+    private static void LazyLoadEmbeddedResource(string embeddedPath, out YamlMappingNode? content)
+    {
+        content = null;
+        
+        // Remove "embedded:" prefix
+        var resourceName = embeddedPath[9..];
+        
+        // Find the assembly that contains this resource
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        foreach (var assembly in assemblies)
+        {
+            var resourceNames = assembly.GetManifestResourceNames();
+            if (resourceNames.Contains(resourceName))
+            {
+                using var stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    using var reader = new StreamReader(stream);
+                    YamlStream yamlStream = [];
+                    yamlStream.Load(reader);
+                    content = (YamlMappingNode)yamlStream.Documents[0].RootNode;
+                    return;
+                }
+            }
+        }
     }
 }

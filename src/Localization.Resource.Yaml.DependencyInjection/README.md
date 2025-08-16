@@ -4,11 +4,12 @@ Dependency injection extensions for YAML-based localization in Clean Architectur
 
 ## ✨ Features
 
-- 🔄 Automatic resource discovery
+- 🔄 Automatic resource discovery (embedded + file system)
 - 📁 Convention-based file organization
 - 🎯 Feature-based localization
 - ⚡ Efficient service registration
 - 🛡️ Type-safe configuration
+- 📦 Embedded resource support for deployment resilience
 
 ## 📥 Installation
 
@@ -22,11 +23,17 @@ dotnet add package NArchitecture.Core.Localization.Resource.Yaml.DependencyInjec
 // Program.cs or Startup.cs
 public void ConfigureServices(IServiceCollection services)
 {
-    // Add YAML-based localization
-    services.AddYamlResourceLocalization();
+    // Add YAML-based localization with assembly scanning
+    services.AddYamlResourceLocalization(Assembly.GetExecutingAssembly());
 }
 
-// Expected folder structure:
+// Embedded resources (preferred - robust deployment):
+// Features.Index.Resources.Locales.index.en.yaml
+// Features.Index.Resources.Locales.index.tr.yaml  
+// Features.Users.Resources.Locales.users.en.yaml
+// Features.Users.Resources.Locales.users.tr.yaml
+
+// File system fallback structure:
 // Features/
 //   ├── Index/
 //   │   └── Resources/
