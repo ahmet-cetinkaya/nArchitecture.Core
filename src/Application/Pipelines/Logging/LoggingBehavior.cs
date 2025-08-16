@@ -106,8 +106,8 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
             return value.ToString();
 
         const int maskLength = 6;
-        int startChars = param.Name == "SensitiveData" ? 4 : param.KeepStartChars;
-        int endChars = param.Name == "SensitiveData" ? 5 : param.KeepEndChars;
+        int startChars = param.KeepStartChars;
+        int endChars = param.KeepEndChars;
 
         // Removed threshold check to always mask
         char[] emailMaskedResult = new char[startChars + maskLength + endChars];
@@ -122,8 +122,13 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         if (value.Length <= 4)
             return value.ToString();
 
-        const int keepStart = 2,
+        int keepStart = param.KeepStartChars;
+        int keepEnd = param.KeepEndChars;
+        if (keepStart == 0 && keepEnd == 0)
+        {
+            keepStart = 2;
             keepEnd = 2;
+        }
         char[] numericResult = new char[value.Length];
         value[..keepStart].CopyTo(numericResult);
         numericResult.AsSpan(keepStart, value.Length - keepStart - keepEnd).Fill(param.MaskChar);
