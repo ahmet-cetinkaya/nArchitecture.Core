@@ -43,7 +43,7 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
             // Log if elapsed time exceeds threshold.
             if (_stopwatch.Elapsed.TotalSeconds > request.IntervalOptions.Interval)
             {
-                await _logger.InformationAsync(
+                _ = _logger.InformationAsync(
                     $"Performance -> {requestName} took {_stopwatch.Elapsed.TotalSeconds}s, exceeding the threshold of {request.IntervalOptions.Interval}s"
                 );
             }
