@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using NArchitecture.Core.Mediator.Abstractions;
@@ -12,6 +14,10 @@ public class MediatorImpl : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ConcurrentDictionary<Type, (Type HandlerType, MethodInfo HandleMethod)> _handlerCache = new();
+    private readonly ConcurrentDictionary<Type, (Type BehaviorType, MethodInfo HandleMethod)> _behaviorCache = new();
+    private readonly ConcurrentDictionary<Type, (Type HandlerType, MethodInfo HandleMethod)> _streamHandlerCache = new();
+    private readonly ConcurrentDictionary<Type, (Type BehaviorType, MethodInfo HandleMethod)> _streamBehaviorCache = new();
 
     public MediatorImpl(IServiceProvider serviceProvider, IServiceScopeFactory serviceScopeFactory)
     {
@@ -39,16 +45,19 @@ public class MediatorImpl : IMediator
         using var scope = _serviceScopeFactory.CreateScope();
         var serviceProvider = scope.ServiceProvider;
 
-        Type handlerType = typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType);
+        var (handlerType, handleMethod) = _handlerCache.GetOrAdd(requestType, static rt =>
+        {
+            var ht = typeof(IRequestHandler<,>).MakeGenericType(rt, typeof(TResponse));
+            var hm = ht.GetMethod("Handle")!;
+            return (ht, hm);
+        });
+
         object? handler = serviceProvider.GetService(handlerType);
 
         if (handler == null)
         {
             throw new InvalidOperationException($"Handler not found for {requestType.Name}");
         }
-
-        // Get the handle method
-        var handleMethod = handlerType.GetMethod("Handle")!;
 
         // Create the core request handler delegate
         RequestHandlerDelegate<TResponse> coreHandlerDelegate = async () =>
@@ -58,7 +67,12 @@ public class MediatorImpl : IMediator
         };
 
         // Get the closed behavior type for this specific request/response
-        var closedBehaviorType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, responseType);
+        var (closedBehaviorType, behaviorHandleMethod) = _behaviorCache.GetOrAdd(requestType, static rt =>
+        {
+            var bt = typeof(IPipelineBehavior<,>).MakeGenericType(rt, typeof(TResponse));
+            var bm = bt.GetMethod("Handle")!;
+            return (bt, bm);
+        });
 
         // Get behaviors directly registered for this specific request/response type
         var behaviors = serviceProvider.GetServices(closedBehaviorType).ToArray();
@@ -66,9 +80,6 @@ public class MediatorImpl : IMediator
         // If no behaviors, just execute the handler directly
         if (behaviors.Length == 0)
             return await coreHandlerDelegate();
-
-        // Build the pipeline by wrapping behaviors around the core handler
-        var behaviorHandleMethod = closedBehaviorType.GetMethod("Handle")!;
 
         // Start with the core handler
         RequestHandlerDelegate<TResponse> pipeline = coreHandlerDelegate;
@@ -105,16 +116,19 @@ public class MediatorImpl : IMediator
         using var scope = _serviceScopeFactory.CreateScope();
         var serviceProvider = scope.ServiceProvider;
 
-        // Get the handler type for this request
-        var handlerType = typeof(IRequestHandler<>).MakeGenericType(requestType);
+        // Get cached handler type and method
+        var cacheKey = requestType;
+        var (handlerType, handleMethod) = _handlerCache.GetOrAdd(cacheKey, static rt =>
+        {
+            var ht = typeof(IRequestHandler<>).MakeGenericType(rt);
+            var hm = ht.GetMethod("Handle")!;
+            return (ht, hm);
+        });
 
         // Get the handler instance
         var handler =
             serviceProvider.GetService(handlerType)
             ?? throw new InvalidOperationException($"No handler registered for {requestType.Name}");
-
-        // Get the handle method
-        var handleMethod = handlerType.GetMethod("Handle")!;
 
         // Create the core request handler delegate
         RequestHandlerDelegate coreHandlerDelegate = async () =>
@@ -122,8 +136,14 @@ public class MediatorImpl : IMediator
             await (Task)handleMethod.Invoke(handler, new object[] { request, cancellationToken })!;
         };
 
-        // Get the closed behavior type for this specific request
-        var closedBehaviorType = typeof(IPipelineBehavior<>).MakeGenericType(requestType);
+        // Get cached behavior type and method
+        var behaviorCacheKey = requestType;
+        var (closedBehaviorType, behaviorHandleMethod) = _behaviorCache.GetOrAdd(behaviorCacheKey, static rt =>
+        {
+            var bt = typeof(IPipelineBehavior<>).MakeGenericType(rt);
+            var bm = bt.GetMethod("Handle")!;
+            return (bt, bm);
+        });
 
         // Get behaviors directly registered for this specific request type
         var behaviors = serviceProvider.GetServices(closedBehaviorType).ToArray();
@@ -134,9 +154,6 @@ public class MediatorImpl : IMediator
             await coreHandlerDelegate();
             return;
         }
-
-        // Build the pipeline by wrapping behaviors around the core handler
-        var behaviorHandleMethod = closedBehaviorType.GetMethod("Handle")!;
 
         // Start with the core handler
         RequestHandlerDelegate pipeline = coreHandlerDelegate;
@@ -181,16 +198,19 @@ public class MediatorImpl : IMediator
         using var scope = _serviceScopeFactory.CreateScope();
         var serviceProvider = scope.ServiceProvider;
 
-        Type handlerType = typeof(IStreamRequestHandler<,>).MakeGenericType(requestType, responseType);
+        var (handlerType, handleMethod) = _streamHandlerCache.GetOrAdd(requestType, static rt =>
+        {
+            var ht = typeof(IStreamRequestHandler<,>).MakeGenericType(rt, typeof(TResponse));
+            var hm = ht.GetMethod("Handle")!;
+            return (ht, hm);
+        });
+
         object? handler = serviceProvider.GetService(handlerType);
 
         if (handler == null)
         {
             throw new InvalidOperationException($"Stream handler not found for {requestType.Name}");
         }
-
-        // Get the handle method
-        var handleMethod = handlerType.GetMethod("Handle")!;
 
         // Create the core stream request handler delegate
         RequestStreamHandlerDelegate<TResponse> coreHandlerDelegate = () =>
@@ -199,8 +219,13 @@ public class MediatorImpl : IMediator
             return result;
         };
 
-        // Get the closed behavior type for this specific request/response
-        var closedBehaviorType = typeof(IStreamPipelineBehavior<,>).MakeGenericType(requestType, responseType);
+        // Get cached stream behavior type and method
+        var (closedBehaviorType, behaviorHandleMethod) = _streamBehaviorCache.GetOrAdd(requestType, static rt =>
+        {
+            var bt = typeof(IStreamPipelineBehavior<,>).MakeGenericType(rt, typeof(TResponse));
+            var bm = bt.GetMethod("Handle")!;
+            return (bt, bm);
+        });
 
         // Get behaviors directly registered for this specific request/response type
         var behaviors = serviceProvider.GetServices(closedBehaviorType).ToArray();
@@ -214,9 +239,6 @@ public class MediatorImpl : IMediator
             }
             yield break;
         }
-
-        // Build the pipeline by wrapping behaviors around the core handler
-        var behaviorHandleMethod = closedBehaviorType.GetMethod("Handle")!;
 
         // Start with the core handler
         RequestStreamHandlerDelegate<TResponse> pipeline = coreHandlerDelegate;
