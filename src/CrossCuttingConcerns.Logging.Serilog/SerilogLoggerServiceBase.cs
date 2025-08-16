@@ -6,6 +6,11 @@ namespace NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog;
 /// <summary>
 /// Base class for Serilog logging implementations that provides common logging functionality.
 /// </summary>
+/// <remarks>
+/// Note: For true asynchronous logging, configure Serilog with async sinks to prevent blocking application threads.
+/// Example: .WriteTo.Async(a => a.File(...)) or .WriteTo.Async(a => a.Console())
+/// This ensures log messages are processed on background threads, improving application performance.
+/// </remarks>
 public abstract class SerilogLoggerServiceBase(PackageSerilog.ILogger logger) : ILogger
 {
     /// <summary>
