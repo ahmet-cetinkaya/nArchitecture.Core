@@ -114,9 +114,13 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenRolesHaveWhitespace_ShouldSucceed()
     {
         // Arrange: Create a request with roles that include whitespace.
-        await AssertRoleAccess([" editor "], [""], true);
+        // Empty required roles should allow access
+        await AssertRoleAccess([" editor "], [], true);
         await AssertRoleAccess(["editor"], [], true);
+        
+        // Whitespace-only required roles are treated as empty and skipped
         await AssertRoleAccess([" editor "], [" "], true);
+        await AssertRoleAccess(["user"], ["\t"], true);
     }
 
     [Fact(DisplayName = "Handle should throw authorization exception when user lacks required roles")]
@@ -196,13 +200,13 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenMixedEmptyAndNonEmptyRoles_ShouldSucceed()
     {
         // Arrange: Create requests with a mix of empty and valid roles.
-        // Case 1: Empty required role should grant access
-        await AssertRoleAccess(["user"], ["", "editor"], true);
-
-        // Case 2: Non-empty required role should be matched
+        // Case 1: Only non-empty required roles are validated - editor role should be matched
         await AssertRoleAccess(["editor"], ["", "editor"], true);
 
-        // Case 3: Empty user role should not affect matching
+        // Case 2: User without required role should fail even with empty required roles
+        await AssertRoleAccess(["user"], ["", "admin"], false);
+
+        // Case 3: Empty user roles are ignored, matching should work on valid roles
         await AssertRoleAccess(["user", "", "editor"], ["editor"], true);
     }
 
@@ -210,14 +214,15 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenBoundaryConditions_ShouldHandleCorrectly()
     {
         // Arrange: Create requests with boundary values.
-        // Empty arrays
+        // Empty arrays should allow access (no restrictions)
         await AssertRoleAccess([], [], true);
 
-        // Single empty string vs null
+        // Single empty string vs null should allow access (no valid restrictions)
         await AssertRoleAccess([""], null!, true);
 
-        // Mix of empty and valid roles
-        await AssertRoleAccess(["editor", ""], ["", "viewer"], true);
+        // Mix of empty and valid roles - only valid role (viewer) should be checked
+        await AssertRoleAccess(["editor", ""], ["", "viewer"], false); // editor != viewer
+        await AssertRoleAccess(["viewer", ""], ["", "viewer"], true);  // viewer == viewer
     }
 
     [Fact(DisplayName = "Handle should handle null values in role arrays")]
@@ -247,6 +252,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenAllEmptyStrings_ShouldSucceed()
     {
         // Arrange: Create a request with all roles empty.
+        // All empty required roles should be ignored, allowing access
         await AssertRoleAccess(["", "", ""], ["", "", ""], true);
     }
 
@@ -264,6 +270,7 @@ public class AuthorizationBehaviorTests
     public async Task Handle_WhenOnlyWhitespaceRoles_ShouldSucceed()
     {
         // Arrange: Create a request where roles are only whitespace.
+        // Whitespace-only required roles should be ignored, allowing access
         await AssertRoleAccess([" "], [" "], true);
         await AssertRoleAccess(["\t"], ["\t"], true);
         await AssertRoleAccess(["\n"], ["\n"], true);

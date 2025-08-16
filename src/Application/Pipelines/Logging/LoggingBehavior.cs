@@ -105,12 +105,14 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger logger) : IPipe
         if (value.Length < 9)
             return value.ToString();
 
-        const int maskLength = 6;
         int startChars = param.KeepStartChars;
         int endChars = param.KeepEndChars;
+        int maskLength = value.Length - startChars - endChars;
 
-        // Removed threshold check to always mask
-        char[] emailMaskedResult = new char[startChars + maskLength + endChars];
+        if (maskLength <= 0)
+            return value.ToString();
+
+        char[] emailMaskedResult = new char[value.Length];
         value[..startChars].CopyTo(emailMaskedResult);
         emailMaskedResult.AsSpan(startChars, maskLength).Fill(param.MaskChar);
         value[^endChars..].CopyTo(emailMaskedResult.AsSpan(startChars + maskLength));

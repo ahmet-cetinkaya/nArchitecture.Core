@@ -171,8 +171,8 @@ public class LoggingBehaviorTests
     }
 
     [Theory(DisplayName = "Handle should mask specified parameters when masking is enabled")]
-    [InlineData("1234567890", "12******90")]
-    [InlineData("test@email.com", "test******l.com")]
+    [InlineData("1234567890", "12*****890")]
+    [InlineData("test@email.com", "te*********com")]
     public async Task Handle_ShouldMaskSpecifiedParameters_WhenMaskingIsEnabled(string value, string expected)
     {
         // Arrange: Create a request where sensitive data should be masked.
@@ -330,7 +330,7 @@ public class LoggingBehaviorTests
 
         parameters!["PublicData"].ToString().ShouldBe("visible");
         parameters!.ContainsKey("Password").ShouldBeFalse();
-        parameters!["Email"].ToString().ShouldBe("test******com");
+        parameters!["Email"].ToString().ShouldBe("test*********com");
         parameters!["ApiKey"].ToString().ShouldBe("ak_***");
     }
 
