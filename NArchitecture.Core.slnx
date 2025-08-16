@@ -1,0 +1,79 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".csharpierrc" />
+    <File Path=".editorconfig" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/docs/" />
+  <Folder Name="/Solution Items/docs/images/">
+    <File Path="docs/images/n-architecture-logo.png" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Application.DependencyInjection/NArchitecture.Core.Application.DependencyInjection.csproj" />
+    <Project Path="src/Application/NArchitecture.Core.Application.csproj" />
+    <Project Path="src/CrossCuttingConcerns.Exception.WebApi/NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.csproj" />
+    <Project Path="src/CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
+    <Project Path="src/CrossCuttingConcerns.Logging.Abstractions/NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.csproj" />
+    <Project Path="src/CrossCuttingConcerns.Logging.DependencyInjection/NArchitecture.Core.CrossCuttingConcerns.Logging.DependencyInjection.csproj" />
+    <Project Path="src/CrossCuttingConcerns.Logging.Serilog.File/NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.csproj" />
+    <Project Path="src/CrossCuttingConcerns.Logging.Serilog/NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.csproj" />
+    <Project Path="src/Localization.Abstractions/NArchitecture.Core.Localization.Abstractions.csproj" />
+    <Project Path="src/Localization.Resource.Yaml.DependencyInjection/NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection.csproj" />
+    <Project Path="src/Localization.Resource.Yaml/NArchitecture.Core.Localization.Resource.Yaml.csproj" />
+    <Project Path="src/Localization.Translation/NArchitecture.Core.Localization.Translation.csproj" />
+    <Project Path="src/Localization.WebApi/NArchitecture.Core.Localization.WebApi.csproj" />
+    <Project Path="src/Mailing.Abstractions/NArchitecture.Core.Mailing.Abstractions.csproj" />
+    <Project Path="src/Mailing.MailKit/NArchitecture.Core.Mailing.MailKit.csproj" />
+    <Project Path="src/Mapper.Abstractions/NArchitecture.Core.Mapper.Abstractions.csproj" />
+    <Project Path="src/Mapper.AutoMapper.DependencyInjection/NArchitecture.Core.Mapper.AutoMapper.DependencyInjection.csproj" />
+    <Project Path="src/Mapper.AutoMapper/NArchitecture.Core.Mapper.AutoMapper.csproj" />
+    <Project Path="src/Mapper.Mapster.DependencyInjection/NArchitecture.Core.Mapper.Mapster.DependencyInjection.csproj" />
+    <Project Path="src/Mapper.Mapster/NArchitecture.Core.Mapper.Mapster.csproj" />
+    <Project Path="src/Mediator.Abstractions/NArchitecture.Core.Mediator.Abstractions.csproj" />
+    <Project Path="src/Mediator/NArchitecture.Core.Mediator.csproj" />
+    <Project Path="src/Persistence.Abstractions/NArchitecture.Core.Persistence.Abstractions.csproj" />
+    <Project Path="src/Persistence.EntityFramework.DependencyInjection/NArchitecture.Core.Persistence.EntityFramework.DependencyInjection.csproj" />
+    <Project Path="src/Persistence.EntityFramework/NArchitecture.Core.Persistence.EntityFramework.csproj" />
+    <Project Path="src/SearchEngine.Abstractions/NArchitecture.Core.SearchEngine.Abstractions.csproj" />
+    <Project Path="src/SearchEngine.ElasticSearch/NArchitecture.Core.SearchEngine.ElasticSearch.csproj" />
+    <Project Path="src/Security.Abstractions/NArchitecture.Core.Security.Abstractions.csproj" />
+    <Project Path="src/Security.DependencyInjection/NArchitecture.Core.Security.DependencyInjection.csproj" />
+    <Project Path="src/Security.WebApi.Swagger/NArchitecture.Core.Security.WebApi.Swagger.csproj" />
+    <Project Path="src/Security.WebApi/NArchitecture.Core.Security.WebApi.csproj" />
+    <Project Path="src/Security/NArchitecture.Core.Security.csproj" />
+    <Project Path="src/Sms.Abstractions/NArchitecture.Core.Sms.Abstractions.csproj" />
+    <Project Path="src/Translation.Abstractions/NArchitecture.Core.Translation.Abstractions.csproj" />
+    <Project Path="src/Translation.AmazonTranslate.DependencyInjection/NArchitecture.Core.Translation.AmazonTranslate.DependencyInjection.csproj" />
+    <Project Path="src/Translation.AmazonTranslate/NArchitecture.Core.Translation.AmazonTranslate.csproj" />
+    <Project Path="src/Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
+    <Project Path="src/Validation.FluentValidation.DependencyInjection/NArchitecture.Core.Validation.FluentValidation.DependencyInjection.csproj" />
+    <Project Path="src/Validation.FluentValidation/NArchitecture.Core.Validation.FluentValidation.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/benchmarks/">
+    <Project Path="tests/benchmarks/Application.BenchmarkTests/NArchitecture.Core.Application.BenchmarkTests.csproj" />
+    <Project Path="tests/benchmarks/Benchmarks/NArchitecture.Core.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/tests/units/">
+    <Project Path="tests/units/Application.Tests/NArchitecture.Core.Application.Tests.csproj" />
+    <Project Path="tests/units/CrossCuttingConcerns.Exception.WebApi.Tests/NArchitecture.Core.CrossCuttingConcerns.Exception.WebApi.Tests.csproj" />
+    <Project Path="tests/units/CrossCuttingConcerns.Logging.Serilog.File.Tests/NArchitecture.Core.CrossCuttingConcerns.Logging.Serilog.File.Tests.csproj" />
+    <Project Path="tests/units/Localization.Resource.Yaml.DependencyInjection.Tests/NArchitecture.Core.Localization.Resource.Yaml.DependencyInjection.Tests.csproj" />
+    <Project Path="tests/units/Localization.Resource.Yaml.Tests/NArchitecture.Core.Localization.Resource.Yaml.Tests.csproj" />
+    <Project Path="tests/units/Localization.Translation.Tests/NArchitecture.Core.Localization.Translation.Tests.csproj" />
+    <Project Path="tests/units/Localization.WebApi.Tests/NArchitecture.Core.Localization.WebApi.Tests.csproj" />
+    <Project Path="tests/units/Mailing.MailKit.Tests/NArchitecture.Core.Mailing.MailKit.Tests.csproj" />
+    <Project Path="tests/units/Mediator.Tests/NArchitecture.Core.Mediator.Tests.csproj" />
+    <Project Path="tests/units/Persistence.EntityFramework.Tests/NArchitecture.Core.Persistence.EntityFramework.Tests.csproj" />
+    <Project Path="tests/units/SearchEngine.ElasticSearch.Tests/NArchitecture.Core.SearchEngine.ElasticSearch.Tests.csproj" />
+    <Project Path="tests/units/Security.DependencyInjection.Tests/NArchitecture.Core.Security.DependencyInjection.Tests.csproj" />
+    <Project Path="tests/units/Security.Tests/NArchitecture.Core.Security.Tests.csproj" />
+    <Project Path="tests/units/Security.WebApi.Swagger.Tests/NArchitecture.Core.Security.WebApi.Swagger.Tests.csproj" />
+    <Project Path="tests/units/Security.WebApi.Tests/NArchitecture.Core.Security.WebApi.Tests.csproj" />
+    <Project Path="tests/units/Translation.AmazonTranslate.Tests/NArchitecture.Core.Translation.AmazonTranslate.Tests.csproj" />
+    <Project Path="tests/units/Validation.FluentValidation.Tests/NArchitecture.Core.Validation.FluentValidation.Tests.csproj" />
+    <Project Path="tests/units/Mapper.Mapster.Tests/NArchitecture.Core.Mapper.Mapster.Tests.csproj" />
+    <Project Path="tests/units/Mapper.Mapster.DependencyInjection.Tests/NArchitecture.Core.Mapper.Mapster.DependencyInjection.Tests.csproj" />
+  </Folder>
+</Solution>

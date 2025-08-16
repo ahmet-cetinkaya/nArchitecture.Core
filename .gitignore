@@ -400,3 +400,14 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# AI Code Agents
+.cursorignore
+.cursorindexingignore
+.cursor/
+.zencoder/
+.qodo/
+.aider/
+.continue/
+CLAUDE.md
+CLAUDE.local.md

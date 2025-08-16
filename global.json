@@ -1,6 +1,21 @@
 {
+    "sdk": {
+        "allowPrerelease": true,
+        "rollForward": "latestMinor",
+        "version": "10.0.100-preview.7.25380.108"
+    },
     "scripts": {
+        "analyze": "dotnet roslynator analyze --exclude tests/**/**/*",
+        "analyze:fix": "dotnet roslynator fix --exclude tests/**/**/*",
+        "analyze:security": "dotnet security-scan NArchitecture.Core.sln",
+        "benchmark": "dotnet run --project tests/benchmarks/Benchmarks/NArchitecture.Core.Benchmarks.csproj && dotnet restore",
+        "benchmark:last": "dotnet run --project tests/benchmarks/Benchmarks/NArchitecture.Core.Benchmarks.csproj -- --last-run && dotnet restore",
         "build": "dotnet build --configuration Release",
-        "test": "dotnet test --configuration Release"
+        "clean": "dotnet clean && bash -c \"if command -v pwsh >/dev/null 2>&1; then pwsh -c 'Get-ChildItem -Path . -Include bin,obj -Recurse -Directory | ForEach-Object { Remove-Item -Path $_.FullName -Recurse -Force }'; else find . -type d -name bin -exec rm -rf {} + 2>/dev/null || true && find . -type d -name obj -exec rm -rf {} + 2>/dev/null || true; fi\" && dotnet restore && dotnet build --configuration Release",
+        "format": "dotnet csharpier .",
+        "package:update-all": "dotnet outdated -u",
+        "test": "dotnet test --configuration Release",
+        "test:ci:dotnet": "act --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/dotnet.yml",
+        "tool:update-all": "dotnet tool update --all"
     }
 }

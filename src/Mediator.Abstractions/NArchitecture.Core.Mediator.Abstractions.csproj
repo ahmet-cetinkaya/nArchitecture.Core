@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Project Configuration -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <!-- Build Optimization -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <!-- Package Configuration -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <Authors>NArchitecture, Contributors</Authors>
+    <Product>NArchitecture</Product>
+    <PackageId>NArchitecture.Core.Mediator.Abstractions</PackageId>
+    <Title>NArchitecture Core Mediator Abstractions</Title>
+    <Description>Mediator pattern abstractions for Clean/Union Architecture, providing interfaces for commands, queries, and events.</Description>
+    <PackageTags>Clean Architecture; Mediator Pattern; CQRS; Abstractions</PackageTags>
+    <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+    <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/NArchitecture/narchitecture-core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <!-- Package Files -->
+  <ItemGroup>
+    <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+    <None Include="./README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Project Configuration -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <!-- Build Optimization -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <!-- Package Configuration -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0</Version>
+    <Authors>NArchitecture, Contributors</Authors>
+    <Product>NArchitecture</Product>
+    <PackageId>NArchitecture.Core.Application</PackageId>
+    <Title>NArchitecture Core Application Layer</Title>
+    <Description>High-performance application layer components with CQRS, Mediator, and pipeline
+      behaviors for Clean/Union Architecture.</Description>
+    <PackageTags>Clean Architecture; CQRS; Mediator; Pipeline; Application Layer</PackageTags>
+    <PackageIcon>assets/n-architecture-logo.png</PackageIcon>
+    <PackageLicenseFile>assets/LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/NArchitecture/narchitecture-core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <!-- Package Files -->
+  <ItemGroup>
+    <None Include="../../docs/images/n-architecture-logo.png" Pack="true" PackagePath="assets" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="assets" />
+    <None Include="./README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.7" />
+  </ItemGroup>
+  <!-- Project References -->
+  <ItemGroup>
+    <ProjectReference Include="../CrossCuttingConcerns.Exception/NArchitecture.Core.CrossCuttingConcerns.Exception.csproj" />
+    <ProjectReference Include="../CrossCuttingConcerns.Logging.Abstractions/NArchitecture.Core.CrossCuttingConcerns.Logging.Abstractions.csproj" />
+    <ProjectReference Include="../Mediator.Abstractions/NArchitecture.Core.Mediator.Abstractions.csproj" />
+    <ProjectReference Include="../Validation.Abstractions/NArchitecture.Core.Validation.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

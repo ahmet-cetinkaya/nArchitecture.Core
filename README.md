@@ -1,72 +1,49 @@
-<p align="center">
-  <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/graphs/contributors"><img src="https://img.shields.io/github/contributors/kodlamaio-projects/nArchitecture.Core.svg?style=for-the-badge"></a>
-  <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/network/members"><img src="https://img.shields.io/github/forks/kodlamaio-projects/nArchitecture.Core.svg?style=for-the-badge"></a>
-  <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/stargazers"><img src="https://img.shields.io/github/stars/kodlamaio-projects/nArchitecture.Core.svg?style=for-the-badge"></a>
-  <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/issues"><img src="https://img.shields.io/github/issues/kodlamaio-projects/nArchitecture.Core.svg?style=for-the-badge"></a>
-  <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/blob/master/LICENSE"><img src="https://img.shields.io/github/license/kodlamaio-projects/nArchitecture.Core.svg?style=for-the-badge"></a>
-</p><br />
-
-<p align="center">
-  <a href="https://github.com/kodlamaio-projects/nArchitecture.Core"><img src="https://user-images.githubusercontent.com/53148314/194872467-827dc967-acee-4bca-88a2-59ed5695bebf.png" height="125"></a>
-  <h3 align="center">.NetCore Core Packages
-</h3>
-  <p align="center">
-    <!-- PROJECT_DESCRIPTION -->
-    <!-- <br />
-    <a href="https://github.com/kodlamaio-projects/nArchitecture.Core"><strong>Explore the docs »</strong></a>
-    <br /> -->
-    <!-- <br />
-    <a href="https://github.com/kodlamaio-projects/nArchitecture.Core">View Demo</a>
-    · -->
-    <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/kodlamaio-projects/nArchitecture.Core/issues">Request Feature</a>
-  </p>
-</p>
+# ![NArchitecture Logo](docs/images/n-architecture-logo.png) NArchitecture Core Packages 
+![GitHub contributors](https://img.shields.io/github/contributors/kodlamaio-projects/nArchitecture.Core?style=for-the-badge) ![GitHub forks](https://img.shields.io/github/forks/kodlamaio-projects/nArchitecture.Core?style=for-the-badge) ![GitHub stars](https://img.shields.io/github/stars/kodlamaio-projects/nArchitecture.Core?style=for-the-badge) ![GitHub issues](https://img.shields.io/github/issues/kodlamaio-projects/nArchitecture.Core?style=for-the-badge)
 
 ## 💻 About The Project
 
-A project has been created that includes Advanced Repository, Dynamic Querying, JWT, OTP, Google & Microsoft Auth, Role Based Management, Distributed Caching(Redis), Logging (Serilog), Elastic Search, and much more. By contributing, you can support the project and learn new things.
+A comprehensive project has been developed that encompasses a wide range of advanced features including Advanced Repository patterns, Dynamic Querying capabilities, JWT (JSON Web Token) authentication, OTP (One-Time Password) implementation, Role-Based Access Management, Distributed Caching using Redis, robust Logging with Serilog, and powerful search functionalities with Elastic Search, among many other features. By contributing to this project, you not only support its growth but also gain valuable experience and knowledge in these cutting-edge technologies.
 
 ### Built With
 
 [![](https://img.shields.io/badge/.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://learn.microsoft.com/tr-tr/dotnet/welcome)
 
-## ⚙️ Getting Started
+## ⚡ Getting Started
 
-To get a local copy up and running follow these simple steps.
+### ⏬ Installation
 
-### Prerequisites
+#### Using NuGet Packages
 
-- .NET 7
+1. Search for `nArchitecture` on [NuGet](https://www.nuget.org/packages?q=nArchitecture).
+2. Install the desired packages in your project.
 
-### Installation
+#### Using Git Submodule
 
-1. Add submodule to your backend project repository
-
+1. Add the submodule to your backend project repository:
    ```bash
    git submodule add https://github.com/kodlamaio-projects/nArchitecture.Core.git src/corePackages
    ```
 
-- Run the following command to update this module
-
-  ```bash
+2. Update the submodule:
+   ```bash
    git submodule update --remote src/corePackages
    ```
 
-## 🚀 Usage
+### 📖 Usage
 
-1. Check this [NArchitecture.RentACar](https://github.com/kodlamaio-projects/nArchitecture.Core) repository
+For detailed usage instructions, please refer to the README of the relevant package.
 
-### Analysis
+### Custom Commands
+After running `dotnet tool restore`, you can use `dotnet r` to execute and customize commands from global.json.
 
-1. If not, Install dotnet tool `dotnet tool restore`.
-2. Run anaylsis command `dotnet roslynator analyze`
-
-### Format
-
-1. If not, Install dotnet tool `dotnet tool restore`.
-2. Run format command `dotnet csharpier .`
+Example usage:
+```bash
+dotnet r build
+dotnet r test
+dotnet r analyze
+dotnet r format
+```
 
 ## 🚧 Roadmap
 
@@ -90,8 +67,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## 📧 Contact
 
 **Project Link:** [https://github.com/kodlamaio-projects/nArchitecture.Core](https://github.com/kodlamaio-projects/nArchitecture.Core)
-
-<!-- ## 🙏 Acknowledgements
-- []() -->
-
-<!-- readme template author: https://github.com/ahmet-cetinkaya -->
